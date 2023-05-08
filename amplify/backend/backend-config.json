@@ -1,81 +1,133 @@
 {
-  "auth": {
-    "exercises": {
-      "service": "Cognito",
-      "providerPlugin": "awscloudformation",
+  "api": {
+    "AdminQueries": {
+      "authorizationType": "AMAZON_COGNITO_USER_POOLS",
       "dependsOn": [
         {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "exercises"
+        },
+        {
+          "attributes": [
+            "Arn",
+            "Name"
+          ],
           "category": "function",
-          "resourceName": "exercisesCustomMessage",
-          "triggerProvider": "Cognito",
-          "attributes": ["Arn", "Name"]
+          "resourceName": "AdminQueries2f011aff"
         }
       ],
-      "customAuth": false,
-      "frontendAuthConfig": {
-        "socialProviders": [],
-        "usernameAttributes": ["EMAIL"],
-        "signupAttributes": ["EMAIL"],
-        "passwordProtectionSettings": {
-          "passwordPolicyMinLength": 8,
-          "passwordPolicyCharacters": []
-        },
-        "mfaConfiguration": "OFF",
-        "mfaTypes": ["SMS"],
-        "verificationMechanisms": ["EMAIL"]
-      }
-    },
-    "userPoolGroups": {
-      "service": "Cognito-UserPool-Groups",
       "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    }
+  },
+  "auth": {
+    "exercises": {
+      "customAuth": false,
       "dependsOn": [
         {
-          "category": "auth",
-          "resourceName": "exercises",
+          "attributes": [
+            "Arn",
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "exercisesCustomMessage",
+          "triggerProvider": "Cognito"
+        }
+      ],
+      "frontendAuthConfig": {
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyCharacters": [],
+          "passwordPolicyMinLength": 8
+        },
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "socialProviders": [],
+        "usernameAttributes": [
+          "EMAIL"
+        ],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito"
+    },
+    "userPoolGroups": {
+      "dependsOn": [
+        {
           "attributes": [
             "UserPoolId",
             "AppClientIDWeb",
             "AppClientID",
             "IdentityPoolId"
-          ]
+          ],
+          "category": "auth",
+          "resourceName": "exercises"
         }
-      ]
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito-UserPool-Groups"
     }
   },
   "function": {
+    "AdminQueries2f011aff": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "exercises"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "exercisesCustomMessage": {
       "build": true,
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
-    },
-    "AdminQueries2f011aff": {
-      "service": "Lambda",
-      "providerPlugin": "awscloudformation",
-      "build": true,
-      "dependsOn": [
-        {
-          "category": "auth",
-          "resourceName": "exercises",
-          "attributes": ["UserPoolId"]
-        }
-      ]
     }
   },
-  "api": {
-    "AdminQueries": {
-      "service": "API Gateway",
-      "providerPlugin": "awscloudformation",
-      "authorizationType": "AMAZON_COGNITO_USER_POOLS",
-      "dependsOn": [
-        {
-          "category": "auth",
-          "resourceName": "exercises",
-          "attributes": ["UserPoolId"]
-        },
+  "parameters": {
+    "AMPLIFY_function_AdminQueries2f011aff_deploymentBucketName": {
+      "usedBy": [
         {
           "category": "function",
-          "resourceName": "AdminQueries2f011aff",
-          "attributes": ["Arn", "Name"]
+          "resourceName": "AdminQueries2f011aff"
+        }
+      ]
+    },
+    "AMPLIFY_function_AdminQueries2f011aff_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "AdminQueries2f011aff"
+        }
+      ]
+    },
+    "AMPLIFY_function_exercisesCustomMessage_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "exercisesCustomMessage"
+        }
+      ]
+    },
+    "AMPLIFY_function_exercisesCustomMessage_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "exercisesCustomMessage"
         }
       ]
     }

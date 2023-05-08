@@ -45,9 +45,9 @@ export const TopBar: FC = () => {
       return "";
     }
     if (!user?.attributes?.name) {
-      return user?.attributes.email[0];
+      return user?.attributes.email[0].toUpperCase();
     }
-    return user?.attributes.name[0];
+    return user?.attributes.name[0].toUpperCase();
   };
   return (
     <AppBar position="static">

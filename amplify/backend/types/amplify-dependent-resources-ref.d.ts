@@ -1,37 +1,39 @@
 export type AmplifyDependentResourcesAttributes = {
-  auth: {
-    exercises: {
-      IdentityPoolId: "string";
-      IdentityPoolName: "string";
-      UserPoolId: "string";
-      UserPoolArn: "string";
-      UserPoolName: "string";
-      AppClientIDWeb: "string";
-      AppClientID: "string";
-    };
-    userPoolGroups: {
-      AdminGroupRole: "string";
-    };
-  };
-  function: {
-    exercisesCustomMessage: {
-      Name: "string";
-      Arn: "string";
-      LambdaExecutionRole: "string";
-      Region: "string";
-    };
-    AdminQueries2f011aff: {
-      Name: "string";
-      Arn: "string";
-      Region: "string";
-      LambdaExecutionRole: "string";
-    };
-  };
-  api: {
-    AdminQueries: {
-      RootUrl: "string";
-      ApiName: "string";
-      ApiId: "string";
-    };
-  };
-};
+  "api": {
+    "AdminQueries": {
+      "ApiId": "string",
+      "ApiName": "string",
+      "RootUrl": "string"
+    }
+  },
+  "auth": {
+    "exercises": {
+      "AppClientID": "string",
+      "AppClientIDWeb": "string",
+      "IdentityPoolId": "string",
+      "IdentityPoolName": "string",
+      "UserPoolArn": "string",
+      "UserPoolId": "string",
+      "UserPoolName": "string"
+    },
+    "userPoolGroups": {
+      "AdminGroupRole": "string"
+    }
+  },
+  "function": {
+    "AdminQueries2f011aff": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
+    "exercisesCustomMessage": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    }
+  }
+}

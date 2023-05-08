@@ -24,7 +24,7 @@
         },
         "AdminQueries2f011aff": {
           "deploymentBucketName": "amplify-exercises-dev-160903-deployment",
-          "s3Key": "amplify-builds/AdminQueries2f011aff-7075586745646e464b48-build.zip"
+          "s3Key": "amplify-builds/AdminQueries2f011aff-5a44364e326e72793473-build.zip"
         }
       },
       "api": {
