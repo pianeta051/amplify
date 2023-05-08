@@ -1,0 +1,72 @@
+{
+  "name": "task-list",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@mui/icons-material": "^5.8.3",
+    "@mui/lab": "^5.0.0-alpha.110",
+    "@mui/material": "^5.10.11",
+    "@mui/styled-engine-sc": "^5.8.0",
+    "@mui/x-data-grid": "^5.17.16",
+    "aws-amplify": "^5.0.7",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0",
+    "react-router-dom": "^6.3.0",
+    "react-scripts": "5.0.1",
+    "styled-components": "^5.3.5",
+    "typescript": "^4.7.3",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --passWithNoTests",
+    "test:ci": "react-scripts test --passWithNoTests --watchAll=false",
+    "eject": "react-scripts eject",
+    "lint": "eslint ./src/**/*.{ts,tsx} --fix",
+    "format": "prettier --write .",
+    "prepare": "husky install",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:unit": "cypress run --component"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@testing-library/cypress": "^9.0.0",
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^14.4.3",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.11.38",
+    "@types/react": "^18.0.12",
+    "@types/react-dom": "^18.0.5",
+    "@types/styled-components": "^5.1.25",
+    "@types/testing-library__cypress": "^5.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.27.1",
+    "@typescript-eslint/parser": "^5.27.1",
+    "cypress": "^12.7.0",
+    "eslint": "^8.17.0",
+    "eslint-plugin-react": "^7.30.0",
+    "husky": "^8.0.1",
+    "prettier": "2.6.2"
+  }
+}
