@@ -21,6 +21,20 @@
       ],
       "providerPlugin": "awscloudformation",
       "service": "API Gateway"
+    },
+    "dataapi": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "dataapi"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
     }
   },
   "auth": {
@@ -92,6 +106,11 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "dataapi": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "exercisesCustomMessage": {
       "build": true,
       "providerPlugin": "awscloudformation",
@@ -112,6 +131,22 @@
         {
           "category": "function",
           "resourceName": "AdminQueries2f011aff"
+        }
+      ]
+    },
+    "AMPLIFY_function_dataapi_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "dataapi"
+        }
+      ]
+    },
+    "AMPLIFY_function_dataapi_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "dataapi"
         }
       ]
     },

@@ -23,9 +23,24 @@ export const ForgotPasswordForm: FC<ForgotPasswordFormProps> = ({
   initialValues = EMPTY_FORM,
 }) => {
   const [formValues, setFormValues] = useState(initialValues);
+  const [emailErrorMessage, setEmailErrorMessage] = useState<
+    string | undefined
+  >();
+  const validate = (formValues: ForgotPasswordFormValues) => {
+    const errors: { email?: string } = {};
+    if (!errors.email) {
+      errors.email = "Email requiered";
+    }
+    if (!errors.email.includes("@")) {
+      errors.email = "Invalid Email";
+    }
+    return errors;
+  };
 
   const submitHandler = () => {
-    if (onSubmit && formValues.email.length) {
+    const { email } = validate(formValues);
+    setEmailErrorMessage(email);
+    if (onSubmit && !email) {
       onSubmit(formValues);
     }
   };
@@ -45,6 +60,7 @@ export const ForgotPasswordForm: FC<ForgotPasswordFormProps> = ({
       <EmailInput
         value={formValues.email}
         onChange={(email) => changeHandler(email, "email")}
+        errorMessage={emailErrorMessage}
       />
       <LoadingButton loading={loading} variant="outlined" type="submit">
         Send

@@ -1,8 +1,10 @@
 import { LoadingButton } from "@mui/lab";
-import { FC, useState } from "react";
+import { FC } from "react";
 import { EmailInput } from "../EmailInput/EmailInput";
 import { Form } from "../Form/Form";
 import { PasswordInput } from "../PasswordInput/PasswordInput";
+import * as yup from "yup";
+import { useFormik } from "formik";
 
 export type LogInFormValues = {
   email: string;
@@ -15,40 +17,43 @@ const EMPTY_FORM = {
 };
 
 type LogInFormProps = {
-  onSubmit?: (values: LogInFormValues) => void;
+  onSubmit: (values: LogInFormValues) => void;
   loading?: boolean;
   initialValues?: LogInFormValues;
 };
+
+const validationSchema = yup.object<LogInFormValues>({
+  email: yup
+    .string()
+    .email("Enter a valid email")
+    .required("Email is required"),
+  password: yup.string().required("Password is required"),
+});
 
 export const LogInForm: FC<LogInFormProps> = ({
   onSubmit,
   loading = false,
   initialValues = EMPTY_FORM,
 }) => {
-  const [formValues, setFormValues] = useState(initialValues);
-
-  const submitHandler = () => {
-    if (onSubmit && formValues.email.length && formValues.password.length) {
-      onSubmit(formValues);
-    }
-  };
-
-  const changeHandler = (value: string, key: keyof LogInFormValues) => {
-    setFormValues((formValues) => ({
-      ...formValues,
-      [key]: value,
-    }));
-  };
+  const formik = useFormik({
+    initialValues,
+    validationSchema,
+    onSubmit,
+  });
 
   return (
-    <Form onSubmit={submitHandler}>
+    <Form onSubmit={formik.handleSubmit}>
       <EmailInput
-        value={formValues.email}
-        onChange={(email) => changeHandler(email, "email")}
+        value={formik.values.email}
+        onChange={formik.handleChange}
+        errorMessage={formik.touched.email ? formik.errors.email : undefined}
       />
       <PasswordInput
-        value={formValues.password}
-        onChange={(password) => changeHandler(password, "password")}
+        value={formik.values.password}
+        onChange={formik.handleChange}
+        errorMessage={
+          formik.touched.password ? formik.errors.password : undefined
+        }
       />
       <LoadingButton loading={loading} variant="outlined" type="submit">
         Log in

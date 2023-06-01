@@ -3,10 +3,11 @@ import { Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import { FC, useState } from "react";
 
 type PasswordInputProps = {
-  onChange?: (password: string) => void;
+  onChange?: React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>;
   value?: string;
   label?: string;
   name?: string;
+  errorMessage?: string;
 };
 
 export const PasswordInput: FC<PasswordInputProps> = ({
@@ -14,16 +15,9 @@ export const PasswordInput: FC<PasswordInputProps> = ({
   value,
   label = "Password",
   name = "password",
+  errorMessage,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
-
-  const changeHandler: React.ChangeEventHandler<
-    HTMLTextAreaElement | HTMLInputElement
-  > = (event) => {
-    if (onChange) {
-      onChange(event.target.value);
-    }
-  };
 
   const togglePasswordVisibility = () => setShowPassword((show) => !show);
 
@@ -35,7 +29,9 @@ export const PasswordInput: FC<PasswordInputProps> = ({
       value={value}
       type={showPassword ? "text" : "password"}
       margin="normal"
-      onChange={changeHandler}
+      onChange={onChange}
+      error={!!errorMessage}
+      helperText={errorMessage}
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
