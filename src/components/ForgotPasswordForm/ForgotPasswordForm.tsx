@@ -28,10 +28,10 @@ export const ForgotPasswordForm: FC<ForgotPasswordFormProps> = ({
   >();
   const validate = (formValues: ForgotPasswordFormValues) => {
     const errors: { email?: string } = {};
-    if (!errors.email) {
+    if (!formValues.email) {
       errors.email = "Email requiered";
     }
-    if (!errors.email.includes("@")) {
+    if (!formValues.email.includes("@")) {
       errors.email = "Invalid Email";
     }
     return errors;
@@ -59,7 +59,7 @@ export const ForgotPasswordForm: FC<ForgotPasswordFormProps> = ({
     <Form onSubmit={submitHandler}>
       <EmailInput
         value={formValues.email}
-        onChange={(email) => changeHandler(email, "email")}
+        onChange={(event) => changeHandler(event.target.value, "email")}
         errorMessage={emailErrorMessage}
       />
       <LoadingButton loading={loading} variant="outlined" type="submit">

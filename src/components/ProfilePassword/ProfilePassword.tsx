@@ -47,12 +47,12 @@ export const ProfilePassword: FC<ProfilePasswordProps> = ({
       <Form onSubmit={submitHandler}>
         <PasswordInput
           value={formValues.oldPassword}
-          onChange={(password) => changeHandler(password, "oldPassword")}
+          onChange={(event) => changeHandler(event.target.value, "oldPassword")}
           label="Current password"
         />
         <PasswordInput
           value={formValues.newPassword}
-          onChange={(password) => changeHandler(password, "newPassword")}
+          onChange={(event) => changeHandler(event.target.value, "newPassword")}
           label="New password"
         />
         <LoadingButton loading={loading} variant="outlined" type="submit">

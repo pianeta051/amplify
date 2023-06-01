@@ -41,7 +41,7 @@ export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({
     <Form onSubmit={submitHandler}>
       <PasswordInput
         value={formValues.password}
-        onChange={(password) => changeHandler(password, "password")}
+        onChange={(event) => changeHandler(event.target.value, "password")}
       />
       <LoadingButton loading={loading} variant="outlined" type="submit">
         Change password
