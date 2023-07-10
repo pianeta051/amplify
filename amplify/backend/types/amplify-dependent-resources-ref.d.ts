@@ -12,7 +12,7 @@ export type AmplifyDependentResourcesAttributes = {
     }
   },
   "auth": {
-    "exercises": {
+    "exercisesauth": {
       "AppClientID": "string",
       "AppClientIDWeb": "string",
       "IdentityPoolId": "string",
@@ -26,7 +26,7 @@ export type AmplifyDependentResourcesAttributes = {
     }
   },
   "function": {
-    "AdminQueries2f011aff": {
+    "AdminQueries3903e60d": {
       "Arn": "string",
       "LambdaExecutionRole": "string",
       "LambdaExecutionRoleArn": "string",
@@ -40,7 +40,7 @@ export type AmplifyDependentResourcesAttributes = {
       "Name": "string",
       "Region": "string"
     },
-    "exercisesCustomMessage": {
+    "exercisesauthCustomMessage": {
       "Arn": "string",
       "LambdaExecutionRole": "string",
       "LambdaExecutionRoleArn": "string",

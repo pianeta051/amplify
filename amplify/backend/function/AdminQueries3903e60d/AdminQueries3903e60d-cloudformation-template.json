@@ -1,13 +1,13 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "{\"createdOn\":\"Linux\",\"createdBy\":\"Amplify\",\"createdWith\":\"10.5.2\",\"stackType\":\"function-Lambda\",\"metadata\":{}}",
+  "Description": "{\"createdOn\":\"Linux\",\"createdBy\":\"Amplify\",\"createdWith\":\"12.0.3\",\"stackType\":\"function-Lambda\",\"metadata\":{}}",
   "Parameters": {
     "env": {
       "Type": "String"
     },
-    "authexercisesUserPoolId": {
+    "authexercisesauthUserPoolId": {
       "Type": "String",
-      "Default": "authexercisesUserPoolId"
+      "Default": "authexercisesauthUserPoolId"
     },
     "deploymentBucketName": {
       "Type": "String"
@@ -38,12 +38,12 @@
         "FunctionName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "AdminQueries2f011aff",
+            "AdminQueries3903e60d",
             {
               "Fn::Join": [
                 "",
                 [
-                  "AdminQueries2f011aff",
+                  "AdminQueries3903e60d",
                   "-",
                   {
                     "Ref": "env"
@@ -60,7 +60,7 @@
             },
             "GROUP": "Admin",
             "USERPOOL": {
-              "Ref": "authexercisesUserPoolId"
+              "Ref": "authexercisesauthUserPoolId"
             }
           }
         },
@@ -70,7 +70,7 @@
             "Arn"
           ]
         },
-        "Runtime": "nodejs14.x",
+        "Runtime": "nodejs18.x",
         "Timeout": 25,
         "Code": {
           "S3Bucket": {
@@ -88,12 +88,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "AdminQueries2f011affLambdaRole",
+            "AdminQueries3903e60dLambdaRole",
             {
               "Fn::Join": [
                 "",
                 [
-                  "AdminQueries2f011affLambdaRole",
+                  "AdminQueries3903e60dLambdaRole",
                   "-",
                   {
                     "Ref": "env"
@@ -163,7 +163,17 @@
             {
               "Effect": "Allow",
               "Action": [
+                "cognito-idp:ListUsersInGroup",
+                "cognito-idp:AdminUserGlobalSignOut",
+                "cognito-idp:AdminEnableUser",
+                "cognito-idp:AdminDisableUser",
+                "cognito-idp:AdminRemoveUserFromGroup",
+                "cognito-idp:AdminAddUserToGroup",
+                "cognito-idp:AdminListGroupsForUser",
+                "cognito-idp:AdminGetUser",
+                "cognito-idp:AdminConfirmSignUp",
                 "cognito-idp:ListUsers",
+                "cognito-idp:ListGroups",
                 "cognito-idp:AdminCreateUser"
               ],
               "Resource": {
@@ -180,7 +190,7 @@
                     },
                     ":userpool/",
                     {
-                      "Ref": "authexercisesUserPoolId"
+                      "Ref": "authexercisesauthUserPoolId"
                     }
                   ]
                 ]

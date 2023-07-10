@@ -8,7 +8,7 @@
             "UserPoolId"
           ],
           "category": "auth",
-          "resourceName": "exercises"
+          "resourceName": "exercisesauth"
         },
         {
           "attributes": [
@@ -16,7 +16,7 @@
             "Name"
           ],
           "category": "function",
-          "resourceName": "AdminQueries2f011aff"
+          "resourceName": "AdminQueries3903e60d"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -37,7 +37,7 @@
             "UserPoolId"
           ],
           "category": "auth",
-          "resourceName": "exercises"
+          "resourceName": "exercisesauth"
         },
         {
           "attributes": [
@@ -52,7 +52,7 @@
     }
   },
   "auth": {
-    "exercises": {
+    "exercisesauth": {
       "customAuth": false,
       "dependsOn": [
         {
@@ -61,7 +61,7 @@
             "Name"
           ],
           "category": "function",
-          "resourceName": "exercisesCustomMessage",
+          "resourceName": "exercisesauthCustomMessage",
           "triggerProvider": "Cognito"
         }
       ],
@@ -98,7 +98,7 @@
             "IdentityPoolId"
           ],
           "category": "auth",
-          "resourceName": "exercises"
+          "resourceName": "exercisesauth"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -106,7 +106,7 @@
     }
   },
   "function": {
-    "AdminQueries2f011aff": {
+    "AdminQueries3903e60d": {
       "build": true,
       "dependsOn": [
         {
@@ -114,7 +114,7 @@
             "UserPoolId"
           ],
           "category": "auth",
-          "resourceName": "exercises"
+          "resourceName": "exercisesauth"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -122,40 +122,36 @@
     },
     "dataapi": {
       "build": true,
-      "dependsOn": [
-        {
-          "attributes": [
-            "Name",
-            "Arn",
-            "StreamArn"
-          ],
-          "category": "storage",
-          "resourceName": "exercises"
-        }
-      ],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
-    "exercisesCustomMessage": {
+    "exercisesauthCustomMessage": {
       "build": true,
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     }
   },
+  "hosting": {
+    "amplifyhosting": {
+      "lastPushTimeStamp": "2023-07-10T15:55:46.802Z",
+      "service": "amplifyhosting",
+      "type": "cicd"
+    }
+  },
   "parameters": {
-    "AMPLIFY_function_AdminQueries2f011aff_deploymentBucketName": {
+    "AMPLIFY_function_AdminQueries3903e60d_deploymentBucketName": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "AdminQueries2f011aff"
+          "resourceName": "AdminQueries3903e60d"
         }
       ]
     },
-    "AMPLIFY_function_AdminQueries2f011aff_s3Key": {
+    "AMPLIFY_function_AdminQueries3903e60d_s3Key": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "AdminQueries2f011aff"
+          "resourceName": "AdminQueries3903e60d"
         }
       ]
     },
@@ -175,19 +171,19 @@
         }
       ]
     },
-    "AMPLIFY_function_exercisesCustomMessage_deploymentBucketName": {
+    "AMPLIFY_function_exercisesauthCustomMessage_deploymentBucketName": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "exercisesCustomMessage"
+          "resourceName": "exercisesauthCustomMessage"
         }
       ]
     },
-    "AMPLIFY_function_exercisesCustomMessage_s3Key": {
+    "AMPLIFY_function_exercisesauthCustomMessage_s3Key": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "exercisesCustomMessage"
+          "resourceName": "exercisesauthCustomMessage"
         }
       ]
     }

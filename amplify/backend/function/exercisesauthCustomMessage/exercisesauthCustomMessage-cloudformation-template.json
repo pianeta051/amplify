@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "{\"createdOn\":\"Linux\",\"createdBy\":\"Amplify\",\"createdWith\":\"10.5.2\",\"stackType\":\"function-Lambda\",\"metadata\":{}}",
+  "Description": "{\"createdOn\":\"Linux\",\"createdBy\":\"Amplify\",\"createdWith\":\"12.0.3\",\"stackType\":\"function-Lambda\",\"metadata\":{}}",
   "Parameters": {
     "REDIRECTURL": {
       "Type": "String",
@@ -75,12 +75,12 @@
         "FunctionName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "exercisesCustomMessage",
+            "exercisesauthCustomMessage",
             {
               "Fn::Join": [
                 "",
                 [
-                  "exercisesCustomMessage",
+                  "exercisesauthCustomMessage",
                   "-",
                   {
                     "Ref": "env"
@@ -121,7 +121,7 @@
             "Arn"
           ]
         },
-        "Runtime": "nodejs14.x",
+        "Runtime": "nodejs18.x",
         "Timeout": 25,
         "Code": {
           "S3Bucket": {
@@ -139,12 +139,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "exercisesCustomMessage",
+            "exercisesauthCustomMessage",
             {
               "Fn::Join": [
                 "",
                 [
-                  "exercisesCustomMessage",
+                  "exercisesauthCustomMessage",
                   "-",
                   {
                     "Ref": "env"
@@ -235,17 +235,17 @@
         "Ref": "LambdaExecutionRole"
       }
     },
-    "Region": {
-      "Value": {
-        "Ref": "AWS::Region"
-      }
-    },
     "LambdaExecutionRoleArn": {
       "Value": {
         "Fn::GetAtt": [
           "LambdaExecutionRole",
           "Arn"
         ]
+      }
+    },
+    "Region": {
+      "Value": {
+        "Ref": "AWS::Region"
       }
     }
   }

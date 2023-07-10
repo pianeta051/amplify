@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "{\"createdOn\":\"Linux\",\"createdBy\":\"Amplify\",\"createdWith\":\"11.1.1\",\"stackType\":\"function-Lambda\",\"metadata\":{}}",
+  "Description": "{\"createdOn\":\"Linux\",\"createdBy\":\"Amplify\",\"createdWith\":\"12.0.3\",\"stackType\":\"function-Lambda\",\"metadata\":{}}",
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
@@ -15,18 +15,6 @@
     },
     "s3Key": {
       "Type": "String"
-    },
-    "storageexercisesName": {
-      "Type": "String",
-      "Default": "storageexercisesName"
-    },
-    "storageexercisesArn": {
-      "Type": "String",
-      "Default": "storageexercisesArn"
-    },
-    "storageexercisesStreamArn": {
-      "Type": "String",
-      "Default": "storageexercisesArn"
     }
   },
   "Conditions": {
@@ -90,7 +78,7 @@
             "Arn"
           ]
         },
-        "Runtime": "nodejs16.x",
+        "Runtime": "nodejs18.x",
         "Layers": [],
         "Timeout": 25
       }
@@ -101,12 +89,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "exercisesLambdaRolea0792c2a",
+            "exercisesLambdaRole33bdc2c8",
             {
               "Fn::Join": [
                 "",
                 [
-                  "exercisesLambdaRolea0792c2a",
+                  "exercisesLambdaRole33bdc2c8",
                   "-",
                   {
                     "Ref": "env"
@@ -172,62 +160,33 @@
                   }
                 ]
               }
-            }
-          ]
-        }
-      }
-    },
-    "exercisesTriggerPolicy": {
-      "DependsOn": [
-        "LambdaExecutionRole"
-      ],
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyName": "lambda-trigger-policy-exercises",
-        "Roles": [
-          {
-            "Ref": "LambdaExecutionRole"
-          }
-        ],
-        "PolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
+            },
             {
               "Effect": "Allow",
               "Action": [
-                "dynamodb:DescribeStream",
-                "dynamodb:GetRecords",
-                "dynamodb:GetShardIterator",
-                "dynamodb:ListStreams"
+                "dynamodb:PutItem",
+                "dynamodb:Scan",
+                "dynamodb:GetItem"
               ],
-              "Resource": [
-                {
-                  "Ref": "storageexercisesStreamArn"
-                }
-              ]
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:dynamodb:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":table/*"
+                  ]
+                ]
+              }
             }
           ]
         }
-      }
-    },
-    "exercisesTrigger": {
-      "Type": "AWS::Lambda::EventSourceMapping",
-      "DependsOn": [
-        "exercisesTriggerPolicy"
-      ],
-      "Properties": {
-        "BatchSize": 100,
-        "Enabled": true,
-        "EventSourceArn": {
-          "Ref": "storageexercisesStreamArn"
-        },
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaFunction",
-            "Arn"
-          ]
-        },
-        "StartingPosition": "LATEST"
       }
     }
   },

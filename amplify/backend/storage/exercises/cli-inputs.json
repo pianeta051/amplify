@@ -9,12 +9,10 @@
     {
       "name": "search_by_email",
       "partitionKey": {
-        "fieldName": "id",
+        "fieldName": "email",
         "fieldType": "string"
       }
     }
   ],
-  "triggerFunctions": [
-    "dataapi"
-  ]
+  "triggerFunctions": []
 }

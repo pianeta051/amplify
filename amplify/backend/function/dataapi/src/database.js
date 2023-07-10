@@ -58,6 +58,18 @@ const getCustomer = async (id) => {
   return customer.Item;
 };
 
+const queryCustomersByEmail = async (email) => {
+  const params = {
+    // ExpressionAttributeValues
+    // KeyConditionExpression
+    // TableName
+    // IndexName
+  };
+  const result = await ddb.query(params).promise();
+  console.log(result); // Por ahora solo console.log del resultado
+  return [];
+};
+
 module.exports = {
   createCustomer,
   getCustomer,
