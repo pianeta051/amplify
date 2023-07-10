@@ -1,4 +1,4 @@
-import { Toolbar, Typography } from "@mui/material";
+import { Box, Button, Toolbar, Typography } from "@mui/material";
 import { styled } from "@mui/system";
 
 export const Bar = styled(Toolbar)(() => ({
@@ -18,4 +18,14 @@ export const Logo = styled(Typography)(({ theme }) => ({
   [theme.breakpoints.up("md")]: {
     display: "flex",
   },
+}));
+
+export const Navigation = styled(Box)(() => ({
+  flexGrow: 1,
+}));
+
+export const NavigationItem = styled(Button)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  color: theme.palette.common.white,
 }));

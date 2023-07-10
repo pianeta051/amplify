@@ -1,8 +1,10 @@
 import { LoadingButton } from "@mui/lab";
-import { FC, useState } from "react";
+import { FC } from "react";
 import { EmailInput } from "../EmailInput/EmailInput";
 import { Form } from "../Form/Form";
 import { PasswordInput } from "../PasswordInput/PasswordInput";
+import { useFormik } from "formik";
+import * as yup from "yup";
 
 export type CreateUserFormValues = {
   email: string;
@@ -13,9 +15,17 @@ const EMPTY_FORM = {
   email: "",
   password: "",
 };
+const validationSchema = yup.object<CreateUserFormValues>({
+  email: yup.string().email().required(),
+  password: yup
+    .string()
+    .required("No password provided.")
+    .min(8, "Password is too short - should be 8 chars minimum.")
+    .matches(/[a-zA-Z]/, "Password can only contain Latin letters."),
+});
 
 type CreateUserFormProps = {
-  onSubmit?: (values: CreateUserFormValues) => void;
+  onSubmit: (values: CreateUserFormValues) => void;
   loading?: boolean;
   initialValues?: CreateUserFormValues;
 };
@@ -25,30 +35,18 @@ export const CreateUserForm: FC<CreateUserFormProps> = ({
   loading = false,
   initialValues = EMPTY_FORM,
 }) => {
-  const [formValues, setFormValues] = useState(initialValues);
-
-  const submitHandler = () => {
-    if (onSubmit && formValues.email.length && formValues.password.length) {
-      onSubmit(formValues);
-    }
-  };
-
-  const changeHandler = (value: string, key: keyof CreateUserFormValues) => {
-    setFormValues((formValues) => ({
-      ...formValues,
-      [key]: value,
-    }));
-  };
+  const formik = useFormik<CreateUserFormValues>({
+    initialValues: initialValues,
+    onSubmit,
+    validationSchema,
+  });
 
   return (
-    <Form onSubmit={submitHandler}>
-      <EmailInput
-        value={formValues.email}
-        onChange={(event) => changeHandler(event.target.value, "email")}
-      />
+    <Form onSubmit={formik.handleSubmit}>
+      <EmailInput value={formik.values.email} onChange={formik.handleChange} />
       <PasswordInput
-        value={formValues.password}
-        onChange={(event) => changeHandler(event.target.value, "password")}
+        value={formik.values.password}
+        onChange={formik.handleChange}
       />
       <LoadingButton loading={loading} variant="outlined" type="submit">
         Create

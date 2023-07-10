@@ -12,7 +12,7 @@ import {
 import { FC, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { Bar, Logo } from "./TopBar.style";
+import { Bar, Logo, Navigation, NavigationItem } from "./TopBar.style";
 
 export const TopBar: FC = () => {
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
@@ -28,6 +28,8 @@ export const TopBar: FC = () => {
   };
 
   const toUsers = () => navigate("/users");
+  const toCustomers = () => navigate("/customers");
+
   const toProfile = () => {
     closeUserMenu();
     navigate("/users/me");
@@ -56,6 +58,10 @@ export const TopBar: FC = () => {
           <Logo variant="h6" noWrap onClick={toUsers}>
             AUTH
           </Logo>
+          <Navigation>
+            <NavigationItem onClick={toUsers}>Users</NavigationItem>
+            <NavigationItem onClick={toCustomers}>Customers</NavigationItem>
+          </Navigation>
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={openUserMenu} sx={{ p: 0 }}>

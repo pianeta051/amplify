@@ -1,0 +1,12 @@
+{
+  "resourceName": "exercises",
+  "tableName": "customers-ex",
+  "partitionKey": {
+    "fieldName": "id",
+    "fieldType": "string"
+  },
+  "gsi": [],
+  "triggerFunctions": [
+    "dataapi"
+  ]
+}

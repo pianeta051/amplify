@@ -1,7 +1,7 @@
 import { FC } from "react";
-import { Outlet, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { AuthenticationLayout } from "../components/AuthenticationLayout/AuthenticationLayout";
-import { UsersLayout } from "../components/UsersLayout/UsersLayout";
+import { DashboardLayout } from "../components/DashboardLayout/DashboardLayout";
 import { CreateUserPage } from "../pages/CreateUser/CreateUser";
 import { ForgotPasswordPage } from "../pages/ForgotPassword/ForgotPassword";
 import { LogInPage } from "../pages/LogIn/LogIn";
@@ -14,6 +14,8 @@ import { AuthenticatedRoute } from "./AuthenticatedRoute";
 import { UnAuthenticatedRoute } from "./UnAuthenticateRoute";
 import { AdminRoute } from "./AdminRoute";
 import { CustomersPage } from "../pages/Customers/Customers";
+import { CustomerDetailsPage } from "../pages/CustomerDetails/CustomerDetails";
+import { CreateCustomerPage } from "../pages/CreateCustomer/CreateCustomer";
 
 export const AppRoutes: FC = () => (
   <Routes>
@@ -36,7 +38,7 @@ export const AppRoutes: FC = () => (
       element={
         <AuthenticatedRoute>
           <AdminRoute>
-            <UsersLayout />
+            <DashboardLayout />
           </AdminRoute>
         </AuthenticatedRoute>
       }
@@ -51,11 +53,13 @@ export const AppRoutes: FC = () => (
       path="customers"
       element={
         <AuthenticatedRoute>
-          <Outlet />
+          <DashboardLayout />
         </AuthenticatedRoute>
       }
     >
       <Route index element={<CustomersPage />} />
+      <Route path=":id" element={<CustomerDetailsPage />} />
+      <Route path="create" element={<CreateCustomerPage />} />
     </Route>
   </Routes>
 );

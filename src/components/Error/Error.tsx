@@ -11,6 +11,7 @@ export const Error: FC<ErrorProps> = ({ code }) => {
   const navigate = useNavigate();
 
   const toForgotPassword = () => navigate("forgot-password");
+  const toCustomers = () => navigate("/customers");
 
   if (code === "INCORRECT_PASSWORD") {
     return (
@@ -65,6 +66,17 @@ export const Error: FC<ErrorProps> = ({ code }) => {
     return (
       <Alert severity="error">
         <Typography>You&apos;re not authorized to see this page.</Typography>
+      </Alert>
+    );
+  }
+
+  if (code === "CUSTOMER_NOT_EXISTS") {
+    return (
+      <Alert severity="error">
+        <Typography>Customer does not exist.</Typography>
+        <Button color="inherit" onClick={toCustomers}>
+          Back
+        </Button>
       </Alert>
     );
   }

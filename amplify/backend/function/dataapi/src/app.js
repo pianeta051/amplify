@@ -10,6 +10,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const awsServerlessExpressMiddleware = require("aws-serverless-express/middleware");
 
+const { createCustomer, getCustomers, getCustomer } = require("./database");
+
 // declare a new express app
 const app = express();
 app.use(bodyParser.json());
@@ -22,57 +24,46 @@ app.use(function (req, res, next) {
   next();
 });
 
-/**********************
- * Example get method *
- **********************/
-
-app.get("/customers", function (req, res) {
-  // Add your code here
-  res.json({ success: "get call succeed!", url: req.url });
+const mapCustomer = (customerFromDb) => ({
+  id: customerFromDb.id.S,
+  name: customerFromDb.name.S,
+  email: customerFromDb.email.S,
+  type: customerFromDb.type.S,
 });
 
-app.get("/customers/*", function (req, res) {
-  // Add your code here
-  res.json({ success: "get call succeed!", url: req.url });
+// List all customers
+app.get("/customers", async function (_, res) {
+  const customers = (await getCustomers()).map(mapCustomer);
+  res.json({ customers });
 });
 
-/****************************
- * Example post method *
- ****************************/
-
-app.post("/customers", function (req, res) {
-  // Add your code here
-  res.json({ success: "post call succeed!", url: req.url, body: req.body });
+// Get a single customer
+app.get("/customers/*", async function (req, res) {
+  const id = req.params[0];
+  const customerFromDb = await getCustomer(id);
+  if (customerFromDb) {
+    const customer = mapCustomer(customerFromDb);
+    res.json({ customer });
+  } else {
+    res.status(404).json({
+      error: "Customer not registered!",
+    });
+  }
 });
 
-app.post("/customers/*", function (req, res) {
-  // Add your code here
-  res.json({ success: "post call succeed!", url: req.url, body: req.body });
+// Create a new customer
+app.post("/customers", async function (req, res) {
+  const createdCustomer = await createCustomer(req.body);
+  res.json({ customer: createdCustomer });
 });
 
-/****************************
- * Example put method *
- ****************************/
-
-app.put("/customers", function (req, res) {
-  // Add your code here
-  res.json({ success: "put call succeed!", url: req.url, body: req.body });
-});
-
+// Update a customer
 app.put("/customers/*", function (req, res) {
   // Add your code here
   res.json({ success: "put call succeed!", url: req.url, body: req.body });
 });
 
-/****************************
- * Example delete method *
- ****************************/
-
-app.delete("/customers", function (req, res) {
-  // Add your code here
-  res.json({ success: "delete call succeed!", url: req.url });
-});
-
+// delete a customer
 app.delete("/customers/*", function (req, res) {
   // Add your code here
   res.json({ success: "delete call succeed!", url: req.url });
@@ -80,6 +71,13 @@ app.delete("/customers/*", function (req, res) {
 
 app.listen(3000, function () {
   console.log("App started");
+});
+
+//USERS
+// Create a new user
+app.post("/users", function (req, res) {
+  // Add your code here
+  res.json({ success: "post call succeed!", url: req.url, body: req.body });
 });
 
 // Export the app object. When executing the application local this does nothing. However,
