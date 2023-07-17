@@ -60,11 +60,20 @@ const isCustomer = (value: unknown): value is Customer => {
 export const createCustomer = async (
   formValues: CreateCustomerFormValues
 ): Promise<Customer> => {
-  const response = await post("/customers", formValues);
-  if (!isCustomer(response.customer)) {
+  try {
+    const response = await post("/customers", formValues);
+    if (!isCustomer(response.customer)) {
+      throw new Error("INTERNAL_ERROR");
+    }
+    return response.customer;
+  } catch (error) {
+    if (isErrorResponse(error)) {
+      if (error.response.status === 409) {
+        throw new Error("EMAIL_ALREADY_EXISTS");
+      }
+    }
     throw new Error("INTERNAL_ERROR");
   }
-  return response.customer;
 };
 
 export const getCustomers = async () => {

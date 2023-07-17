@@ -81,6 +81,14 @@ export const Error: FC<ErrorProps> = ({ code }) => {
     );
   }
 
+  if (code === "EMAIL_ALREADY_EXISTS") {
+    return (
+      <Alert severity="error">
+        <Typography>Email already exists.</Typography>
+      </Alert>
+    );
+  }
+
   return (
     <Alert severity="error">
       <Typography>Internal error</Typography>

@@ -8,6 +8,7 @@ const ERROR_CODES = [
   "TOO_MANY_TRIES",
   "UNAUTHORIZED",
   "CUSTOMER_NOT_EXISTS",
+  "EMAIL_ALREADY_EXISTS",
 ] as const;
 
 export type ErrorCode = typeof ERROR_CODES[number];

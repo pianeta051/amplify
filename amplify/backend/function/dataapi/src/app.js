@@ -53,8 +53,18 @@ app.get("/customers/*", async function (req, res) {
 
 // Create a new customer
 app.post("/customers", async function (req, res) {
-  const createdCustomer = await createCustomer(req.body);
-  res.json({ customer: createdCustomer });
+  try {
+    const createdCustomer = await createCustomer(req.body);
+    res.json({ customer: createdCustomer });
+  } catch (error) {
+    if (error.message === "EMAIL_ALREADY_REGISTERED") {
+      res.status(409).json({
+        error: "Email Already Exists",
+      });
+    } else {
+      throw error;
+    }
+  }
 });
 
 // Update a customer

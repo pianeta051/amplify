@@ -4,6 +4,13 @@ const ddb = new AWS.DynamoDB();
 const uuid = require("node-uuid");
 
 const createCustomer = async (customer) => {
+  const emailExisting = await queryCustomersByEmail(customer.email);
+
+  if (emailExisting.length > 0) {
+    console.log("Customer already exist");
+    throw new Error("EMAIL_ALREADY_REGISTERED");
+  }
+
   const id = uuid.v1();
 
   const params = {
@@ -23,6 +30,7 @@ const createCustomer = async (customer) => {
       },
     },
   };
+
   const data = await ddb.putItem(params).promise();
   console.log("Customer created", data);
   return {
@@ -60,18 +68,20 @@ const getCustomer = async (id) => {
 
 const queryCustomersByEmail = async (email) => {
   const params = {
-    // ExpressionAttributeValues
-    // KeyConditionExpression
-    // TableName
-    // IndexName
+    ExpressionAttributeValues: {
+      ":email": { S: email },
+    },
+    KeyConditionExpression: "email = :email",
+    TableName: "customers-ex-dev",
+    IndexName: "search_by_email",
   };
   const result = await ddb.query(params).promise();
-  console.log(result); // Por ahora solo console.log del resultado
-  return [];
+  return result.Items;
 };
 
 module.exports = {
   createCustomer,
   getCustomer,
   getCustomers,
+  queryCustomersByEmail,
 };
