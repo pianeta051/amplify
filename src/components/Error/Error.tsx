@@ -88,7 +88,13 @@ export const Error: FC<ErrorProps> = ({ code }) => {
       </Alert>
     );
   }
-
+  if (code === "EMAIL_CANNOT_BE_EMPTY") {
+    return (
+      <Alert severity="error">
+        <Typography>Email field cannot be empty.</Typography>
+      </Alert>
+    );
+  }
   return (
     <Alert severity="error">
       <Typography>Internal error</Typography>

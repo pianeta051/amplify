@@ -1,5 +1,5 @@
 import { API } from "aws-amplify";
-import { CreateCustomerFormValues } from "../components/CreateCustomerForm/CreateCustomerForm";
+import { CustomerFormValues } from "../components/CustomerForm/CustomerForm";
 
 const get = async (
   path: string,
@@ -12,6 +12,12 @@ const get = async (
 
 const post = async (path: string, body: { [param: string]: string } = {}) => {
   return API.post("dataapi", path, {
+    body,
+  });
+};
+
+const put = async (path: string, body: { [param: string]: string } = {}) => {
+  return API.put("dataapi", path, {
     body,
   });
 };
@@ -58,7 +64,7 @@ const isCustomer = (value: unknown): value is Customer => {
 };
 
 export const createCustomer = async (
-  formValues: CreateCustomerFormValues
+  formValues: CustomerFormValues
 ): Promise<Customer> => {
   try {
     const response = await post("/customers", formValues);
@@ -70,6 +76,9 @@ export const createCustomer = async (
     if (isErrorResponse(error)) {
       if (error.response.status === 409) {
         throw new Error("EMAIL_ALREADY_EXISTS");
+      }
+      if (error.response.status === 400) {
+        throw new Error("EMAIL_CANNOT_BE_EMPTY");
       }
     }
     throw new Error("INTERNAL_ERROR");
@@ -106,6 +115,33 @@ export const getCustomer = async (id: string): Promise<Customer> => {
       }
     }
 
+    throw new Error("INTERNAL_ERROR");
+  }
+};
+
+//este codigo es un ejemplo de lo que hay que hacer.... hay que adaptarlo
+export const editCustomer = async (
+  id: string,
+  formValues: CustomerFormValues
+): Promise<Customer> => {
+  try {
+    const response = await put("/customers/" + id, formValues);
+    if (!isCustomer(response.customer)) {
+      throw new Error("INTERNAL_ERROR");
+    }
+    return response.customer;
+  } catch (error) {
+    if (isErrorResponse(error)) {
+      if (error.response.status === 409) {
+        throw new Error("EMAIL_ALREADY_EXISTS");
+      }
+      if (error.response.status === 400) {
+        throw new Error("EMAIL_CANNOT_BE_EMPTY");
+      }
+      if (error.response.status === 404) {
+        throw new Error("CUSTOMER_NOT_EXISTS");
+      }
+    }
     throw new Error("INTERNAL_ERROR");
   }
 };

@@ -7,19 +7,19 @@ import { MenuItem, Select, TextField } from "@mui/material";
 import { Form } from "../Form/Form";
 import { LoadingButton } from "@mui/lab";
 
-export type CreateCustomerFormValues = {
+export type CustomerFormValues = {
   email: string;
   name: string;
   type: CustomerType;
 };
 
-const INITIAL_VALUES: CreateCustomerFormValues = {
+const INITIAL_VALUES: CustomerFormValues = {
   email: "",
   name: "",
   type: "company",
 };
 
-const validationSchema = yup.object<CreateCustomerFormValues>({
+const validationSchema = yup.object<CustomerFormValues>({
   email: yup.string().email().required(),
   name: yup.string().required(),
   type: yup.mixed<CustomerType>().oneOf(CUSTOMER_TYPES).required(),
@@ -32,18 +32,18 @@ const capitalize = (value: string) => {
   return `${value[0].toUpperCase()}${value.slice(1).toLowerCase()}`;
 };
 
-type CreateCustomerFormProps = {
-  onSubmit: (values: CreateCustomerFormValues) => void;
-  defaultValues?: CreateCustomerFormValues;
+type CustomerFormProps = {
+  onSubmit: (values: CustomerFormValues) => void;
+  defaultValues?: CustomerFormValues;
   loading?: boolean;
 };
 
-export const CreateCustomerForm: FC<CreateCustomerFormProps> = ({
+export const CustomerForm: FC<CustomerFormProps> = ({
   onSubmit,
   defaultValues = INITIAL_VALUES,
   loading = false,
 }) => {
-  const formik = useFormik<CreateCustomerFormValues>({
+  const formik = useFormik<CustomerFormValues>({
     initialValues: defaultValues,
     onSubmit,
     validationSchema,
@@ -80,7 +80,7 @@ export const CreateCustomerForm: FC<CreateCustomerFormProps> = ({
         ))}
       </Select>
       <LoadingButton variant="contained" type="submit" loading={loading}>
-        Create
+        Save
       </LoadingButton>
     </Form>
   );

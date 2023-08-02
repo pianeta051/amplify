@@ -10,7 +10,13 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const awsServerlessExpressMiddleware = require("aws-serverless-express/middleware");
 
-const { createCustomer, getCustomers, getCustomer } = require("./database");
+const {
+  createCustomer,
+  deleteCustomer,
+  getCustomers,
+  getCustomer,
+  updateCustomer,
+} = require("./database");
 
 // declare a new express app
 const app = express();
@@ -61,6 +67,10 @@ app.post("/customers", async function (req, res) {
       res.status(409).json({
         error: "Email Already Exists",
       });
+    } else if (error.message === "EMAIL_CANNOT_BE_EMPTY") {
+      res.status(400).json({
+        error: "Email cannot be empty",
+      });
     } else {
       throw error;
     }
@@ -68,9 +78,20 @@ app.post("/customers", async function (req, res) {
 });
 
 // Update a customer
-app.put("/customers/*", function (req, res) {
-  // Add your code here
-  res.json({ success: "put call succeed!", url: req.url, body: req.body });
+app.put("/customers/*", async function (req, res) {
+  try {
+    const id = req.params[0];
+    const updatedCustomer = await updateCustomer(id, req.body);
+    res.json({ customer: updatedCustomer });
+  } catch (error) {
+    if (error.message === "EMAIL_ALREADY_REGISTERED") {
+      res.status(409).json({
+        error: "Email Already Exists",
+      });
+    } else {
+      throw error;
+    }
+  }
 });
 
 // delete a customer

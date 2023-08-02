@@ -167,7 +167,8 @@
                 "dynamodb:PutItem",
                 "dynamodb:Scan",
                 "dynamodb:GetItem",
-                "dynamodb:Query"
+                "dynamodb:Query",
+                "dynamodb:UpdateItem"
               ],
               "Resource": {
                 "Fn::Join": [

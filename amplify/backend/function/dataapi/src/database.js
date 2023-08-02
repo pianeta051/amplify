@@ -4,6 +4,10 @@ const ddb = new AWS.DynamoDB();
 const uuid = require("node-uuid");
 
 const createCustomer = async (customer) => {
+  if (!customer.email?.length) {
+    throw new Error("EMAIL_CANNOT_BE_EMPTY");
+  }
+
   const emailExisting = await queryCustomersByEmail(customer.email);
 
   if (emailExisting.length > 0) {
@@ -38,6 +42,8 @@ const createCustomer = async (customer) => {
     id,
   };
 };
+
+const deleteCustomer = async (id) => {};
 
 const getCustomers = async () => {
   const params = {
@@ -79,9 +85,53 @@ const queryCustomersByEmail = async (email) => {
   return result.Items;
 };
 
+const updateCustomer = async (id, updatedCustomer) => {
+  const emailExisting = await queryCustomersByEmail(updatedCustomer.email);
+  console.log(JSON.stringify(emailExisting, null, 2));
+
+  if (
+    emailExisting.length > 0 &&
+    !emailExisting.find((item) => item.id.S === id)
+  ) {
+    console.log("Customer already exist");
+
+    throw new Error("EMAIL_ALREADY_REGISTERED");
+  }
+  const params = {
+    TableName: "customers-ex-dev",
+    ExpressionAttributeNames: {
+      "#N": "name",
+      "#E": "email",
+      "#T": "type",
+    },
+    ExpressionAttributeValues: {
+      ":name": {
+        S: updatedCustomer.name,
+      },
+      ":email": {
+        S: updatedCustomer.email,
+      },
+      ":type": {
+        S: updatedCustomer.type,
+      },
+    },
+    UpdateExpression: "SET #N = :name, #E = :email, #T = :type",
+    Key: {
+      id: { S: id },
+    },
+  };
+  await ddb.updateItem(params).promise();
+  return {
+    id,
+    ...updatedCustomer,
+  };
+};
+
 module.exports = {
   createCustomer,
+  deleteCustomer,
   getCustomer,
   getCustomers,
   queryCustomersByEmail,
+  updateCustomer,
 };

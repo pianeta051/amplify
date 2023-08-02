@@ -1,9 +1,10 @@
 import { FC, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Customer, getCustomer } from "../../services/customers";
 import { ErrorCode, isErrorCode } from "../../services/error";
 import { Error } from "../../components/Error/Error";
 import {
+  Button,
   CircularProgress,
   List,
   ListItem,
@@ -23,6 +24,9 @@ export const CustomerDetailsPage: FC = () => {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [error, setError] = useState<ErrorCode | null>(null);
   const { id } = useParams<CustomerDetailsParams>();
+  const navigate = useNavigate();
+
+  const editClickHandler = () => navigate(`/customers/${id}/edit`);
 
   useEffect(() => {
     if (loading && id) {
@@ -64,6 +68,10 @@ export const CustomerDetailsPage: FC = () => {
       <Typography variant="h3" gutterBottom>
         {customer.name}
       </Typography>
+      <Button variant="contained" onClick={editClickHandler}>
+        Edit
+      </Button>
+
       <List>
         <ListItem disablePadding>
           <ListItemIcon>
