@@ -1,6 +1,10 @@
 import { API } from "aws-amplify";
 import { CustomerFormValues } from "../components/CustomerForm/CustomerForm";
 
+const del = async (path: string) => {
+  return API.del("dataapi", path, {});
+};
+
 const get = async (
   path: string,
   queryParams: { [param: string]: string } = {}
@@ -83,6 +87,10 @@ export const createCustomer = async (
     }
     throw new Error("INTERNAL_ERROR");
   }
+};
+
+export const deleteCustomer = async (id: string): Promise<void> => {
+  await del("/customers/" + id);
 };
 
 export const getCustomers = async () => {

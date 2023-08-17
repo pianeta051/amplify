@@ -168,7 +168,8 @@
                 "dynamodb:Scan",
                 "dynamodb:GetItem",
                 "dynamodb:Query",
-                "dynamodb:UpdateItem"
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem"
               ],
               "Resource": {
                 "Fn::Join": [

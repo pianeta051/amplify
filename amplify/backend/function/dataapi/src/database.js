@@ -43,7 +43,15 @@ const createCustomer = async (customer) => {
   };
 };
 
-const deleteCustomer = async (id) => {};
+const deleteCustomer = async (id) => {
+  const params = {
+    TableName: "customers-ex-dev",
+    Key: {
+      id: { S: id },
+    },
+  };
+  await ddb.deleteItem(params).promise();
+};
 
 const getCustomers = async () => {
   const params = {

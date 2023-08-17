@@ -95,9 +95,10 @@ app.put("/customers/*", async function (req, res) {
 });
 
 // delete a customer
-app.delete("/customers/*", function (req, res) {
-  // Add your code here
-  res.json({ success: "delete call succeed!", url: req.url });
+app.delete("/customers/*", async function (req, res) {
+  const id = req.params[0];
+  await deleteCustomer(id);
+  res.json({ message: "Customer deleted" });
 });
 
 app.listen(3000, function () {
