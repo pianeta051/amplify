@@ -7,7 +7,7 @@ const del = async (path: string) => {
 
 const get = async (
   path: string,
-  queryParams: { [param: string]: string } = {}
+  queryParams: { [param: string]: string | undefined } = {}
 ) => {
   return API.get("dataapi", path, {
     queryStringParameters: queryParams,
@@ -93,8 +93,16 @@ export const deleteCustomer = async (id: string): Promise<void> => {
   await del("/customers/" + id);
 };
 
-export const getCustomers = async () => {
-  const response = await get("/customers");
+export const getCustomers = async (
+  nextToken?: string,
+  searchInput?: string
+): Promise<{
+  customers: Customer[];
+  nextToken?: string;
+}> => {
+  const response = await get("/customers", { nextToken, search: searchInput });
+  const customers = response.customers as Customer[];
+  const responseToken = response.nextToken as string | undefined;
   if (!("customers" in response) || !Array.isArray(response.customers)) {
     throw new Error("INTERNAL_ERROR");
   }
@@ -103,7 +111,7 @@ export const getCustomers = async () => {
       throw new Error("INTERNAL_ERROR");
     }
   }
-  return response.customers;
+  return { customers, nextToken: responseToken };
 };
 
 export const getCustomer = async (id: string): Promise<Customer> => {
