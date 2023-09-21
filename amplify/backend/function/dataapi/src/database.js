@@ -26,6 +26,9 @@ const createCustomer = async (customer) => {
       name: {
         S: customer.name,
       },
+      name_lowercase: {
+        S: customer.name?.toLowerCase(),
+      },
       email: {
         S: customer.email,
       },
@@ -53,20 +56,49 @@ const deleteCustomer = async (id) => {
   await ddb.deleteItem(params).promise();
 };
 
-const getCustomers = async () => {
-  const params = {
+const getCustomers = async (exclusiveStartKey, limit, name) => {
+  let params = {
     TableName: "customers-ex-dev",
+    Limit: limit,
+    ExclusiveStartKey: exclusiveStartKey,
   };
 
-  const scanResults = [];
-  let items;
-  do {
-    items = await ddb.scan(params).promise();
-    items.Items.forEach((item) => scanResults.push(item));
-    params.ExclusiveStartKey = items.LastEvaluatedKey;
-  } while (typeof items.LastEvaluatedKey !== "undefined");
+  if (name?.length) {
+    const searchParams = {
+      // case insensitive search
+      ExpressionAttributeNames: {
+        "#NL": "name_lowercase",
+      },
+      FilterExpression: "contains(#NL, :name) ",
+      ExpressionAttributeValues: {
+        ":name": { S: name.toLowerCase() },
+      },
+    };
+    params = {
+      ...params,
+      ...searchParams,
+    };
+  }
 
-  return scanResults;
+  let result = await ddb.scan(params).promise();
+  const items = result.Items;
+
+  while (result.LastEvaluatedKey && items.length < limit) {
+    const exclusiveStartKey = result.LastEvaluatedKey;
+    params = {
+      ...params,
+      ExclusiveStartKey: exclusiveStartKey,
+      Limit: limit - items.length,
+    };
+    result = await ddb.scan(params).promise();
+    items.push(...result.Items);
+  }
+
+  const nextItem = await getNextCustomer(result.LastEvaluatedKey);
+  return {
+    items,
+    lastEvaluatedKey: nextItem ? result.LastEvaluatedKey : null,
+  };
 };
 
 const getCustomer = async (id) => {
@@ -78,6 +110,20 @@ const getCustomer = async (id) => {
   };
   const customer = await ddb.getItem(params).promise();
   return customer.Item;
+};
+
+const getNextCustomer = async (lastEvaluatedKey) => {
+  const params = {
+    TableName: "customers-ex-dev",
+    Limit: 1,
+    ExclusiveStartKey: lastEvaluatedKey,
+  };
+  const result = await ddb.scan(params).promise();
+  if (result.Items.length) {
+    const item = result.Items[0];
+    return item;
+  }
+  return null;
 };
 
 const queryCustomersByEmail = async (email) => {
@@ -109,6 +155,7 @@ const updateCustomer = async (id, updatedCustomer) => {
     TableName: "customers-ex-dev",
     ExpressionAttributeNames: {
       "#N": "name",
+      "#NL": "name_lowercase",
       "#E": "email",
       "#T": "type",
     },
@@ -122,8 +169,12 @@ const updateCustomer = async (id, updatedCustomer) => {
       ":type": {
         S: updatedCustomer.type,
       },
+      ":name_lowercase": {
+        S: updatedCustomer.name?.toLowerCase(),
+      },
     },
-    UpdateExpression: "SET #N = :name, #E = :email, #T = :type",
+    UpdateExpression:
+      "SET #N = :name, #E = :email, #T = :type, #NL = :name_lowercase",
     Key: {
       id: { S: id },
     },

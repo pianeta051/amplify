@@ -29,7 +29,7 @@
         },
         "dataapi": {
           "deploymentBucketName": "amplify-exercises-dev-164240-deployment",
-          "s3Key": "amplify-builds/dataapi-4138626a4d643555556c-build.zip"
+          "s3Key": "amplify-builds/dataapi-6c455644455a4e773251-build.zip"
         }
       },
       "api": {
@@ -38,6 +38,12 @@
       },
       "storage": {
         "exercises": {}
+      },
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "dxusl5rcgb4bq",
+          "type": "cicd"
+        }
       }
     }
   }

@@ -18,6 +18,8 @@ const {
   updateCustomer,
 } = require("./database");
 
+const { generateToken, parseToken } = require("./token");
+
 // declare a new express app
 const app = express();
 app.use(bodyParser.json());
@@ -38,9 +40,19 @@ const mapCustomer = (customerFromDb) => ({
 });
 
 // List all customers
-app.get("/customers", async function (_, res) {
-  const customers = (await getCustomers()).map(mapCustomer);
-  res.json({ customers });
+app.get("/customers", async function (req, res) {
+  const nextToken = req.query?.nextToken;
+  const limit = req.query?.limit ? +req.query?.limit : 5;
+  const search = req.query?.search;
+  const exclusiveStartKey = parseToken(nextToken);
+  const { items, lastEvaluatedKey } = await getCustomers(
+    exclusiveStartKey,
+    limit,
+    search
+  );
+  const customers = items.map(mapCustomer);
+  const responseToken = generateToken(lastEvaluatedKey);
+  res.json({ customers, nextToken: responseToken });
 });
 
 // Get a single customer
