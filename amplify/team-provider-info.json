@@ -21,15 +21,15 @@
       "function": {
         "AdminQueries3903e60d": {
           "deploymentBucketName": "amplify-exercises-dev-164240-deployment",
-          "s3Key": "amplify-builds/AdminQueries3903e60d-54715159616878734a56-build.zip"
+          "s3Key": "amplify-builds/AdminQueries3903e60d-76657959336a644c4730-build.zip"
         },
         "exercisesauthCustomMessage": {
           "deploymentBucketName": "amplify-exercises-dev-164240-deployment",
-          "s3Key": "amplify-builds/exercisesauthCustomMessage-665159456b423237364b-build.zip"
+          "s3Key": "amplify-builds/exercisesauthCustomMessage-617442794538556a4631-build.zip"
         },
         "dataapi": {
           "deploymentBucketName": "amplify-exercises-dev-164240-deployment",
-          "s3Key": "amplify-builds/dataapi-6c455644455a4e773251-build.zip"
+          "s3Key": "amplify-builds/dataapi-63393242466e38386f45-build.zip"
         }
       },
       "api": {

@@ -9,7 +9,7 @@
  * The names of modules to load are stored as a comma-delimited string in the
  * `MODULES` env var.
  */
-const moduleNames = process.env.MODULES.split(',');
+const moduleNames = process.env.MODULES.split(",");
 /**
  * The array of imported modules.
  */
