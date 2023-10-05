@@ -95,12 +95,17 @@ export const deleteCustomer = async (id: string): Promise<void> => {
 
 export const getCustomers = async (
   nextToken?: string,
-  searchInput?: string
+  searchInput?: string,
+  customerType?: string
 ): Promise<{
   customers: Customer[];
   nextToken?: string;
 }> => {
-  const response = await get("/customers", { nextToken, search: searchInput });
+  const response = await get("/customers", {
+    nextToken,
+    search: searchInput,
+    customerType,
+  });
   const customers = response.customers as Customer[];
   const responseToken = response.nextToken as string | undefined;
   if (!("customers" in response) || !Array.isArray(response.customers)) {
@@ -114,7 +119,7 @@ export const getCustomers = async (
   return { customers, nextToken: responseToken };
 };
 
-export const getCustomer = async (id: string): Promise<Customer> => {
+export const getCustomer = async (id: string): Promise<Customer | null> => {
   try {
     const response = await get(`/customers/${id}`);
     if (!("customer" in response) && typeof response.customer !== "object") {

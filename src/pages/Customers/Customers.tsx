@@ -4,15 +4,17 @@ import {
   ListItemButton,
   Typography,
 } from "@mui/material";
+import Stack from "@mui/material/Stack";
 import { FC, useEffect, useState } from "react";
 import { CustomerItem } from "../../components/CustomerItem/CustomerItem";
 import { CustomersList } from "./Customers.style";
-import { Customer, getCustomers } from "../../services/customers";
+import { Customer } from "../../services/customers";
 import { useNavigate } from "react-router-dom";
 import { ErrorCode, isErrorCode } from "../../services/error";
 import { Error } from "../../components/Error/Error";
 import { LoadingButton } from "@mui/lab";
 import { SearchBar } from "../../components/SearchBar/SearchBar";
+import { useCustomers } from "../../context/CustomersContext";
 
 export const CustomersPage: FC = () => {
   const [loading, setLoading] = useState(true);
@@ -22,8 +24,10 @@ export const CustomersPage: FC = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [searching, setSearching] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchButtonTerm, setSearchButtonTerm] = useState("");
 
   const navigate = useNavigate();
+  const { getCustomers } = useCustomers();
 
   useEffect(() => {
     if (loading) {
@@ -55,7 +59,7 @@ export const CustomersPage: FC = () => {
   const loadMoreHandler = () => {
     if (nextToken) {
       setLoadingMore(true);
-      getCustomers(nextToken, searchTerm)
+      getCustomers(nextToken, searchTerm, searchButtonTerm)
         .then(({ customers, nextToken }) => {
           setLoadingMore(false);
           setCustomers((prevCustomers) => [...prevCustomers, ...customers]);
@@ -71,7 +75,7 @@ export const CustomersPage: FC = () => {
   const searchHandler = (searchTerm: string) => {
     setSearching(true);
     setSearchTerm(searchTerm);
-    getCustomers(undefined, searchTerm)
+    getCustomers(undefined, searchTerm, searchButtonTerm)
       .then(({ customers, nextToken }) => {
         setSearching(false);
         setCustomers(customers);
@@ -82,6 +86,37 @@ export const CustomersPage: FC = () => {
         setCustomers([]);
         setNextToken(undefined);
       });
+  };
+
+  const searchButtonHandler = (buttonName: string) => {
+    setSearching(true);
+    if (searchButtonTerm === buttonName) {
+      setSearchButtonTerm("");
+      getCustomers(undefined, searchTerm, undefined)
+        .then(({ customers, nextToken }) => {
+          setSearching(false);
+          setCustomers(customers);
+          setNextToken(nextToken);
+        })
+        .catch(() => {
+          setSearching(false);
+          setCustomers([]);
+          setNextToken(undefined);
+        });
+    } else {
+      setSearchButtonTerm(buttonName);
+      getCustomers(undefined, searchTerm, buttonName)
+        .then(({ customers, nextToken }) => {
+          setSearching(false);
+          setCustomers(customers);
+          setNextToken(nextToken);
+        })
+        .catch(() => {
+          setSearching(false);
+          setCustomers([]);
+          setNextToken(undefined);
+        });
+    }
   };
 
   return (
@@ -96,6 +131,30 @@ export const CustomersPage: FC = () => {
       ) : (
         <>
           <SearchBar onSearch={searchHandler} initialValue={searchTerm} />
+          <Stack spacing={2} direction="row" mt={2}>
+            <Button
+              variant={
+                searchButtonTerm === "company" ? "contained" : "outlined"
+              }
+              onClick={() => searchButtonHandler("company")}
+            >
+              Company
+            </Button>
+            <Button
+              variant={
+                searchButtonTerm === "individual" ? "contained" : "outlined"
+              }
+              onClick={() => searchButtonHandler("individual")}
+            >
+              Individual
+            </Button>
+            <Button
+              variant={searchButtonTerm === "other" ? "contained" : "outlined"}
+              onClick={() => searchButtonHandler("other")}
+            >
+              Other
+            </Button>
+          </Stack>
           <Button onClick={onCreate}>Create new customer</Button>
           <CustomersList>
             {customers.map((customer) => (

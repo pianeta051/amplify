@@ -44,11 +44,13 @@ app.get("/customers", async function (req, res) {
   const nextToken = req.query?.nextToken;
   const limit = req.query?.limit ? +req.query?.limit : 5;
   const search = req.query?.search;
+  const customerType = req.query?.customerType;
   const exclusiveStartKey = parseToken(nextToken);
   const { items, lastEvaluatedKey } = await getCustomers(
     exclusiveStartKey,
     limit,
-    search
+    search,
+    customerType
   );
   const customers = items.map(mapCustomer);
   const responseToken = generateToken(lastEvaluatedKey);

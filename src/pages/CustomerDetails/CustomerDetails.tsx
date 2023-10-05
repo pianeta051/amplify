@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Customer, getCustomer } from "../../services/customers";
+import { Customer } from "../../services/customers";
 import { ErrorCode, isErrorCode } from "../../services/error";
 import { Error } from "../../components/Error/Error";
 import {
@@ -16,6 +16,7 @@ import {
 import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
 import { CustomerIcon } from "../../components/CustomerIcon/CustomerIcon";
 import { DeleteCustomerButton } from "../../components/DeleteCustomerButton/DeleteCustomerButton";
+import { useCustomers } from "../../context/CustomersContext";
 
 type CustomerDetailsParams = {
   id: string;
@@ -27,6 +28,7 @@ export const CustomerDetailsPage: FC = () => {
   const [error, setError] = useState<ErrorCode | null>(null);
   const { id } = useParams<CustomerDetailsParams>();
   const navigate = useNavigate();
+  const { getCustomer } = useCustomers();
 
   const editClickHandler = () => navigate(`/customers/${id}/edit`);
   const deleteCustomerHandler = () => navigate("/customers");

@@ -32,6 +32,9 @@ const createCustomer = async (customer) => {
       email: {
         S: customer.email,
       },
+      email_lowercase: {
+        S: customer.email?.toLowerCase(),
+      },
       type: {
         S: customer.type,
       },
@@ -56,29 +59,75 @@ const deleteCustomer = async (id) => {
   await ddb.deleteItem(params).promise();
 };
 
-const getCustomers = async (exclusiveStartKey, limit, name) => {
+const getCustomers = async (
+  exclusiveStartKey,
+  limit,
+  searchInput,
+  customerType
+) => {
   let params = {
     TableName: "customers-ex-dev",
     Limit: limit,
     ExclusiveStartKey: exclusiveStartKey,
   };
 
-  if (name?.length) {
-    const searchParams = {
-      // case insensitive search
-      ExpressionAttributeNames: {
-        "#NL": "name_lowercase",
-      },
-      FilterExpression: "contains(#NL, :name) ",
-      ExpressionAttributeValues: {
-        ":name": { S: name.toLowerCase() },
-      },
+  let ExpressionAttributeNames = undefined;
+  const FilterExpressions = [];
+  let ExpressionAttributeValues = undefined;
+
+  if (searchInput?.length) {
+    if (!ExpressionAttributeNames) {
+      ExpressionAttributeNames = {};
+    }
+    ExpressionAttributeNames = {
+      ...ExpressionAttributeNames,
+      "#NL": "name_lowercase",
+      "#EL": "email_lowercase",
     };
-    params = {
-      ...params,
-      ...searchParams,
+    if (!ExpressionAttributeValues) {
+      ExpressionAttributeValues = {};
+    }
+    ExpressionAttributeValues = {
+      ...ExpressionAttributeValues,
+      ":name": { S: searchInput.toLowerCase() },
+      ":email": { S: searchInput.toLowerCase() },
     };
+    FilterExpressions.push("contains(#NL, :name) OR contains(#EL, :email)");
   }
+
+  if (customerType?.length) {
+    if (!ExpressionAttributeNames) {
+      ExpressionAttributeNames = {};
+    }
+    ExpressionAttributeNames = {
+      ...ExpressionAttributeNames,
+      "#T": "type",
+    };
+    if (!ExpressionAttributeValues) {
+      ExpressionAttributeValues = {};
+    }
+    ExpressionAttributeValues = {
+      ...ExpressionAttributeValues,
+      ":type": { S: customerType },
+    };
+    FilterExpressions.push("#T = :type");
+  }
+
+  let FilterExpression = undefined;
+  if (FilterExpressions.length) {
+    FilterExpression = FilterExpressions.map(
+      (expression) => `(${expression})`
+    ).join(" AND ");
+  }
+
+  params = {
+    ...params,
+    ExpressionAttributeNames,
+    ExpressionAttributeValues,
+    FilterExpression,
+  };
+
+  console.log(params);
 
   let result = await ddb.scan(params).promise();
   const items = result.Items;
@@ -157,6 +206,7 @@ const updateCustomer = async (id, updatedCustomer) => {
       "#N": "name",
       "#NL": "name_lowercase",
       "#E": "email",
+      "#EL": "email_lowercase",
       "#T": "type",
     },
     ExpressionAttributeValues: {
@@ -172,9 +222,12 @@ const updateCustomer = async (id, updatedCustomer) => {
       ":name_lowercase": {
         S: updatedCustomer.name?.toLowerCase(),
       },
+      ":email_lowercase": {
+        S: updatedCustomer.email?.toLowerCase(),
+      },
     },
     UpdateExpression:
-      "SET #N = :name, #E = :email, #T = :type, #NL = :name_lowercase",
+      "SET #N = :name, #E = :email, #T = :type, #NL = :name_lowercase, #EL = :email_lowercase ",
     Key: {
       id: { S: id },
     },

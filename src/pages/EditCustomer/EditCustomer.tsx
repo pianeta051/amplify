@@ -1,13 +1,14 @@
 import { FC, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Error } from "../../components/Error/Error";
-import { Customer, editCustomer, getCustomer } from "../../services/customers";
+import { Customer } from "../../services/customers";
 import { ErrorCode, isErrorCode } from "../../services/error";
 import { Button, CircularProgress, Typography } from "@mui/material";
 import {
   CustomerForm,
   CustomerFormValues,
 } from "../../components/CustomerForm/CustomerForm";
+import { useCustomers } from "../../context/CustomersContext";
 
 type EditCustomerParams = {
   id: string;
@@ -21,6 +22,7 @@ export const EditCustomerPage: FC = () => {
 
   const { id } = useParams<EditCustomerParams>();
   const navigate = useNavigate();
+  const { getCustomer, editCustomer } = useCustomers();
 
   useEffect(() => {
     if (loading && id) {
