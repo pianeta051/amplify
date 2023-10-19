@@ -1,7 +1,7 @@
 import { FC, useState } from "react";
-import { deleteCustomer } from "../../services/customers";
 import { LoadingButton } from "@mui/lab";
 import { ErrorCode, isErrorCode } from "../../services/error";
+import { useCustomers } from "../../context/CustomersContext";
 
 type DeleteCustomerButtonProps = {
   customerId: string;
@@ -15,8 +15,10 @@ export const DeleteCustomerButton: FC<DeleteCustomerButtonProps> = ({
   onError,
 }) => {
   const [loading, setLoading] = useState(false);
+  const { deleteCustomer } = useCustomers();
   const deleteHandler = () => {
     setLoading(true);
+
     deleteCustomer(customerId)
       .then(() => {
         setLoading(false);

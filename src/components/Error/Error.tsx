@@ -62,6 +62,14 @@ export const Error: FC<ErrorProps> = ({ code }) => {
       </Alert>
     );
   }
+
+  if (code === "NO_CUSTOMERS") {
+    return (
+      <Alert severity="error">
+        <Typography>No Customers in the database</Typography>
+      </Alert>
+    );
+  }
   if (code === "UNAUTHORIZED") {
     return (
       <Alert severity="error">

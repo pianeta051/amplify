@@ -6,11 +6,24 @@ import {
   getCustomer as getCustomerFromService,
   editCustomer as editCustomerFromService,
   createCustomer as createCustomerFromService,
+  deleteCustomer as deleteCustomerFromService,
 } from "../../services/customers";
 import { CustomerFormValues } from "../CustomerForm/CustomerForm";
 
 type CustomersProviderProps = {
   children?: ReactNode;
+};
+
+const MINUTES_TO_EXPIRE = 1;
+
+const expirationDate = (minutesFromNow: number) => {
+  const date = new Date();
+  date.setMinutes(date.getMinutes() + minutesFromNow);
+  return date;
+};
+
+const isExpired = (expiresAt: Date) => {
+  return expiresAt < new Date();
 };
 
 export const CustomersProvider: FC<CustomersProviderProps> = ({ children }) => {
@@ -22,40 +35,40 @@ export const CustomersProvider: FC<CustomersProviderProps> = ({ children }) => {
           customers: Customer[];
           nextToken?: string;
         };
-        validUntil: Date;
+        expiresAt: Date;
       }
     >
   >({});
 
   const [getCustomerStore, setGetCustomerStore] = useState<
-    Record<string, Customer | null>
+    Record<string, { response: Customer | null; expiresAt: Date }>
   >({});
 
   const getCustomers = async (
     nextToken?: string,
     searchInput?: string,
-    customerType?: string
+    customerTypes?: string[]
   ): Promise<{
     customers: Customer[];
     nextToken?: string;
   }> => {
-    const args = JSON.stringify({ nextToken, searchInput, customerType });
+    const args = JSON.stringify({ nextToken, searchInput, customerTypes });
     if (
       getCustomersStore[args] &&
-      getCustomersStore[args].validUntil > new Date()
+      !isExpired(getCustomersStore[args].expiresAt)
     ) {
       return getCustomersStore[args].response;
     }
     const response = await getCustomersFromService(
       nextToken,
       searchInput,
-      customerType
+      customerTypes
     );
     setGetCustomersStore((getCustomersStore) => ({
       ...getCustomersStore,
       [args]: {
         response,
-        validUntil: new Date(new Date().getTime() + 60000),
+        expiresAt: expirationDate(MINUTES_TO_EXPIRE),
       },
     }));
     return response;
@@ -63,13 +76,16 @@ export const CustomersProvider: FC<CustomersProviderProps> = ({ children }) => {
 
   const getCustomer = async (id: string): Promise<Customer | null> => {
     const args = JSON.stringify({ id });
-    if (getCustomerStore[args]) {
-      return getCustomerStore[args];
+    if (
+      getCustomerStore[args] &&
+      !isExpired(getCustomerStore[args].expiresAt)
+    ) {
+      return getCustomerStore[args].response;
     }
     const response = await getCustomerFromService(id);
     setGetCustomerStore((getCustomerStore) => ({
       ...getCustomerStore,
-      [args]: response,
+      [args]: { response, expiresAt: expirationDate(MINUTES_TO_EXPIRE) },
     }));
     return response;
   };
@@ -90,9 +106,20 @@ export const CustomersProvider: FC<CustomersProviderProps> = ({ children }) => {
     return createCustomerFromService(formValues);
   };
 
+  const deleteCustomer = async (id: string): Promise<void> => {
+    setGetCustomersStore({});
+    return deleteCustomerFromService(id);
+  };
+
   return (
     <CustomersContext.Provider
-      value={{ getCustomers, getCustomer, editCustomer, createCustomer }}
+      value={{
+        getCustomers,
+        getCustomer,
+        editCustomer,
+        createCustomer,
+        deleteCustomer,
+      }}
     >
       {children}
     </CustomersContext.Provider>

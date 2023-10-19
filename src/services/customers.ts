@@ -96,7 +96,7 @@ export const deleteCustomer = async (id: string): Promise<void> => {
 export const getCustomers = async (
   nextToken?: string,
   searchInput?: string,
-  customerType?: string
+  customerTypes?: string[]
 ): Promise<{
   customers: Customer[];
   nextToken?: string;
@@ -104,7 +104,7 @@ export const getCustomers = async (
   const response = await get("/customers", {
     nextToken,
     search: searchInput,
-    customerType,
+    customerTypes: JSON.stringify(customerTypes),
   });
   const customers = response.customers as Customer[];
   const responseToken = response.nextToken as string | undefined;

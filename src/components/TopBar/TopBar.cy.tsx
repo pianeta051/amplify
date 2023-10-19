@@ -3,7 +3,6 @@ import { TopBar } from "./TopBar";
 import { AuthContext, AuthContextData } from "../../context/AuthContext";
 import { CognitoUserWithAttributes } from "../../services/authentication";
 import { CognitoUser, CognitoUserPool } from "amazon-cognito-identity-js";
-import { contains } from "cypress/types/jquery";
 
 const mountWithUserAttributes = (attributes: {
   email: string;

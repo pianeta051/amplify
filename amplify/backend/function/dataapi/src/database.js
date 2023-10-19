@@ -63,7 +63,7 @@ const getCustomers = async (
   exclusiveStartKey,
   limit,
   searchInput,
-  customerType
+  customerTypes
 ) => {
   let params = {
     TableName: "customers-ex-dev",
@@ -92,10 +92,10 @@ const getCustomers = async (
       ":name": { S: searchInput.toLowerCase() },
       ":email": { S: searchInput.toLowerCase() },
     };
-    FilterExpressions.push("contains(#NL, :name) OR contains(#EL, :email)");
+    FilterExpressions.push("(contains(#NL, :name) OR contains(#EL, :email))");
   }
 
-  if (customerType?.length) {
+  if (customerTypes?.length) {
     if (!ExpressionAttributeNames) {
       ExpressionAttributeNames = {};
     }
@@ -106,18 +106,29 @@ const getCustomers = async (
     if (!ExpressionAttributeValues) {
       ExpressionAttributeValues = {};
     }
-    ExpressionAttributeValues = {
-      ...ExpressionAttributeValues,
-      ":type": { S: customerType },
-    };
-    FilterExpressions.push("#T = :type");
+
+    const clauses = [];
+    for (let i = 0; i < customerTypes.length; i++) {
+      const customerType = customerTypes[i];
+      const attributeName = `:type${i}`;
+      ExpressionAttributeValues = {
+        ...ExpressionAttributeValues,
+        [attributeName]: { S: customerType },
+      };
+      clauses.push(`(#T = :type${i})`);
+    }
+
+    // Join with OR
+    let expression = clauses.join(" OR ");
+    if (clauses.length > 1) {
+      expression = `(${expression})`;
+    }
+    FilterExpressions.push(expression);
   }
 
   let FilterExpression = undefined;
   if (FilterExpressions.length) {
-    FilterExpression = FilterExpressions.map(
-      (expression) => `(${expression})`
-    ).join(" AND ");
+    FilterExpression = FilterExpressions.join(" AND ");
   }
 
   params = {

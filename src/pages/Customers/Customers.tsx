@@ -24,7 +24,7 @@ export const CustomersPage: FC = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [searching, setSearching] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchButtonTerm, setSearchButtonTerm] = useState("");
+  const [searchButtonTerms, setSearchButtonTerms] = useState<string[]>([]);
 
   const navigate = useNavigate();
   const { getCustomers } = useCustomers();
@@ -59,7 +59,7 @@ export const CustomersPage: FC = () => {
   const loadMoreHandler = () => {
     if (nextToken) {
       setLoadingMore(true);
-      getCustomers(nextToken, searchTerm, searchButtonTerm)
+      getCustomers(nextToken, searchTerm, searchButtonTerms)
         .then(({ customers, nextToken }) => {
           setLoadingMore(false);
           setCustomers((prevCustomers) => [...prevCustomers, ...customers]);
@@ -75,7 +75,7 @@ export const CustomersPage: FC = () => {
   const searchHandler = (searchTerm: string) => {
     setSearching(true);
     setSearchTerm(searchTerm);
-    getCustomers(undefined, searchTerm, searchButtonTerm)
+    getCustomers(undefined, searchTerm, searchButtonTerms)
       .then(({ customers, nextToken }) => {
         setSearching(false);
         setCustomers(customers);
@@ -90,9 +90,15 @@ export const CustomersPage: FC = () => {
 
   const searchButtonHandler = (buttonName: string) => {
     setSearching(true);
-    if (searchButtonTerm === buttonName) {
-      setSearchButtonTerm("");
-      getCustomers(undefined, searchTerm, undefined)
+    // if el boton esta activo
+    // ["company", "other"]
+    if (searchButtonTerms.includes(buttonName)) {
+      // desactivalo
+      // ["other"]
+      const newTerms = searchButtonTerms.filter((term) => term !== buttonName);
+      setSearchButtonTerms(newTerms);
+      // Refrescar la lista de customers con la nueva condicion
+      getCustomers(undefined, searchTerm, newTerms)
         .then(({ customers, nextToken }) => {
           setSearching(false);
           setCustomers(customers);
@@ -104,8 +110,11 @@ export const CustomersPage: FC = () => {
           setNextToken(undefined);
         });
     } else {
-      setSearchButtonTerm(buttonName);
-      getCustomers(undefined, searchTerm, buttonName)
+      // activalo
+      // ["other"] -> ["company", "other"]
+      const newTerms = [...searchButtonTerms, buttonName];
+      setSearchButtonTerms(newTerms);
+      getCustomers(undefined, searchTerm, newTerms)
         .then(({ customers, nextToken }) => {
           setSearching(false);
           setCustomers(customers);
@@ -124,59 +133,69 @@ export const CustomersPage: FC = () => {
       <Typography variant="h3" gutterBottom>
         Customers
       </Typography>
-      {loading || searching ? (
-        <CircularProgress />
-      ) : error ? (
-        <Error code={error} />
-      ) : (
-        <>
-          <SearchBar onSearch={searchHandler} initialValue={searchTerm} />
-          <Stack spacing={2} direction="row" mt={2}>
-            <Button
-              variant={
-                searchButtonTerm === "company" ? "contained" : "outlined"
-              }
-              onClick={() => searchButtonHandler("company")}
-            >
-              Company
-            </Button>
-            <Button
-              variant={
-                searchButtonTerm === "individual" ? "contained" : "outlined"
-              }
-              onClick={() => searchButtonHandler("individual")}
-            >
-              Individual
-            </Button>
-            <Button
-              variant={searchButtonTerm === "other" ? "contained" : "outlined"}
-              onClick={() => searchButtonHandler("other")}
-            >
-              Other
-            </Button>
-          </Stack>
-          <Button onClick={onCreate}>Create new customer</Button>
-          <CustomersList>
-            {customers.map((customer) => (
-              <ListItemButton
-                key={customer.id}
-                onClick={() => customerClickHandler(customer)}
+      <>
+        <SearchBar onSearch={searchHandler} initialValue={searchTerm} />
+        <Stack spacing={2} direction="row" mt={2}>
+          <Button
+            variant={
+              searchButtonTerms.includes("company") ? "contained" : "outlined"
+            }
+            onClick={() => searchButtonHandler("company")}
+          >
+            Company
+          </Button>
+          <Button
+            variant={
+              searchButtonTerms.includes("individual")
+                ? "contained"
+                : "outlined"
+            }
+            onClick={() => searchButtonHandler("individual")}
+          >
+            Individual
+          </Button>
+          <Button
+            variant={
+              searchButtonTerms.includes("other") ? "contained" : "outlined"
+            }
+            onClick={() => searchButtonHandler("other")}
+          >
+            Other
+          </Button>
+        </Stack>
+        <Button onClick={onCreate}>Create new customer</Button>
+        {loading || searching ? (
+          <CircularProgress />
+        ) : error ? (
+          <Error code={error} />
+        ) : (
+          <>
+            <CustomersList>
+              {customers.length === 0 ? (
+                <Error code="NO_CUSTOMERS" />
+              ) : (
+                customers.map((customer) => (
+                  <ListItemButton
+                    key={customer.id}
+                    onClick={() => customerClickHandler(customer)}
+                  >
+                    <CustomerItem customer={customer} />
+                  </ListItemButton>
+                ))
+              )}
+            </CustomersList>
+            {nextToken && (
+              <LoadingButton
+                variant="text"
+                onClick={loadMoreHandler}
+                loading={loadingMore}
               >
-                <CustomerItem customer={customer} />
-              </ListItemButton>
-            ))}
-          </CustomersList>
-          {nextToken && (
-            <LoadingButton
-              variant="text"
-              onClick={loadMoreHandler}
-              loading={loadingMore}
-            >
-              Load more
-            </LoadingButton>
-          )}
-        </>
-      )}
+                Load more
+              </LoadingButton>
+            )}
+          </>
+        )}
+      </>
     </>
   );
 };

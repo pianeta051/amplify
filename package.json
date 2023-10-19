@@ -54,6 +54,7 @@
     ]
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.1.0",
     "@testing-library/cypress": "^9.0.0",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.4.0",
@@ -66,9 +67,10 @@
     "@types/testing-library__cypress": "^5.0.9",
     "@typescript-eslint/eslint-plugin": "^5.27.1",
     "@typescript-eslint/parser": "^5.27.1",
-    "cypress": "^12.7.0",
+    "cypress": "^13.3.0",
     "eslint": "^8.17.0",
     "eslint-plugin-react": "^7.30.0",
+    "fishery": "^2.2.2",
     "husky": "^8.0.3",
     "prettier": "2.6.2"
   }

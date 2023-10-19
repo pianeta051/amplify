@@ -6,7 +6,7 @@ export type CustomersContextData = {
   getCustomers: (
     nextToken?: string,
     searchInput?: string,
-    searchButton?: string
+    customerTypes?: string[]
   ) => Promise<{
     customers: Customer[];
     nextToken?: string;
@@ -17,6 +17,7 @@ export type CustomersContextData = {
     formValues: CustomerFormValues
   ) => Promise<Customer>;
   createCustomer: (formValues: CustomerFormValues) => Promise<Customer>;
+  deleteCustomer: (id: string) => Promise<void>;
 };
 
 export const CustomersContext = createContext<CustomersContextData>({
@@ -36,6 +37,7 @@ export const CustomersContext = createContext<CustomersContextData>({
       email: "Default",
       type: "company",
     }),
+  deleteCustomer: () => Promise.resolve(),
 });
 
 export const useCustomers = () => useContext(CustomersContext);
