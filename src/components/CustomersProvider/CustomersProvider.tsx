@@ -1,5 +1,5 @@
 import { FC, ReactNode, useState } from "react";
-import { Customer } from "../../services/customers";
+import { Customer, TaxData } from "../../services/customers";
 import { CustomersContext } from "../../context/CustomersContext";
 import {
   getCustomers as getCustomersFromService,
@@ -7,8 +7,10 @@ import {
   editCustomer as editCustomerFromService,
   createCustomer as createCustomerFromService,
   deleteCustomer as deleteCustomerFromService,
+  addTaxData as addTaxDataFromService,
 } from "../../services/customers";
 import { CustomerFormValues } from "../CustomerForm/CustomerForm";
+import { TaxDataFormValues } from "../TaxDataForm/TaxDataForm";
 
 type CustomersProviderProps = {
   children?: ReactNode;
@@ -110,6 +112,13 @@ export const CustomersProvider: FC<CustomersProviderProps> = ({ children }) => {
     setGetCustomersStore({});
     return deleteCustomerFromService(id);
   };
+  const addTaxData = async (
+    customerId: string,
+    formValues: TaxDataFormValues
+  ): Promise<TaxData> => {
+    setGetCustomerStore({});
+    return addTaxDataFromService(customerId, formValues);
+  };
 
   return (
     <CustomersContext.Provider
@@ -119,6 +128,7 @@ export const CustomersProvider: FC<CustomersProviderProps> = ({ children }) => {
         editCustomer,
         createCustomer,
         deleteCustomer,
+        addTaxData,
       }}
     >
       {children}

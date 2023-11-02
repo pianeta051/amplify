@@ -1,5 +1,6 @@
 import { API } from "aws-amplify";
 import { CustomerFormValues } from "../components/CustomerForm/CustomerForm";
+import { TaxDataFormValues } from "../components/TaxDataForm/TaxDataForm";
 
 const del = async (path: string) => {
   return API.del("dataapi", path, {});
@@ -51,6 +52,12 @@ export type Customer = {
   type: CustomerType;
 };
 
+export type TaxData = {
+  taxId: string;
+  companyName: string;
+  companyAddress: string;
+};
+
 const isCustomer = (value: unknown): value is Customer => {
   return (
     typeof value === "object" &&
@@ -65,6 +72,14 @@ const isCustomer = (value: unknown): value is Customer => {
     typeof (value as Customer)["type"] === "string" &&
     CUSTOMER_TYPES.includes((value as Customer)["type"] as CustomerType)
   );
+};
+
+export const addTaxData = async (
+  customerId: string,
+  formValues: TaxDataFormValues
+): Promise<TaxData> => {
+  console.log("Added data to customer " + customerId);
+  return formValues;
 };
 
 export const createCustomer = async (

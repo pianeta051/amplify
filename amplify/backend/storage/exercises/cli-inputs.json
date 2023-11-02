@@ -5,28 +5,6 @@
     "fieldName": "id",
     "fieldType": "string"
   },
-  "gsi": [
-    {
-      "name": "search_by_email",
-      "partitionKey": {
-        "fieldName": "email",
-        "fieldType": "string"
-      }
-    },
-    {
-      "name": "search_by_name",
-      "partitionKey": {
-        "fieldName": "name",
-        "fieldType": "string"
-      }
-    },
-    {
-      "name": "search_by_name_lowercase",
-      "partitionKey": {
-        "fieldName": "name_lowercase",
-        "fieldType": "string"
-      }
-    }
-  ],
+  "gsi": [],
   "triggerFunctions": []
 }

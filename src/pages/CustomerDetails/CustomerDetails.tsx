@@ -17,6 +17,7 @@ import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
 import { CustomerIcon } from "../../components/CustomerIcon/CustomerIcon";
 import { DeleteCustomerButton } from "../../components/DeleteCustomerButton/DeleteCustomerButton";
 import { useCustomers } from "../../context/CustomersContext";
+import AddIcon from "@mui/icons-material/Add";
 
 type CustomerDetailsParams = {
   id: string;
@@ -33,6 +34,7 @@ export const CustomerDetailsPage: FC = () => {
   const editClickHandler = () => navigate(`/customers/${id}/edit`);
   const deleteCustomerHandler = () => navigate("/customers");
   const errorDeletingHandler = (code: ErrorCode) => setError(code);
+  const addTaxDataHandler = () => navigate(`/customers/${id}/tax-data/add`);
 
   useEffect(() => {
     if (loading && id) {
@@ -99,6 +101,14 @@ export const CustomerDetailsPage: FC = () => {
           <ListItemText primary="Type" secondary={customer.type} />
         </ListItem>
       </List>
+
+      <Button
+        variant="outlined"
+        startIcon={<AddIcon />}
+        onClick={addTaxDataHandler}
+      >
+        Add tax data
+      </Button>
     </>
   );
 };
