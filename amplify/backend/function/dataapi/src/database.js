@@ -3,6 +3,8 @@ AWS.config.update({ region: "eu-west-2" });
 const ddb = new AWS.DynamoDB();
 const uuid = require("node-uuid");
 
+const TABLE_NAME = "exercises-dev";
+
 const createCustomer = async (customer) => {
   if (!customer.email?.length) {
     throw new Error("EMAIL_CANNOT_BE_EMPTY");
@@ -18,10 +20,13 @@ const createCustomer = async (customer) => {
   const id = uuid.v1();
 
   const params = {
-    TableName: "customers-ex-dev",
+    TableName: TABLE_NAME,
     Item: {
-      id: {
-        S: id,
+      PK: {
+        S: `customer_${id}`,
+      },
+      SK: {
+        S: "profile",
       },
       name: {
         S: customer.name,
@@ -51,9 +56,10 @@ const createCustomer = async (customer) => {
 
 const deleteCustomer = async (id) => {
   const params = {
-    TableName: "customers-ex-dev",
+    TableName: TABLE_NAME,
     Key: {
-      id: { S: id },
+      PK: { S: `customer_${id}` },
+      SK: { S: "profile" },
     },
   };
   await ddb.deleteItem(params).promise();
@@ -66,7 +72,7 @@ const getCustomers = async (
   customerTypes
 ) => {
   let params = {
-    TableName: "customers-ex-dev",
+    TableName: TABLE_NAME,
     Limit: limit,
     ExclusiveStartKey: exclusiveStartKey,
   };
@@ -163,9 +169,10 @@ const getCustomers = async (
 
 const getCustomer = async (id) => {
   const params = {
-    TableName: "customers-ex-dev",
+    TableName: TABLE_NAME,
     Key: {
-      id: { S: id },
+      PK: { S: `customer_${id}` },
+      SK: { S: "profile" },
     },
   };
   const customer = await ddb.getItem(params).promise();
@@ -174,7 +181,7 @@ const getCustomer = async (id) => {
 
 const getNextCustomer = async (lastEvaluatedKey) => {
   const params = {
-    TableName: "customers-ex-dev",
+    TableName: TABLE_NAME,
     Limit: 1,
     ExclusiveStartKey: lastEvaluatedKey,
   };
@@ -189,11 +196,11 @@ const getNextCustomer = async (lastEvaluatedKey) => {
 const queryCustomersByEmail = async (email) => {
   const params = {
     ExpressionAttributeValues: {
-      ":email": { S: email },
+      ":email": { S: email.toLowerCase() },
     },
-    KeyConditionExpression: "email = :email",
-    TableName: "customers-ex-dev",
-    IndexName: "search_by_email",
+    KeyConditionExpression: "email_lowercase = :email",
+    TableName: TABLE_NAME,
+    IndexName: "customer_email",
   };
   const result = await ddb.query(params).promise();
   return result.Items;
@@ -205,14 +212,14 @@ const updateCustomer = async (id, updatedCustomer) => {
 
   if (
     emailExisting.length > 0 &&
-    !emailExisting.find((item) => item.id.S === id)
+    !emailExisting.find((item) => item.PK.S === `customer_${id}`)
   ) {
     console.log("Customer already exist");
 
     throw new Error("EMAIL_ALREADY_REGISTERED");
   }
   const params = {
-    TableName: "customers-ex-dev",
+    TableName: TABLE_NAME,
     ExpressionAttributeNames: {
       "#N": "name",
       "#NL": "name_lowercase",
@@ -240,7 +247,8 @@ const updateCustomer = async (id, updatedCustomer) => {
     UpdateExpression:
       "SET #N = :name, #E = :email, #T = :type, #NL = :name_lowercase, #EL = :email_lowercase ",
     Key: {
-      id: { S: id },
+      PK: { S: `customer_${id}` },
+      SK: { S: "profile" },
     },
   };
   await ddb.updateItem(params).promise();

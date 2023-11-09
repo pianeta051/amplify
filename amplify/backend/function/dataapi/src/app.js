@@ -33,7 +33,7 @@ app.use(function (req, res, next) {
 });
 
 const mapCustomer = (customerFromDb) => ({
-  id: customerFromDb.id.S,
+  id: customerFromDb.PK.S.replace("customer_", ""),
   name: customerFromDb.name.S,
   email: customerFromDb.email.S,
   type: customerFromDb.type.S,
@@ -60,8 +60,8 @@ app.get("/customers", async function (req, res) {
 });
 
 // Get a single customer
-app.get("/customers/*", async function (req, res) {
-  const id = req.params[0];
+app.get("/customers/:id", async function (req, res) {
+  const id = req.params.id;
   const customerFromDb = await getCustomer(id);
   if (customerFromDb) {
     const customer = mapCustomer(customerFromDb);
@@ -94,9 +94,9 @@ app.post("/customers", async function (req, res) {
 });
 
 // Update a customer
-app.put("/customers/*", async function (req, res) {
+app.put("/customers/:id", async function (req, res) {
   try {
-    const id = req.params[0];
+    const id = req.params.id;
     const updatedCustomer = await updateCustomer(id, req.body);
     res.json({ customer: updatedCustomer });
   } catch (error) {
@@ -111,10 +111,18 @@ app.put("/customers/*", async function (req, res) {
 });
 
 // delete a customer
-app.delete("/customers/*", async function (req, res) {
-  const id = req.params[0];
+app.delete("/customers/:id", async function (req, res) {
+  const id = req.params.id;
   await deleteCustomer(id);
   res.json({ message: "Customer deleted" });
+});
+
+// add tax data to an existing customer
+app.post("/customers/:id/tax-data", async function (req, res) {
+  const customerId = req.params.id;
+  const taxData = req.body;
+  console.log(`Adding taxData for customer ${customerId}`);
+  res.json({ taxData });
 });
 
 app.listen(3000, function () {

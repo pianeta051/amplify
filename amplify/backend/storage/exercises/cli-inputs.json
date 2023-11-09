@@ -1,10 +1,22 @@
 {
   "resourceName": "exercises",
-  "tableName": "customers-ex",
+  "tableName": "exercises",
   "partitionKey": {
-    "fieldName": "id",
+    "fieldName": "PK",
     "fieldType": "string"
   },
-  "gsi": [],
+  "sortKey": {
+    "fieldName": "SK",
+    "fieldType": "string"
+  },
+  "gsi": [
+    {
+      "name": "customer_email",
+      "partitionKey": {
+        "fieldName": "email_lowercase",
+        "fieldType": "string"
+      }
+    }
+  ],
   "triggerFunctions": []
 }
