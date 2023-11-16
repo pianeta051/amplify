@@ -11,6 +11,7 @@ const ERROR_CODES = [
   "EMAIL_ALREADY_EXISTS",
   "EMAIL_CANNOT_BE_EMPTY",
   "NO_CUSTOMERS",
+  "TAX_ID_CANNOT_BE_EMPTY",
 ] as const;
 
 export type ErrorCode = typeof ERROR_CODES[number];

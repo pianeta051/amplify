@@ -11,6 +11,7 @@ const bodyParser = require("body-parser");
 const awsServerlessExpressMiddleware = require("aws-serverless-express/middleware");
 
 const {
+  addTaxData,
   createCustomer,
   deleteCustomer,
   getCustomers,
@@ -104,6 +105,10 @@ app.put("/customers/:id", async function (req, res) {
       res.status(409).json({
         error: "Email Already Exists",
       });
+    } else if (error.message === "CUSTOMER_NOT_FOUND") {
+      res.status(404).json({
+        error: "Customer not registered!",
+      });
     } else {
       throw error;
     }
@@ -119,10 +124,24 @@ app.delete("/customers/:id", async function (req, res) {
 
 // add tax data to an existing customer
 app.post("/customers/:id/tax-data", async function (req, res) {
-  const customerId = req.params.id;
-  const taxData = req.body;
-  console.log(`Adding taxData for customer ${customerId}`);
-  res.json({ taxData });
+  try {
+    const customerId = req.params.id;
+    const taxData = req.body;
+    const createdTaxData = await addTaxData(customerId, taxData);
+    res.json({ taxData: createdTaxData });
+  } catch (error) {
+    if (error.message === "TAX_ID_CANNOT_BE_EMPTY") {
+      res.status(400).json({
+        error: "Tax ID cannot be empty",
+      });
+    } else if (error.message === "CUSTOMER_NOT_FOUND") {
+      res.status(404).json({
+        error: "Customer not registered!",
+      });
+    } else {
+      throw error;
+    }
+  }
 });
 
 app.listen(3000, function () {

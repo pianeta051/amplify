@@ -74,12 +74,46 @@ const isCustomer = (value: unknown): value is Customer => {
   );
 };
 
+const isTaxData = (value: unknown): value is TaxData => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "taxId" in value &&
+    typeof (value as TaxData)["taxId"] === "string" &&
+    "companyName" in value &&
+    typeof (value as TaxData)["companyName"] === "string" &&
+    "companyAddress" in value &&
+    typeof (value as TaxData)["companyAddress"] === "string"
+  );
+};
+
 export const addTaxData = async (
   customerId: string,
   formValues: TaxDataFormValues
 ): Promise<TaxData> => {
-  console.log("Added data to customer " + customerId);
-  return formValues;
+  try {
+    const response = await post(
+      `/customers/${customerId}/tax-data`,
+      formValues
+    );
+    if (!("taxData" in response) && typeof response.taxData !== "object") {
+      throw new Error("INTERNAL_ERROR");
+    }
+    if (!isTaxData(response.taxData)) {
+      throw new Error("INTERNAL_ERROR");
+    }
+    return response.taxData;
+  } catch (error) {
+    if (isErrorResponse(error)) {
+      if (error.response.status === 400) {
+        throw new Error("TAX_ID_CANNOT_BE_EMPTY");
+      }
+      if (error.response.status === 404) {
+        throw new Error("CUSTOMER_NOT_EXISTS");
+      }
+    }
+    throw new Error("INTERNAL_ERROR");
+  }
 };
 
 export const createCustomer = async (

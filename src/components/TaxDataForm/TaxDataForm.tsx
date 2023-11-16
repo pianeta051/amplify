@@ -24,9 +24,11 @@ const INITIAL_VALUES: TaxDataFormValues = {
 };
 
 const validationSchema = yup.object<TaxDataFormValues>({
-  taxId: yup.string().required(),
-  companyName: yup.string().required(),
-  companyAddress: yup.string().required(),
+  taxId: yup.string().required("Tax ID field cannot be empty"),
+  companyName: yup.string(),
+  companyAddress: yup
+    .string()
+    .required("Company Address field cannot be empty"),
 });
 
 export const TaxDataForm: FC<TaxDataFormProps> = ({

@@ -8,6 +8,7 @@ import {
 import { Error } from "../../components/Error/Error";
 import { useCustomers } from "../../context/CustomersContext";
 import { useNavigate, useParams } from "react-router-dom";
+
 type AddCustomerTaxDataParams = {
   id: string;
 };
@@ -17,6 +18,10 @@ export const AddCustomerTaxDataPage: FC = () => {
   const { addTaxData } = useCustomers();
   const { id } = useParams<AddCustomerTaxDataParams>();
   const navigate = useNavigate();
+
+  if (!id) {
+    return <Error code={"INTERNAL_ERROR"} />;
+  }
 
   const submitHandler = (formValues: TaxDataFormValues) => {
     if (id) {

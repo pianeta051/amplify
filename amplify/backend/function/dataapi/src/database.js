@@ -5,6 +5,48 @@ const uuid = require("node-uuid");
 
 const TABLE_NAME = "exercises-dev";
 
+const addTaxData = async (customerId, taxData) => {
+  if (!taxData.taxId?.length) {
+    throw new Error("TAX_ID_CANNOT_BE_EMPTY");
+  }
+  const customer = await getCustomer(customerId);
+  if (!customer) {
+    throw new Error("CUSTOMER_NOT_FOUND");
+  }
+  const params = {
+    ExpressionAttributeNames: {
+      "#TD": "taxData",
+    },
+    ExpressionAttributeValues: {
+      ":taxData": {
+        M: {
+          taxId: {
+            S: taxData.taxId,
+          },
+          companyName: {
+            S: taxData.companyName,
+          },
+          companyAddress: {
+            S: taxData.companyAddress,
+          },
+        },
+      },
+    },
+    Key: {
+      PK: {
+        S: `customer_${customerId}`,
+      },
+      SK: {
+        S: "profile",
+      },
+    },
+    TableName: TABLE_NAME,
+    UpdateExpression: "SET #TD = :taxData",
+  };
+  await ddb.updateItem(params).promise();
+  return taxData;
+};
+
 const createCustomer = async (customer) => {
   if (!customer.email?.length) {
     throw new Error("EMAIL_CANNOT_BE_EMPTY");
@@ -207,8 +249,11 @@ const queryCustomersByEmail = async (email) => {
 };
 
 const updateCustomer = async (id, updatedCustomer) => {
+  const customer = await getCustomer(id);
+  if (!customer) {
+    throw new Error("CUSTOMER_NOT_FOUND");
+  }
   const emailExisting = await queryCustomersByEmail(updatedCustomer.email);
-  console.log(JSON.stringify(emailExisting, null, 2));
 
   if (
     emailExisting.length > 0 &&
@@ -259,6 +304,7 @@ const updateCustomer = async (id, updatedCustomer) => {
 };
 
 module.exports = {
+  addTaxData,
   createCustomer,
   deleteCustomer,
   getCustomer,
