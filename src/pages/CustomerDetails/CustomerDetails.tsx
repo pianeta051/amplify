@@ -13,11 +13,14 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+
 import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
 import { CustomerIcon } from "../../components/CustomerIcon/CustomerIcon";
 import { DeleteCustomerButton } from "../../components/DeleteCustomerButton/DeleteCustomerButton";
 import { useCustomers } from "../../context/CustomersContext";
 import AddIcon from "@mui/icons-material/Add";
+import { CustomerTaxData } from "../../components/CustomerTaxData/CustomerTaxData";
+import { CustomerVoucher } from "../../components/CustomerVoucher/CustomerVoucher";
 
 type CustomerDetailsParams = {
   id: string;
@@ -35,6 +38,8 @@ export const CustomerDetailsPage: FC = () => {
   const deleteCustomerHandler = () => navigate("/customers");
   const errorDeletingHandler = (code: ErrorCode) => setError(code);
   const addTaxDataHandler = () => navigate(`/customers/${id}/tax-data/add`);
+  const addVoucherHandler = () =>
+    navigate(`/customers/${id}/voucher-detail/add`);
 
   useEffect(() => {
     if (loading && id) {
@@ -102,13 +107,29 @@ export const CustomerDetailsPage: FC = () => {
         </ListItem>
       </List>
 
-      <Button
-        variant="outlined"
-        startIcon={<AddIcon />}
-        onClick={addTaxDataHandler}
-      >
-        Add tax data
-      </Button>
+      {customer.taxData ? (
+        <CustomerTaxData taxData={customer.taxData} />
+      ) : (
+        <Button
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={addTaxDataHandler}
+        >
+          Add tax data
+        </Button>
+      )}
+
+      {customer.voucherDetail ? (
+        <CustomerVoucher voucherDetail={customer.voucherDetail} />
+      ) : (
+        <Button
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={addVoucherHandler}
+        >
+          Add Voucher
+        </Button>
+      )}
     </>
   );
 };

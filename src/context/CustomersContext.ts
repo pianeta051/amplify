@@ -1,7 +1,8 @@
 import { createContext, useContext } from "react";
-import { Customer, TaxData } from "../services/customers";
+import { Customer, TaxData, VoucherDetail } from "../services/customers";
 import { CustomerFormValues } from "../components/CustomerForm/CustomerForm";
 import { TaxDataFormValues } from "../components/TaxDataForm/TaxDataForm";
+import { VoucherFormValues } from "../components/VoucherForm/VoucherForm";
 
 export type CustomersContextData = {
   getCustomers: (
@@ -23,6 +24,10 @@ export type CustomersContextData = {
     customerId: string,
     formValues: TaxDataFormValues
   ) => Promise<TaxData>;
+  addVoucher: (
+    customerId: string,
+    formValues: VoucherFormValues
+  ) => Promise<VoucherDetail>;
 };
 
 export const CustomersContext = createContext<CustomersContextData>({
@@ -48,6 +53,12 @@ export const CustomersContext = createContext<CustomersContextData>({
       taxId: "2",
       companyName: "ADDLL",
       companyAddress: "Silos 12",
+    }),
+  addVoucher: () =>
+    Promise.resolve({
+      voucherId: "2",
+      value: 100,
+      type: "absolute",
     }),
 });
 

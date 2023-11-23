@@ -1,6 +1,7 @@
 import { API } from "aws-amplify";
 import { CustomerFormValues } from "../components/CustomerForm/CustomerForm";
 import { TaxDataFormValues } from "../components/TaxDataForm/TaxDataForm";
+import { VoucherFormValues } from "../components/VoucherForm/VoucherForm";
 
 const del = async (path: string) => {
   return API.del("dataapi", path, {});
@@ -15,7 +16,10 @@ const get = async (
   });
 };
 
-const post = async (path: string, body: { [param: string]: string } = {}) => {
+const post = async (
+  path: string,
+  body: { [param: string]: string | number } = {}
+) => {
   return API.post("dataapi", path, {
     body,
   });
@@ -50,12 +54,22 @@ export type Customer = {
   name: string;
   email: string;
   type: CustomerType;
+  taxData?: TaxData;
+  voucherDetail?: VoucherDetail;
 };
 
 export type TaxData = {
   taxId: string;
   companyName: string;
   companyAddress: string;
+};
+
+export const VOUCHER_TYPES = ["percentage", "absolute"] as const;
+export type VoucherType = typeof VOUCHER_TYPES[number];
+export type VoucherDetail = {
+  voucherId: string;
+  value: number;
+  type: VoucherType;
 };
 
 const isCustomer = (value: unknown): value is Customer => {
@@ -70,7 +84,10 @@ const isCustomer = (value: unknown): value is Customer => {
     typeof (value as Customer)["email"] === "string" &&
     "type" in value &&
     typeof (value as Customer)["type"] === "string" &&
-    CUSTOMER_TYPES.includes((value as Customer)["type"] as CustomerType)
+    CUSTOMER_TYPES.includes((value as Customer)["type"] as CustomerType) &&
+    ((typeof (value as Customer).taxData === "object" &&
+      isTaxData((value as Customer).taxData)) ||
+      (value as Customer).taxData === undefined)
   );
 };
 
@@ -84,6 +101,19 @@ const isTaxData = (value: unknown): value is TaxData => {
     typeof (value as TaxData)["companyName"] === "string" &&
     "companyAddress" in value &&
     typeof (value as TaxData)["companyAddress"] === "string"
+  );
+};
+
+const isVoucher = (value: unknown): value is VoucherDetail => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "voucherId" in value &&
+    typeof (value as VoucherDetail)["voucherId"] === "number" &&
+    "value" in value &&
+    "type" in value &&
+    typeof (value as VoucherDetail)["type"] === "string" &&
+    VOUCHER_TYPES.includes((value as VoucherDetail)["type"] as VoucherType)
   );
 };
 
@@ -116,6 +146,37 @@ export const addTaxData = async (
   }
 };
 
+export const addVoucher = async (
+  customerId: string,
+  formValues: VoucherFormValues
+): Promise<VoucherDetail> => {
+  try {
+    const response = await post(
+      `/customers/${customerId}/voucher-detail`,
+      formValues
+    );
+    if (
+      !("voucherDetail" in response) &&
+      typeof response.taxData !== "object"
+    ) {
+      throw new Error("INTERNAL_ERROR");
+    }
+    if (!isVoucher(response.voucherDetail)) {
+      throw new Error("INTERNAL_ERROR");
+    }
+    return response.voucherDetail;
+  } catch (error) {
+    if (isErrorResponse(error)) {
+      if (error.response.status === 400) {
+        throw new Error("VOUCHER_ID_CANNOT_BE_EMPTY");
+      }
+      if (error.response.status === 404) {
+        throw new Error("CUSTOMER_NOT_EXISTS");
+      }
+    }
+    throw new Error("INTERNAL_ERROR");
+  }
+};
 export const createCustomer = async (
   formValues: CustomerFormValues
 ): Promise<Customer> => {
