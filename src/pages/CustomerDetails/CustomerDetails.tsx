@@ -59,6 +59,18 @@ export const CustomerDetailsPage: FC = () => {
     }
   }, []);
 
+  const deleteTaxDataHandler = () => {
+    setCustomer((customer) => {
+      if (customer) {
+        return {
+          ...customer,
+          taxData: undefined,
+        };
+      }
+      return null;
+    });
+  };
+
   if (loading) {
     <>
       <Typography variant="h3" gutterBottom>
@@ -108,7 +120,11 @@ export const CustomerDetailsPage: FC = () => {
       </List>
 
       {customer.taxData ? (
-        <CustomerTaxData taxData={customer.taxData} />
+        <CustomerTaxData
+          taxData={customer.taxData}
+          onDelete={deleteTaxDataHandler}
+          customerId={customer.id}
+        />
       ) : (
         <Button
           variant="outlined"

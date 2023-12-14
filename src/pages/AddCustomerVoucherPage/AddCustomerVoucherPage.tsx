@@ -26,6 +26,7 @@ export const AddCustomerVoucherPage: FC = () => {
   const submitHandler = (formValues: VoucherFormValues) => {
     if (id) {
       setLoading(true);
+      setError(null);
       addVoucher(id, formValues)
         .then(() => {
           navigate(`/customers/${id}`);

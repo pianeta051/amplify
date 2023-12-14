@@ -1,25 +1,22 @@
+import LoadingButton from "@mui/lab/LoadingButton";
 import { FC, useState } from "react";
-import { LoadingButton } from "@mui/lab";
-import { ErrorCode, isErrorCode } from "../../services/error";
 import { useCustomers } from "../../context/CustomersContext";
+import { ErrorCode, isErrorCode } from "../../services/error";
 
-type DeleteCustomerButtonProps = {
+type DeleteCustomerTaxDataButtonProps = {
   customerId: string;
   onDelete: () => void;
   onError: (code: ErrorCode) => void;
 };
 
-export const DeleteCustomerButton: FC<DeleteCustomerButtonProps> = ({
-  customerId,
-  onDelete,
-  onError,
-}) => {
+export const DeleteCustomerTaxDataButton: FC<
+  DeleteCustomerTaxDataButtonProps
+> = ({ customerId, onDelete, onError }) => {
   const [loading, setLoading] = useState(false);
-  const { deleteCustomer } = useCustomers();
+  const { deleteCustomerTaxData } = useCustomers();
   const deleteHandler = () => {
     setLoading(true);
-
-    deleteCustomer(customerId)
+    deleteCustomerTaxData(customerId)
       .then(() => {
         setLoading(false);
         onDelete();
@@ -33,6 +30,7 @@ export const DeleteCustomerButton: FC<DeleteCustomerButtonProps> = ({
         }
       });
   };
+
   return (
     <LoadingButton
       variant="contained"

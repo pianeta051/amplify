@@ -12,8 +12,11 @@ const awsServerlessExpressMiddleware = require("aws-serverless-express/middlewar
 
 const {
   addTaxData,
+  addVoucher,
   createCustomer,
   deleteCustomer,
+  deleteTaxData,
+  deleteVoucher,
   getCustomers,
   getCustomer,
   updateCustomer,
@@ -38,6 +41,13 @@ const mapCustomer = (customerFromDb) => ({
   name: customerFromDb.name.S,
   email: customerFromDb.email.S,
   type: customerFromDb.type.S,
+  taxData: customerFromDb.taxData
+    ? {
+        taxId: customerFromDb.taxData.M.taxId.S,
+        companyName: customerFromDb.taxData.M.companyName.S,
+        companyAddress: customerFromDb.taxData.M.companyAddress.S,
+      }
+    : undefined,
 });
 
 // List all customers
@@ -135,6 +145,60 @@ app.post("/customers/:id/tax-data", async function (req, res) {
         error: "Tax ID cannot be empty",
       });
     } else if (error.message === "CUSTOMER_NOT_FOUND") {
+      res.status(404).json({
+        error: "Customer not registered!",
+      });
+    } else {
+      throw error;
+    }
+  }
+});
+
+app.delete("/customers/:id/tax-data", async function (req, res) {
+  try {
+    const customerId = req.params.id;
+    await deleteTaxData(customerId);
+    res.json({ message: `Tax data removed for ${customerId}` });
+  } catch (error) {
+    if (error.message === "CUSTOMER_NOT_FOUND") {
+      res.status(404).json({
+        error: "Customer not registered!",
+      });
+    } else {
+      throw error;
+    }
+  }
+});
+
+// add voucher to an existing customer
+app.post("/customers/:id/voucher-detail", async function (req, res) {
+  try {
+    const customerId = req.params.id;
+    const voucher = req.body;
+    const createdVoucher = await addVoucher(customerId, voucher);
+    res.json({ voucher: createdVoucher });
+  } catch (error) {
+    if (error.message === "VOUCHER_ID_CANNOT_BE_EMPTY") {
+      res.status(400).json({
+        error: "Voucher ID cannot be empty",
+      });
+    } else if (error.message === "CUSTOMER_NOT_FOUND") {
+      res.status(404).json({
+        error: "Customer not registered!",
+      });
+    } else {
+      throw error;
+    }
+  }
+});
+
+app.delete("/customers/:id/voucher-detail", async function (req, res) {
+  try {
+    const customerId = req.params.id;
+    await deleteVoucher(customerId);
+    res.json({ message: `Voucher removed for ${customerId}` });
+  } catch (error) {
+    if (error.message === "CUSTOMER_NOT_FOUND") {
       res.status(404).json({
         error: "Customer not registered!",
       });

@@ -109,8 +109,9 @@ const isVoucher = (value: unknown): value is VoucherDetail => {
     typeof value === "object" &&
     value !== null &&
     "voucherId" in value &&
-    typeof (value as VoucherDetail)["voucherId"] === "number" &&
+    typeof (value as VoucherDetail)["voucherId"] === "string" &&
     "value" in value &&
+    typeof (value as VoucherDetail)["value"] === "number" &&
     "type" in value &&
     typeof (value as VoucherDetail)["type"] === "string" &&
     VOUCHER_TYPES.includes((value as VoucherDetail)["type"] as VoucherType)
@@ -155,16 +156,13 @@ export const addVoucher = async (
       `/customers/${customerId}/voucher-detail`,
       formValues
     );
-    if (
-      !("voucherDetail" in response) &&
-      typeof response.taxData !== "object"
-    ) {
+    if (!("voucher" in response) && typeof response.voucher !== "object") {
       throw new Error("INTERNAL_ERROR");
     }
-    if (!isVoucher(response.voucherDetail)) {
+    if (!isVoucher(response.voucher)) {
       throw new Error("INTERNAL_ERROR");
     }
-    return response.voucherDetail;
+    return response.voucher;
   } catch (error) {
     if (isErrorResponse(error)) {
       if (error.response.status === 400) {
@@ -201,6 +199,19 @@ export const createCustomer = async (
 
 export const deleteCustomer = async (id: string): Promise<void> => {
   await del("/customers/" + id);
+};
+
+export const deleteCustomerTaxData = async (
+  customerId: string
+): Promise<void> => {
+  await del(`/customers/${customerId}/tax-data`);
+};
+
+export const editTaxData = async (
+  customerId: string,
+  formValues: TaxDataFormValues
+): Promise<TaxData> => {
+  return formValues;
 };
 
 export const getCustomers = async (

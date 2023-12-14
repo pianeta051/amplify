@@ -110,6 +110,13 @@ export const Error: FC<ErrorProps> = ({ code }) => {
       </Alert>
     );
   }
+  if (code === "VOUCHER_ID_CANNOT_BE_EMPTY") {
+    return (
+      <Alert severity="error">
+        <Typography>Voucher ID field cannot be empty.</Typography>
+      </Alert>
+    );
+  }
   return (
     <Alert severity="error">
       <Typography>Internal error</Typography>
