@@ -3,6 +3,10 @@ import { CustomerFormValues } from "../components/CustomerForm/CustomerForm";
 import { TaxDataFormValues } from "../components/TaxDataForm/TaxDataForm";
 import { VoucherFormValues } from "../components/VoucherForm/VoucherForm";
 
+/**
+ * GENERAL API FUNCTIONS
+ */
+
 const del = async (path: string) => {
   return API.del("dataapi", path, {});
 };
@@ -30,6 +34,20 @@ const put = async (path: string, body: { [param: string]: string } = {}) => {
     body,
   });
 };
+/**
+ * TYPES AND TYPE GUARDS
+ */
+
+export type Customer = {
+  id: string;
+  name: string;
+  email: string;
+  type: CustomerType;
+  taxData?: TaxData;
+  voucherDetail?: VoucherDetail;
+};
+export const CUSTOMER_TYPES = ["individual", "company", "other"] as const;
+export type CustomerType = typeof CUSTOMER_TYPES[number];
 
 type ErrorResponse = {
   response: { status: number };
@@ -47,30 +65,19 @@ const isErrorResponse = (value: unknown): value is ErrorResponse => {
   );
 };
 
-export const CUSTOMER_TYPES = ["individual", "company", "other"] as const;
-export type CustomerType = typeof CUSTOMER_TYPES[number];
-export type Customer = {
-  id: string;
-  name: string;
-  email: string;
-  type: CustomerType;
-  taxData?: TaxData;
-  voucherDetail?: VoucherDetail;
-};
-
 export type TaxData = {
   taxId: string;
   companyName: string;
   companyAddress: string;
 };
 
-export const VOUCHER_TYPES = ["percentage", "absolute"] as const;
-export type VoucherType = typeof VOUCHER_TYPES[number];
 export type VoucherDetail = {
   voucherId: string;
   value: number;
   type: VoucherType;
 };
+export const VOUCHER_TYPES = ["percentage", "absolute"] as const;
+export type VoucherType = typeof VOUCHER_TYPES[number];
 
 const isCustomer = (value: unknown): value is Customer => {
   return (
@@ -117,6 +124,10 @@ const isVoucher = (value: unknown): value is VoucherDetail => {
     VOUCHER_TYPES.includes((value as VoucherDetail)["type"] as VoucherType)
   );
 };
+
+/**
+ * AJAX FUNCTIONS
+ */
 
 export const addTaxData = async (
   customerId: string,
@@ -175,6 +186,7 @@ export const addVoucher = async (
     throw new Error("INTERNAL_ERROR");
   }
 };
+
 export const createCustomer = async (
   formValues: CustomerFormValues
 ): Promise<Customer> => {
@@ -207,11 +219,45 @@ export const deleteCustomerTaxData = async (
   await del(`/customers/${customerId}/tax-data`);
 };
 
+export const editCustomer = async (
+  id: string,
+  formValues: CustomerFormValues
+): Promise<Customer> => {
+  try {
+    const response = await put("/customers/" + id, formValues);
+    if (!isCustomer(response.customer)) {
+      throw new Error("INTERNAL_ERROR");
+    }
+    return response.customer;
+  } catch (error) {
+    if (isErrorResponse(error)) {
+      if (error.response.status === 409) {
+        throw new Error("EMAIL_ALREADY_EXISTS");
+      }
+      if (error.response.status === 400) {
+        throw new Error("EMAIL_CANNOT_BE_EMPTY");
+      }
+      if (error.response.status === 404) {
+        throw new Error("CUSTOMER_NOT_EXISTS");
+      }
+    }
+    throw new Error("INTERNAL_ERROR");
+  }
+};
+
 export const editTaxData = async (
   customerId: string,
   formValues: TaxDataFormValues
 ): Promise<TaxData> => {
-  return formValues;
+  try {
+    const response = await put(`/customers/${customerId}/tax-data`, formValues);
+    if (!isTaxData(response.taxData)) {
+      throw new Error("INTERNAL_ERROR");
+    }
+    return response.taxData;
+  } catch (error) {
+    throw new Error("INTERNAL_ERROR");
+  }
 };
 
 export const getCustomers = async (
@@ -257,33 +303,6 @@ export const getCustomer = async (id: string): Promise<Customer | null> => {
       }
     }
 
-    throw new Error("INTERNAL_ERROR");
-  }
-};
-
-//este codigo es un ejemplo de lo que hay que hacer.... hay que adaptarlo
-export const editCustomer = async (
-  id: string,
-  formValues: CustomerFormValues
-): Promise<Customer> => {
-  try {
-    const response = await put("/customers/" + id, formValues);
-    if (!isCustomer(response.customer)) {
-      throw new Error("INTERNAL_ERROR");
-    }
-    return response.customer;
-  } catch (error) {
-    if (isErrorResponse(error)) {
-      if (error.response.status === 409) {
-        throw new Error("EMAIL_ALREADY_EXISTS");
-      }
-      if (error.response.status === 400) {
-        throw new Error("EMAIL_CANNOT_BE_EMPTY");
-      }
-      if (error.response.status === 404) {
-        throw new Error("CUSTOMER_NOT_EXISTS");
-      }
-    }
     throw new Error("INTERNAL_ERROR");
   }
 };

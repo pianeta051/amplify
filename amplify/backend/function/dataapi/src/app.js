@@ -20,6 +20,7 @@ const {
   getCustomers,
   getCustomer,
   updateCustomer,
+  updateTaxData,
 } = require("./database");
 
 const { generateToken, parseToken } = require("./token");
@@ -159,6 +160,23 @@ app.delete("/customers/:id/tax-data", async function (req, res) {
     const customerId = req.params.id;
     await deleteTaxData(customerId);
     res.json({ message: `Tax data removed for ${customerId}` });
+  } catch (error) {
+    if (error.message === "CUSTOMER_NOT_FOUND") {
+      res.status(404).json({
+        error: "Customer not registered!",
+      });
+    } else {
+      throw error;
+    }
+  }
+});
+
+app.put("/customers/:id/tax-data", async function (req, res) {
+  try {
+    const taxData = req.body;
+    const customerId = req.params.id;
+    const updatedTaxData = await updateTaxData(customerId, taxData);
+    res.json({ taxData: updatedTaxData });
   } catch (error) {
     if (error.message === "CUSTOMER_NOT_FOUND") {
       res.status(404).json({

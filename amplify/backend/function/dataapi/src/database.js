@@ -47,27 +47,44 @@ const addTaxData = async (customerId, taxData) => {
   return taxData;
 };
 
-const deleteTaxData = async (customerId) => {
+const addVoucher = async (customerId, voucher) => {
+  if (!voucher.voucherId?.length) {
+    throw new Error("VOUCHER_ID_CANNOT_BE_EMPTY");
+  }
   const customer = await getCustomer(customerId);
   if (!customer) {
     throw new Error("CUSTOMER_NOT_FOUND");
   }
   const params = {
     ExpressionAttributeNames: {
-      "#TD": "taxData",
+      "#V": "voucher",
+    },
+    ExpressionAttributeValues: {
+      ":voucher": {
+        M: {
+          voucherId: {
+            S: voucher.voucherId,
+          },
+          value: {
+            N: voucher.value.toString(),
+          },
+          type: {
+            S: voucher.type,
+          },
+        },
+      },
     },
     Key: {
       PK: {
         S: `customer_${customerId}`,
       },
-      SK: {
-        S: "profile",
-      },
+      SK: { S: "profile" },
     },
     TableName: TABLE_NAME,
-    UpdateExpression: "REMOVE #TD",
+    UpdateExpression: "SET #V = :voucher",
   };
   await ddb.updateItem(params).promise();
+  return voucher;
 };
 
 const createCustomer = async (customer) => {
@@ -119,46 +136,29 @@ const createCustomer = async (customer) => {
   };
 };
 
-//Voucher
-const addVoucher = async (customerId, voucher) => {
-  if (!voucher.voucherId?.length) {
-    throw new Error("VOUCHER_ID_CANNOT_BE_EMPTY");
-  }
+const deleteTaxData = async (customerId) => {
   const customer = await getCustomer(customerId);
   if (!customer) {
     throw new Error("CUSTOMER_NOT_FOUND");
   }
   const params = {
     ExpressionAttributeNames: {
-      "#V": "voucher",
-    },
-    ExpressionAttributeValues: {
-      ":voucher": {
-        M: {
-          voucherId: {
-            S: voucher.voucherId,
-          },
-          value: {
-            N: "" + voucher.value,
-          },
-          type: {
-            S: voucher.type,
-          },
-        },
-      },
+      "#TD": "taxData",
     },
     Key: {
       PK: {
         S: `customer_${customerId}`,
       },
-      SK: { S: "profile" },
+      SK: {
+        S: "profile",
+      },
     },
     TableName: TABLE_NAME,
-    UpdateExpression: "SET #V = :voucher",
+    UpdateExpression: "REMOVE #TD",
   };
   await ddb.updateItem(params).promise();
-  return voucher;
 };
+
 const deleteVoucher = async (customerId) => {
   const customer = await getCustomer(customerId);
   if (!customer) {
@@ -180,7 +180,6 @@ const deleteVoucher = async (customerId) => {
   await ddb.updateItem(params).promise();
 };
 
-//Customer
 const deleteCustomer = async (id) => {
   const params = {
     TableName: TABLE_NAME,
@@ -388,6 +387,36 @@ const updateCustomer = async (id, updatedCustomer) => {
   };
 };
 
+const updateTaxData = async (customerId, updatedTaxData) => {
+  const customer = await getCustomer(customerId);
+  if (!customer) {
+    throw new Error("CUSTOMER_NOT_FOUND");
+  }
+
+  const params = {
+    TableName: TABLE_NAME,
+    ExpressionAttributeNames: {
+      "#TD": "taxData",
+    },
+    ExpressionAttributeValues: {
+      ":taxData": {
+        M: {
+          taxId: { S: updatedTaxData.taxId },
+          companyName: { S: updatedTaxData.companyName },
+          companyAddress: { S: updatedTaxData.companyAddress },
+        },
+      },
+    },
+    UpdateExpression: "SET #TD = :taxData",
+    Key: {
+      PK: { S: `customer_${customerId}` },
+      SK: { S: "profile" },
+    },
+  };
+  await ddb.updateItem(params).promise();
+  return updatedTaxData;
+};
+
 module.exports = {
   addTaxData,
   addVoucher,
@@ -399,4 +428,5 @@ module.exports = {
   getCustomers,
   queryCustomersByEmail,
   updateCustomer,
+  updateTaxData,
 };
