@@ -2,6 +2,7 @@ import { API } from "aws-amplify";
 import { CustomerFormValues } from "../components/CustomerForm/CustomerForm";
 import { TaxDataFormValues } from "../components/TaxDataForm/TaxDataForm";
 import { VoucherFormValues } from "../components/VoucherForm/VoucherForm";
+import { CustomerAddressFormValues } from "../components/CustomerAddressForm/CustomerAddressForm";
 
 /**
  * GENERAL API FUNCTIONS
@@ -44,7 +45,7 @@ export type Customer = {
   email: string;
   type: CustomerType;
   taxData?: TaxData;
-  voucherDetail?: VoucherDetail;
+  voucher?: VoucherDetail;
 };
 export const CUSTOMER_TYPES = ["individual", "company", "other"] as const;
 export type CustomerType = typeof CUSTOMER_TYPES[number];
@@ -63,6 +64,13 @@ const isErrorResponse = (value: unknown): value is ErrorResponse => {
     "status" in (value as ErrorResponse)["response"] &&
     typeof (value as ErrorResponse)["response"]["status"] === "number"
   );
+};
+
+export type CustomerAddress = {
+  street: string;
+  number: string;
+  city: string;
+  postcode: string;
 };
 
 export type TaxData = {
@@ -98,6 +106,19 @@ const isCustomer = (value: unknown): value is Customer => {
   );
 };
 
+const isCustomerAddress = (value: unknown): value is CustomerAddress => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  const customerAddress = value as CustomerAddress;
+  return (
+    typeof customerAddress.street === "string" &&
+    typeof customerAddress.number === "string" &&
+    typeof customerAddress.city === "string" &&
+    typeof customerAddress.postcode === "string"
+  );
+};
+
 const isTaxData = (value: unknown): value is TaxData => {
   return (
     typeof value === "object" &&
@@ -128,6 +149,30 @@ const isVoucher = (value: unknown): value is VoucherDetail => {
 /**
  * AJAX FUNCTIONS
  */
+
+export const addMainAddress = async (
+  customerId: string,
+  formValues: CustomerAddressFormValues
+): Promise<CustomerAddress> => {
+  try {
+    const response = await post(
+      `/customers/${customerId}/main-address`,
+      formValues
+    );
+    if (!isCustomerAddress(response.mainAddress)) {
+      throw new Error("INTERNAL_ERROR");
+    }
+    return response.mainAddress;
+  } catch (error) {
+    if (isErrorResponse(error)) {
+      const status = error.response.status;
+      if (status === 404) {
+        throw new Error("CUSTOMER_NOT_FOUND");
+      }
+    }
+    throw new Error("INTERNAL_ERROR");
+  }
+};
 
 export const addTaxData = async (
   customerId: string,
@@ -219,6 +264,11 @@ export const deleteCustomerTaxData = async (
   await del(`/customers/${customerId}/tax-data`);
 };
 
+export const deleteCustomerVoucher = async (
+  customerId: string
+): Promise<void> => {
+  await del(`/customers/${customerId}/voucher-detail`);
+};
 export const editCustomer = async (
   id: string,
   formValues: CustomerFormValues
@@ -255,6 +305,24 @@ export const editTaxData = async (
       throw new Error("INTERNAL_ERROR");
     }
     return response.taxData;
+  } catch (error) {
+    throw new Error("INTERNAL_ERROR");
+  }
+};
+
+export const editVoucher = async (
+  customerId: string,
+  formValues: VoucherFormValues
+): Promise<VoucherDetail> => {
+  try {
+    const response = await put(
+      `/customers/${customerId}/voucher-detail`,
+      formValues
+    );
+    if (!isVoucher(response.voucher)) {
+      throw new Error("INTERNAL_ERROR");
+    }
+    return response.voucher;
   } catch (error) {
     throw new Error("INTERNAL_ERROR");
   }

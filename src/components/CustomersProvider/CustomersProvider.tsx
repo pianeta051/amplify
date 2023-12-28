@@ -1,5 +1,10 @@
 import { FC, ReactNode, useState } from "react";
-import { Customer, TaxData, VoucherDetail } from "../../services/customers";
+import {
+  Customer,
+  CustomerAddress,
+  TaxData,
+  VoucherDetail,
+} from "../../services/customers";
 import { CustomersContext } from "../../context/CustomersContext";
 import {
   getCustomers as getCustomersFromService,
@@ -10,11 +15,15 @@ import {
   addTaxData as addTaxDataFromService,
   addVoucher as addVoucherFromService,
   deleteCustomerTaxData as deleteCustomerTaxDataFromService,
+  deleteCustomerVoucher as deleteCustomerVoucherFromService,
   editTaxData as editTaxDataFromService,
+  editVoucher as editVoucherFromService,
+  addMainAddress as addMainAddressFromService,
 } from "../../services/customers";
 import { CustomerFormValues } from "../CustomerForm/CustomerForm";
 import { TaxDataFormValues } from "../TaxDataForm/TaxDataForm";
 import { VoucherFormValues } from "../VoucherForm/VoucherForm";
+import { CustomerAddressFormValues } from "../CustomerAddressForm/CustomerAddressForm";
 
 type CustomersProviderProps = {
   children?: ReactNode;
@@ -137,12 +146,31 @@ export const CustomersProvider: FC<CustomersProviderProps> = ({ children }) => {
     return editTaxDataFromService(customerId, formValues);
   };
 
+  const editVoucher = async (
+    customerId: string,
+    formValues: VoucherFormValues
+  ): Promise<VoucherDetail> => {
+    setSingleCustomerStore({});
+    return editVoucherFromService(customerId, formValues);
+  };
+  const deleteCustomerVoucher = async (id: string): Promise<void> => {
+    setSingleCustomerStore({});
+    return deleteCustomerVoucherFromService(id);
+  };
   const addVoucher = async (
     customerId: string,
     formValues: VoucherFormValues
   ): Promise<VoucherDetail> => {
     setSingleCustomerStore({});
     return addVoucherFromService(customerId, formValues);
+  };
+
+  const addMainAddress = async (
+    customerId: string,
+    formValues: CustomerAddressFormValues
+  ): Promise<CustomerAddress> => {
+    setSingleCustomerStore({});
+    return addMainAddressFromService(customerId, formValues);
   };
 
   return (
@@ -154,9 +182,12 @@ export const CustomersProvider: FC<CustomersProviderProps> = ({ children }) => {
         createCustomer,
         deleteCustomer,
         deleteCustomerTaxData,
+        deleteCustomerVoucher,
         addTaxData,
         addVoucher,
         editTaxData,
+        editVoucher,
+        addMainAddress,
       }}
     >
       {children}

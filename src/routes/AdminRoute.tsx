@@ -1,6 +1,6 @@
 import { FC, ReactElement } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Error } from "../components/Error/Error";
+import { ErrorAlert } from "../components/ErrorAlert/ErrorAlert";
 
 type AdminRouteProps = {
   children: ReactElement;
@@ -8,5 +8,5 @@ type AdminRouteProps = {
 
 export const AdminRoute: FC<AdminRouteProps> = ({ children }) => {
   const { isInGroup } = useAuth();
-  return isInGroup("Admin") ? children : <Error code="UNAUTHORIZED" />;
+  return isInGroup("Admin") ? children : <ErrorAlert code="UNAUTHORIZED" />;
 };

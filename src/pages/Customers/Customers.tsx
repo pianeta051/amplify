@@ -11,7 +11,7 @@ import { CustomersList } from "./Customers.style";
 import { Customer } from "../../services/customers";
 import { useNavigate } from "react-router-dom";
 import { ErrorCode, isErrorCode } from "../../services/error";
-import { Error } from "../../components/Error/Error";
+import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 import { LoadingButton } from "@mui/lab";
 import { SearchBar } from "../../components/SearchBar/SearchBar";
 import { useCustomers } from "../../context/CustomersContext";
@@ -167,12 +167,12 @@ export const CustomersPage: FC = () => {
         {loading || searching ? (
           <CircularProgress />
         ) : error ? (
-          <Error code={error} />
+          <ErrorAlert code={error} />
         ) : (
           <>
             <CustomersList>
               {customers.length === 0 ? (
-                <Error code="NO_CUSTOMERS" />
+                <ErrorAlert code="NO_CUSTOMERS" />
               ) : (
                 customers.map((customer) => (
                   <ListItemButton

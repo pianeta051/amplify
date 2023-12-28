@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Error } from "../../components/Error/Error";
+import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 import { Customer } from "../../services/customers";
 import { ErrorCode, isErrorCode } from "../../services/error";
 import { Button, CircularProgress, Typography } from "@mui/material";
@@ -57,7 +57,7 @@ export const EditCustomerPage: FC = () => {
   if (error) {
     return (
       <>
-        <Error code={error} />
+        <ErrorAlert code={error} />
         <Button variant="contained" color="primary" onClick={backClickHandler}>
           Back
         </Button>
@@ -67,7 +67,7 @@ export const EditCustomerPage: FC = () => {
   if (!customer || !id) {
     return (
       <>
-        <Error code="INTERNAL_ERROR" />
+        <ErrorAlert code="INTERNAL_ERROR" />
         <Button variant="contained" color="primary" onClick={backClickHandler}>
           Back
         </Button>

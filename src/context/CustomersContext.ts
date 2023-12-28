@@ -1,6 +1,7 @@
 import { createContext, useContext } from "react";
 import {
   Customer,
+  CustomerAddress,
   TaxData,
   VoucherDetail,
   deleteCustomerTaxData,
@@ -8,6 +9,7 @@ import {
 import { CustomerFormValues } from "../components/CustomerForm/CustomerForm";
 import { TaxDataFormValues } from "../components/TaxDataForm/TaxDataForm";
 import { VoucherFormValues } from "../components/VoucherForm/VoucherForm";
+import { CustomerAddressFormValues } from "../components/CustomerAddressForm/CustomerAddressForm";
 
 export type CustomersContextData = {
   getCustomers: (
@@ -34,10 +36,20 @@ export type CustomersContextData = {
     customerId: string,
     formValues: TaxDataFormValues
   ) => Promise<TaxData>;
+
   addVoucher: (
     customerId: string,
     formValues: VoucherFormValues
   ) => Promise<VoucherDetail>;
+  addMainAddress: (
+    customerId: string,
+    formValues: CustomerAddressFormValues
+  ) => Promise<CustomerAddress>;
+  editVoucher: (
+    customerId: string,
+    formValues: VoucherFormValues
+  ) => Promise<VoucherDetail>;
+  deleteCustomerVoucher: (id: string) => Promise<void>;
 };
 
 export const CustomersContext = createContext<CustomersContextData>({
@@ -71,12 +83,20 @@ export const CustomersContext = createContext<CustomersContextData>({
       companyName: "ADDLL",
       companyAddress: "Silos 12",
     }),
+  editVoucher: () =>
+    Promise.resolve({
+      voucherId: "25",
+      value: 54,
+      type: "absolute",
+    }),
   addVoucher: () =>
     Promise.resolve({
       voucherId: "2",
       value: 100,
       type: "absolute",
     }),
+  deleteCustomerVoucher: () => Promise.resolve(),
+  addMainAddress: () => Promise.resolve({} as CustomerAddress),
 });
 
 export const useCustomers = () => useContext(CustomersContext);

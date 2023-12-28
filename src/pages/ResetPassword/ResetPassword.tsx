@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { FC, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Error } from "../../components/Error/Error";
+import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 import {
   ResetPasswordForm,
   ResetPasswordFormValues,
@@ -44,7 +44,7 @@ export const ResetPasswordPage: FC = () => {
           <Typography variant="h3" gutterBottom align="center">
             Invalid link
           </Typography>
-          <Error code="INVALID_RESET_PASSWORD_LINK" />
+          <ErrorAlert code="INVALID_RESET_PASSWORD_LINK" />
         </>
       ) : (
         <>
@@ -52,7 +52,7 @@ export const ResetPasswordPage: FC = () => {
             Reset your password
           </Typography>
           <Typography>Set a new password for logging in.</Typography>
-          {error && <Error code={error} />}
+          {error && <ErrorAlert code={error} />}
           <ResetPasswordForm loading={loading} onSubmit={submitHandler} />
         </>
       )}

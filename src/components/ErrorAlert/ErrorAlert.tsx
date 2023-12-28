@@ -3,11 +3,11 @@ import { FC } from "react";
 import { useNavigate } from "react-router-dom";
 import { ErrorCode } from "../../services/error";
 
-type ErrorProps = {
+type ErrorAlertProps = {
   code: ErrorCode;
 };
 
-export const Error: FC<ErrorProps> = ({ code }) => {
+export const ErrorAlert: FC<ErrorAlertProps> = ({ code }) => {
   const navigate = useNavigate();
 
   const toForgotPassword = () => navigate("forgot-password");

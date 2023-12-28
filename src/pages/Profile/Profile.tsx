@@ -3,7 +3,7 @@ import { FC, useState } from "react";
 import { ProfileName } from "../../components/ProfileName/ProfileName";
 import { updateName, updatePassword } from "../../services/authentication";
 import { ErrorCode, isErrorCode } from "../../services/error";
-import { Error } from "../../components/Error/Error";
+import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 import {
   ProfilePassword,
   ProfilePasswordFormValues,
@@ -18,7 +18,7 @@ export const ProfilePage: FC = () => {
   const { user, setUser } = useAuth();
 
   if (!user) {
-    return <Error code="USER_NOT_EXISTS" />;
+    return <ErrorAlert code="USER_NOT_EXISTS" />;
   }
 
   const changeNameHandler = (newName: string) => {
@@ -70,7 +70,7 @@ export const ProfilePage: FC = () => {
       <Typography variant="h3" gutterBottom>
         My Profile
       </Typography>
-      {error && <Error code={error} />}
+      {error && <ErrorAlert code={error} />}
       <Box>
         <ProfileName
           name={name}

@@ -5,7 +5,7 @@ import {
   TaxDataForm,
   TaxDataFormValues,
 } from "../../components/TaxDataForm/TaxDataForm";
-import { Error } from "../../components/Error/Error";
+import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 import { useCustomers } from "../../context/CustomersContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { Customer } from "../../services/customers";
@@ -42,7 +42,7 @@ export const EditCustomerTaxDataPage: FC = () => {
   }, []);
 
   if (!id) {
-    return <Error code={"INTERNAL_ERROR"} />;
+    return <ErrorAlert code={"INTERNAL_ERROR"} />;
   }
   if (loading) {
     return (
@@ -57,7 +57,7 @@ export const EditCustomerTaxDataPage: FC = () => {
   if (error) {
     return (
       <>
-        <Error code={error} />
+        <ErrorAlert code={error} />
       </>
     );
   }
@@ -86,7 +86,7 @@ export const EditCustomerTaxDataPage: FC = () => {
       <Typography variant="h3" gutterBottom align="center">
         Edit tax data
       </Typography>
-      {error && <Error code={error} />}
+      {error && <ErrorAlert code={error} />}
       <TaxDataForm
         loading={submitting}
         onSubmit={submitHandler}

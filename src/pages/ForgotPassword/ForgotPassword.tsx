@@ -1,7 +1,7 @@
 import { Alert, Button, Typography } from "@mui/material";
 import { FC, useState } from "react";
 import { ErrorCode, isErrorCode } from "../../services/error";
-import { Error } from "../../components/Error/Error";
+import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 import {
   ForgotPasswordForm,
   ForgotPasswordFormValues,
@@ -56,7 +56,7 @@ export const ForgotPasswordPage: FC = () => {
           <Typography>
             We&apos;ll send you a reset link to your email address.
           </Typography>
-          {error && <Error code={error} />}
+          {error && <ErrorAlert code={error} />}
           <ForgotPasswordForm loading={loading} onSubmit={submitHandler} />
         </>
       )}

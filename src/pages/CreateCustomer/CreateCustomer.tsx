@@ -5,7 +5,7 @@ import {
   CustomerFormValues,
 } from "../../components/CustomerForm/CustomerForm";
 import { useNavigate } from "react-router-dom";
-import { Error } from "../../components/Error/Error";
+import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 import { ErrorCode, isErrorCode } from "../../services/error";
 import { useCustomers } from "../../context/CustomersContext";
 
@@ -36,7 +36,7 @@ export const CreateCustomerPage: FC = () => {
       <Typography variant="h3" gutterBottom>
         Customers
       </Typography>
-      {errorMessage && <Error code={errorMessage} />}
+      {errorMessage && <ErrorAlert code={errorMessage} />}
       <CustomerForm onSubmit={submitHandler} loading={loading} />
     </>
   );

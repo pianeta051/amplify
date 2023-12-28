@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { FC, useState } from "react";
 import { ErrorCode, isErrorCode } from "../../services/error";
-import { Error } from "../../components/Error/Error";
+import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 import { useCustomers } from "../../context/CustomersContext";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -20,7 +20,7 @@ export const AddCustomerVoucherPage: FC = () => {
   const navigate = useNavigate();
 
   if (!id) {
-    return <Error code={"INTERNAL_ERROR"} />;
+    return <ErrorAlert code={"INTERNAL_ERROR"} />;
   }
 
   const submitHandler = (formValues: VoucherFormValues) => {
@@ -48,7 +48,7 @@ export const AddCustomerVoucherPage: FC = () => {
       <Typography variant="h3" gutterBottom align="center">
         Add Voucher
       </Typography>
-      {error && <Error code={error} />}
+      {error && <ErrorAlert code={error} />}
       <VoucherForm loading={loading} onSubmit={submitHandler} />
     </>
   );

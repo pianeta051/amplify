@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { DeleteCustomerTaxDataButton } from "../DeleteCustomerTaxDataButton/DeleteCustomerTaxDataButton";
 import { ErrorCode } from "../../services/error";
-import { Error } from "../../components/Error/Error";
+import { ErrorAlert } from "../ErrorAlert/ErrorAlert";
 import { useNavigate } from "react-router-dom";
 
 type CustomerTaxDataProps = {
@@ -35,10 +35,10 @@ export const CustomerTaxData: FC<CustomerTaxDataProps> = ({
   };
   return (
     <>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h3" gutterBottom>
         Tax data
       </Typography>
-      {error && <Error code={error} />}
+      {error && <ErrorAlert code={error} />}
       <Stack direction="row" spacing={2}>
         <Button variant="contained" onClick={editClickHandler}>
           Edit

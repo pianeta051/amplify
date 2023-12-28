@@ -1,7 +1,7 @@
 import { Button, Typography } from "@mui/material";
 import { FC, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Error } from "../../components/Error/Error";
+import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 import {
   LogInForm,
   LogInFormValues,
@@ -52,7 +52,7 @@ export const LogInPage: FC = () => {
       <Typography variant="h3" gutterBottom align="center">
         Log in
       </Typography>
-      {error && <Error code={error} />}
+      {error && <ErrorAlert code={error} />}
       <LogInForm loading={loading} onSubmit={submitHandler} />
       <Button onClick={toForgotPassword}>Forgot your password?</Button>
     </>

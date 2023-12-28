@@ -2,44 +2,55 @@ import { FC, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Customer } from "../../services/customers";
 import { ErrorCode, isErrorCode } from "../../services/error";
-import { Error } from "../../components/Error/Error";
+import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 import {
   Button,
   CircularProgress,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Stack,
+  Tab,
   Typography,
 } from "@mui/material";
 
-import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
-import { CustomerIcon } from "../../components/CustomerIcon/CustomerIcon";
-import { DeleteCustomerButton } from "../../components/DeleteCustomerButton/DeleteCustomerButton";
 import { useCustomers } from "../../context/CustomersContext";
 import AddIcon from "@mui/icons-material/Add";
 import { CustomerTaxData } from "../../components/CustomerTaxData/CustomerTaxData";
 import { CustomerVoucher } from "../../components/CustomerVoucher/CustomerVoucher";
+import { CustomerInformation } from "../../components/CustomerInformation/CustomerInformation";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
 
 type CustomerDetailsParams = {
   id: string;
+};
+
+const tabNames = ["information", "taxData", "voucher", "mainAddress"] as const;
+type TabName = typeof tabNames[number];
+const tabLabels: Record<TabName, string> = {
+  information: "Information",
+  taxData: "Tax data",
+  voucher: "Voucher details",
+  mainAddress: "Main Address",
+};
+
+type CustomerSectionTabProps = {
+  value: TabName;
+  children: React.ReactNode;
+};
+
+const CustomerSectionTab: FC<CustomerSectionTabProps> = ({
+  value,
+  children,
+}) => {
+  return <TabPanel value={value}>{children}</TabPanel>;
 };
 
 export const CustomerDetailsPage: FC = () => {
   const [loading, setLoading] = useState(true);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [error, setError] = useState<ErrorCode | null>(null);
+  const [currentTab, setCurrentTab] = useState<TabName>("information");
   const { id } = useParams<CustomerDetailsParams>();
   const navigate = useNavigate();
   const { getCustomer } = useCustomers();
-
-  const editClickHandler = () => navigate(`/customers/${id}/edit`);
-  const deleteCustomerHandler = () => navigate("/customers");
-  const errorDeletingHandler = (code: ErrorCode) => setError(code);
-  const addTaxDataHandler = () => navigate(`/customers/${id}/tax-data/add`);
-  const addVoucherHandler = () =>
-    navigate(`/customers/${id}/voucher-detail/add`);
 
   useEffect(() => {
     if (loading && id) {
@@ -59,6 +70,12 @@ export const CustomerDetailsPage: FC = () => {
     }
   }, []);
 
+  const addMainAddressHandler = () =>
+    navigate(`/customers/${id}/main-address/add`);
+  const addTaxDataHandler = () => navigate(`/customers/${id}/tax-data/add`);
+  const addVoucherHandler = () =>
+    navigate(`/customers/${id}/voucher-detail/add`);
+
   const deleteTaxDataHandler = () => {
     setCustomer((customer) => {
       if (customer) {
@@ -71,6 +88,22 @@ export const CustomerDetailsPage: FC = () => {
     });
   };
 
+  const deleteVoucherHandler = () => {
+    setCustomer((customer) => {
+      if (customer) {
+        return {
+          ...customer,
+          voucher: undefined,
+        };
+      }
+      return null;
+    });
+  };
+
+  const changeTabHandler = (_: React.SyntheticEvent, newValue: TabName) => {
+    setCurrentTab(newValue);
+  };
+
   if (loading) {
     <>
       <Typography variant="h3" gutterBottom>
@@ -80,72 +113,74 @@ export const CustomerDetailsPage: FC = () => {
     </>;
   }
   if (error) {
-    return <Error code={error} />;
+    return <ErrorAlert code={error} />;
   }
   if (!id) {
-    return <Error code="INTERNAL_ERROR" />;
+    return <ErrorAlert code="INTERNAL_ERROR" />;
   }
   if (!customer) {
-    return <Error code="INTERNAL_ERROR" />;
+    return <ErrorAlert code="INTERNAL_ERROR" />;
   }
   return (
     <>
-      <Typography variant="h3" gutterBottom>
-        {customer.name}
-      </Typography>
-      <Stack direction="row" spacing={2}>
-        <Button variant="contained" onClick={editClickHandler}>
-          Edit
-        </Button>
-        <DeleteCustomerButton
-          customerId={customer.id}
-          onDelete={deleteCustomerHandler}
-          onError={errorDeletingHandler}
-        />
-      </Stack>
-
-      <List>
-        <ListItem disablePadding>
-          <ListItemIcon>
-            <AlternateEmailIcon />
-          </ListItemIcon>
-          <ListItemText primary="Email" secondary={customer.email} />
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemIcon>
-            <CustomerIcon type={customer.type} />
-          </ListItemIcon>
-          <ListItemText primary="Type" secondary={customer.type} />
-        </ListItem>
-      </List>
-
-      {customer.taxData ? (
-        <CustomerTaxData
-          taxData={customer.taxData}
-          onDelete={deleteTaxDataHandler}
-          customerId={customer.id}
-        />
-      ) : (
-        <Button
-          variant="outlined"
-          startIcon={<AddIcon />}
-          onClick={addTaxDataHandler}
-        >
-          Add tax data
-        </Button>
-      )}
-
-      {customer.voucherDetail ? (
-        <CustomerVoucher voucherDetail={customer.voucherDetail} />
-      ) : (
-        <Button
-          variant="outlined"
-          startIcon={<AddIcon />}
-          onClick={addVoucherHandler}
-        >
-          Add Voucher
-        </Button>
-      )}
+      <TabContext value={currentTab}>
+        <Stack direction="row" spacing={2}>
+          <TabList orientation="vertical" onChange={changeTabHandler}>
+            {tabNames.map((tabName) => (
+              <Tab label={tabLabels[tabName]} value={tabName} key={tabName} />
+            ))}
+          </TabList>
+          <CustomerSectionTab value="information">
+            {customer && <CustomerInformation customer={customer} />}
+          </CustomerSectionTab>
+          <CustomerSectionTab value="taxData">
+            {customer.taxData ? (
+              <CustomerTaxData
+                taxData={customer.taxData}
+                onDelete={deleteTaxDataHandler}
+                customerId={customer.id}
+              />
+            ) : (
+              <Button
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={addTaxDataHandler}
+              >
+                Add tax data
+              </Button>
+            )}
+          </CustomerSectionTab>
+          {/* <CustomerSectionTab value="voucher">
+            {customer && <CustomerInformation customer={customer} />}
+          </CustomerSectionTab> */}
+          <CustomerSectionTab value="voucher">
+            {customer.voucher ? (
+              <CustomerVoucher
+                voucher={customer.voucher}
+                onDelete={deleteVoucherHandler}
+                customerId={customer.id}
+              />
+            ) : (
+              <Button
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={addVoucherHandler}
+              >
+                Add Voucher
+              </Button>
+            )}
+          </CustomerSectionTab>
+          <CustomerSectionTab value="mainAddress">
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={addMainAddressHandler}
+            >
+              Add main address
+            </Button>
+          </CustomerSectionTab>
+        </Stack>
+      </TabContext>
     </>
   );
 };

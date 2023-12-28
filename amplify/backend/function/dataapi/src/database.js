@@ -5,6 +5,24 @@ const uuid = require("node-uuid");
 
 const TABLE_NAME = "exercises-dev";
 
+const addMainAddress = async (customerId, mainAddress) => {
+  const params = {
+    TableName: TABLE_NAME,
+    PK: {
+      S: `customer_${customerId}`,
+    },
+    SK: {
+      S: "address_main",
+    },
+    street: { S: mainAddress.street },
+    city: { S: mainAddress.city },
+    number: { S: mainAddress.number },
+    postcode: { S: mainAddress.postcode },
+  };
+  const data = await ddb.putItem(params).promise();
+  return mainAddress;
+};
+
 const addTaxData = async (customerId, taxData) => {
   if (!taxData.taxId?.length) {
     throw new Error("TAX_ID_CANNOT_BE_EMPTY");
@@ -417,7 +435,38 @@ const updateTaxData = async (customerId, updatedTaxData) => {
   return updatedTaxData;
 };
 
+const updateVoucher = async (customerId, updatedVoucher) => {
+  const customer = await getCustomer(customerId);
+  if (!customer) {
+    throw new Error("CUSTOMER_NOT_FOUND");
+  }
+
+  const params = {
+    TableName: TABLE_NAME,
+    ExpressionAttributeNames: {
+      "#V": "voucher",
+    },
+    ExpressionAttributeValues: {
+      ":voucher": {
+        M: {
+          voucherId: { S: updatedVoucher.voucherId },
+          value: { S: updatedVoucher.value },
+          type: { S: updatedVoucher.value },
+        },
+      },
+    },
+    UpdateExpression: "SET #V = :voucher",
+    Key: {
+      PK: { S: `customer_${customerId}` },
+      SK: { S: "profile" },
+    },
+  };
+  await ddb.updateItem(params).promise();
+  return updatedVoucher;
+};
+
 module.exports = {
+  addMainAddress,
   addTaxData,
   addVoucher,
   createCustomer,
@@ -429,4 +478,5 @@ module.exports = {
   queryCustomersByEmail,
   updateCustomer,
   updateTaxData,
+  updateVoucher,
 };

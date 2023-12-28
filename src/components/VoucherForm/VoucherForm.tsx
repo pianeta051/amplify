@@ -20,13 +20,13 @@ type VoucherFormProps = {
 
 export type VoucherFormValues = {
   voucherId: string;
-  value: number;
-  type: VoucherType;
+  value: string;
+  type: string;
 };
 
 const INITIAL_VALUES: VoucherFormValues = {
   voucherId: "",
-  value: 1,
+  value: "1",
   type: "absolute",
 };
 

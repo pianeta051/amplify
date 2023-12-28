@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { FC, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Error } from "../../components/Error/Error";
+import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 import {
   CreateUserForm,
   CreateUserFormValues,
@@ -38,7 +38,7 @@ export const CreateUserPage: FC = () => {
       <Typography variant="h3" gutterBottom align="center">
         Create user
       </Typography>
-      {error && <Error code={error} />}
+      {error && <ErrorAlert code={error} />}
       <CreateUserForm loading={loading} onSubmit={submitHandler} />
     </>
   );

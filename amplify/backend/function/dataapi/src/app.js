@@ -11,6 +11,7 @@ const bodyParser = require("body-parser");
 const awsServerlessExpressMiddleware = require("aws-serverless-express/middleware");
 
 const {
+  addMainAddress,
   addTaxData,
   addVoucher,
   createCustomer,
@@ -21,6 +22,7 @@ const {
   getCustomer,
   updateCustomer,
   updateTaxData,
+  updateVoucher,
 } = require("./database");
 
 const { generateToken, parseToken } = require("./token");
@@ -47,6 +49,13 @@ const mapCustomer = (customerFromDb) => ({
         taxId: customerFromDb.taxData.M.taxId.S,
         companyName: customerFromDb.taxData.M.companyName.S,
         companyAddress: customerFromDb.taxData.M.companyAddress.S,
+      }
+    : undefined,
+  voucher: customerFromDb.voucher
+    ? {
+        voucherId: customerFromDb.voucher.M.voucherId.S,
+        value: +customerFromDb.voucher.M.value.N,
+        type: customerFromDb.voucher.M.type.S,
       }
     : undefined,
 });
@@ -223,6 +232,34 @@ app.delete("/customers/:id/voucher-detail", async function (req, res) {
     } else {
       throw error;
     }
+  }
+});
+
+app.put("/customers/:id/voucher-detail", async function (req, res) {
+  try {
+    const voucher = req.body;
+    const customerId = req.params.id;
+    const updatedVoucher = await updateVoucher(customerId, voucher);
+    res.json({ voucher: updatedVoucher });
+  } catch (error) {
+    if (error.message === "CUSTOMER_NOT_FOUND") {
+      res.status(404).json({
+        error: "Customer not registered!",
+      });
+    } else {
+      throw error;
+    }
+  }
+});
+
+app.post("/customers/:id/main-address", async function (req, res) {
+  try {
+    const customerId = req.params.id;
+    const mainAddress = req.body;
+    const createdMainAddress = await addMainAddress(customerId, mainAddress);
+    res.json({ mainAddress: createdMainAddress });
+  } catch (error) {
+    throw error;
   }
 });
 
