@@ -8,18 +8,20 @@ const TABLE_NAME = "exercises-dev";
 const addMainAddress = async (customerId, mainAddress) => {
   const params = {
     TableName: TABLE_NAME,
-    PK: {
-      S: `customer_${customerId}`,
+    Item: {
+      PK: {
+        S: `customer_${customerId}`,
+      },
+      SK: {
+        S: "address_main",
+      },
+      street: { S: mainAddress.street },
+      city: { S: mainAddress.city },
+      number: { S: mainAddress.number },
+      postcode: { S: mainAddress.postcode },
     },
-    SK: {
-      S: "address_main",
-    },
-    street: { S: mainAddress.street },
-    city: { S: mainAddress.city },
-    number: { S: mainAddress.number },
-    postcode: { S: mainAddress.postcode },
   };
-  const data = await ddb.putItem(params).promise();
+  await ddb.putItem(params).promise();
   return mainAddress;
 };
 
@@ -113,7 +115,6 @@ const createCustomer = async (customer) => {
   const emailExisting = await queryCustomersByEmail(customer.email);
 
   if (emailExisting.length > 0) {
-    console.log("Customer already exist");
     throw new Error("EMAIL_ALREADY_REGISTERED");
   }
 
@@ -147,7 +148,6 @@ const createCustomer = async (customer) => {
   };
 
   const data = await ddb.putItem(params).promise();
-  console.log("Customer created", data);
   return {
     ...customer,
     id,
@@ -206,6 +206,19 @@ const deleteCustomer = async (id) => {
       SK: { S: "profile" },
     },
   };
+
+  await ddb.deleteItem(params).promise();
+  await deleteCustomerMainAddress(id);
+};
+
+const deleteCustomerMainAddress = async (id) => {
+  const params = {
+    TableName: TABLE_NAME,
+    Key: {
+      PK: { S: `customer_${id}` },
+      SK: { S: "address_main" },
+    },
+  };
   await ddb.deleteItem(params).promise();
 };
 
@@ -221,9 +234,15 @@ const getCustomers = async (
     ExclusiveStartKey: exclusiveStartKey,
   };
 
-  let ExpressionAttributeNames = undefined;
-  const FilterExpressions = [];
-  let ExpressionAttributeValues = undefined;
+  let ExpressionAttributeNames = {
+    "#PK": "PK",
+    "#SK": "SK",
+  };
+  const FilterExpressions = ["begins_with(#PK, :pk) AND #SK = :sk"];
+  let ExpressionAttributeValues = {
+    ":pk": { S: "customer_" },
+    ":sk": { S: "profile" },
+  };
 
   if (searchInput?.length) {
     if (!ExpressionAttributeNames) {
@@ -288,8 +307,6 @@ const getCustomers = async (
     FilterExpression,
   };
 
-  console.log(params);
-
   let result = await ddb.scan(params).promise();
   const items = result.Items;
 
@@ -321,6 +338,22 @@ const getCustomer = async (id) => {
   };
   const customer = await ddb.getItem(params).promise();
   return customer.Item;
+};
+
+const getCustomerMainAddress = async (customerId) => {
+  const customer = await getCustomer(customerId);
+  if (!customer) {
+    throw new Error("Customer not found");
+  }
+  const params = {
+    TableName: TABLE_NAME,
+    Key: {
+      PK: { S: `customer_${customerId}` },
+      SK: { S: "address_main" },
+    },
+  };
+  const mainAddress = await ddb.getItem(params).promise();
+  return mainAddress.Item;
 };
 
 const getNextCustomer = async (lastEvaluatedKey) => {
@@ -361,8 +394,6 @@ const updateCustomer = async (id, updatedCustomer) => {
     emailExisting.length > 0 &&
     !emailExisting.find((item) => item.PK.S === `customer_${id}`)
   ) {
-    console.log("Customer already exist");
-
     throw new Error("EMAIL_ALREADY_REGISTERED");
   }
   const params = {
@@ -450,8 +481,8 @@ const updateVoucher = async (customerId, updatedVoucher) => {
       ":voucher": {
         M: {
           voucherId: { S: updatedVoucher.voucherId },
-          value: { S: updatedVoucher.value },
-          type: { S: updatedVoucher.value },
+          value: { N: updatedVoucher.value.toString() },
+          type: { S: updatedVoucher.type },
         },
       },
     },
@@ -463,6 +494,37 @@ const updateVoucher = async (customerId, updatedVoucher) => {
   };
   await ddb.updateItem(params).promise();
   return updatedVoucher;
+};
+
+const updateMainAddress = async (customerId, updatedMainAddress) => {
+  const customer = await getCustomer(customerId);
+  if (!customer) {
+    throw new Error("CUSTOMER_NOT_FOUND");
+  }
+
+  const params = {
+    TableName: TABLE_NAME,
+    ExpressionAttributeNames: {
+      "#S": "street",
+      "#C": "city",
+      "#P": "postcode",
+      "#N": "number",
+    },
+    ExpressionAttributeValues: {
+      ":street": { S: updatedMainAddress.street },
+      ":city": { S: updatedMainAddress.city },
+      ":postcode": { S: updatedMainAddress.postcode },
+      ":number": { S: updatedMainAddress.number },
+    },
+    UpdateExpression:
+      "SET #S = :street, #C = :city, #P = :postcode, #N = :number",
+    Key: {
+      PK: { S: `customer_${customerId}` },
+      SK: { S: "address_main" },
+    },
+  };
+  await ddb.updateItem(params).promise();
+  return updatedMainAddress;
 };
 
 module.exports = {
@@ -479,4 +541,7 @@ module.exports = {
   updateCustomer,
   updateTaxData,
   updateVoucher,
+  updateMainAddress,
+  getCustomerMainAddress,
+  deleteCustomerMainAddress,
 };

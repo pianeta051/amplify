@@ -18,12 +18,17 @@ const {
   deleteCustomer,
   deleteTaxData,
   deleteVoucher,
+  deleteCustomerMainAddress,
   getCustomers,
   getCustomer,
   updateCustomer,
   updateTaxData,
   updateVoucher,
+  updateMainAddress,
+  getCustomerMainAddress,
 } = require("./database");
+
+const { mapCustomer, mapCustomerAddress } = require("./mappers");
 
 const { generateToken, parseToken } = require("./token");
 
@@ -39,25 +44,59 @@ app.use(function (req, res, next) {
   next();
 });
 
-const mapCustomer = (customerFromDb) => ({
-  id: customerFromDb.PK.S.replace("customer_", ""),
-  name: customerFromDb.name.S,
-  email: customerFromDb.email.S,
-  type: customerFromDb.type.S,
-  taxData: customerFromDb.taxData
-    ? {
-        taxId: customerFromDb.taxData.M.taxId.S,
-        companyName: customerFromDb.taxData.M.companyName.S,
-        companyAddress: customerFromDb.taxData.M.companyAddress.S,
-      }
-    : undefined,
-  voucher: customerFromDb.voucher
-    ? {
-        voucherId: customerFromDb.voucher.M.voucherId.S,
-        value: +customerFromDb.voucher.M.value.N,
-        type: customerFromDb.voucher.M.type.S,
-      }
-    : undefined,
+// delete a customer
+app.delete("/customers/:id", async function (req, res) {
+  const id = req.params.id;
+  await deleteCustomer(id);
+  res.json({ message: "Customer deleted" });
+});
+
+app.delete("/customers/:id/address_main", async function (req, res) {
+  try {
+    const customerId = req.params.id;
+    await deleteCustomerMainAddress(customerId);
+    res.json({ message: `Main Address removed for ${customerId}` });
+  } catch (error) {
+    if (error.message === "CUSTOMER_NOT_FOUND") {
+      res.status(404).json({
+        error: "Customer not registered!",
+      });
+    } else {
+      throw error;
+    }
+  }
+});
+
+app.delete("/customers/:id/tax-data", async function (req, res) {
+  try {
+    const customerId = req.params.id;
+    await deleteTaxData(customerId);
+    res.json({ message: `Tax data removed for ${customerId}` });
+  } catch (error) {
+    if (error.message === "CUSTOMER_NOT_FOUND") {
+      res.status(404).json({
+        error: "Customer not registered!",
+      });
+    } else {
+      throw error;
+    }
+  }
+});
+
+app.delete("/customers/:id/voucher-detail", async function (req, res) {
+  try {
+    const customerId = req.params.id;
+    await deleteVoucher(customerId);
+    res.json({ message: `Voucher removed for ${customerId}` });
+  } catch (error) {
+    if (error.message === "CUSTOMER_NOT_FOUND") {
+      res.status(404).json({
+        error: "Customer not registered!",
+      });
+    } else {
+      throw error;
+    }
+  }
 });
 
 // List all customers
@@ -94,6 +133,26 @@ app.get("/customers/:id", async function (req, res) {
   }
 });
 
+// Get a single customer's main address
+app.get("/customers/:id/main-address", async function (req, res) {
+  const id = req.params.id;
+  try {
+    const mainAddressFromDb = await getCustomerMainAddress(id);
+    if (mainAddressFromDb) {
+      const mainAddress = mapCustomerAddress(mainAddressFromDb);
+      res.json({ mainAddress });
+    } else {
+      res.json({ mainAddress: null });
+    }
+  } catch (e) {
+    if (e.message === "Customer not found") {
+      res.status(404).json({ error: e.message });
+      return;
+    }
+    throw e;
+  }
+});
+
 // Create a new customer
 app.post("/customers", async function (req, res) {
   try {
@@ -107,6 +166,60 @@ app.post("/customers", async function (req, res) {
     } else if (error.message === "EMAIL_CANNOT_BE_EMPTY") {
       res.status(400).json({
         error: "Email cannot be empty",
+      });
+    } else {
+      throw error;
+    }
+  }
+});
+
+app.post("/customers/:id/main-address", async function (req, res) {
+  try {
+    const customerId = req.params.id;
+    const mainAddress = req.body;
+    const createdMainAddress = await addMainAddress(customerId, mainAddress);
+    res.json({ mainAddress: createdMainAddress });
+  } catch (error) {
+    throw error;
+  }
+});
+
+// add tax data to an existing customer
+app.post("/customers/:id/tax-data", async function (req, res) {
+  try {
+    const customerId = req.params.id;
+    const taxData = req.body;
+    const createdTaxData = await addTaxData(customerId, taxData);
+    res.json({ taxData: createdTaxData });
+  } catch (error) {
+    if (error.message === "TAX_ID_CANNOT_BE_EMPTY") {
+      res.status(400).json({
+        error: "Tax ID cannot be empty",
+      });
+    } else if (error.message === "CUSTOMER_NOT_FOUND") {
+      res.status(404).json({
+        error: "Customer not registered!",
+      });
+    } else {
+      throw error;
+    }
+  }
+});
+// add voucher to an existing customer
+app.post("/customers/:id/voucher-detail", async function (req, res) {
+  try {
+    const customerId = req.params.id;
+    const voucher = req.body;
+    const createdVoucher = await addVoucher(customerId, voucher);
+    res.json({ voucher: createdVoucher });
+  } catch (error) {
+    if (error.message === "VOUCHER_ID_CANNOT_BE_EMPTY") {
+      res.status(400).json({
+        error: "Voucher ID cannot be empty",
+      });
+    } else if (error.message === "CUSTOMER_NOT_FOUND") {
+      res.status(404).json({
+        error: "Customer not registered!",
       });
     } else {
       throw error;
@@ -135,95 +248,12 @@ app.put("/customers/:id", async function (req, res) {
   }
 });
 
-// delete a customer
-app.delete("/customers/:id", async function (req, res) {
-  const id = req.params.id;
-  await deleteCustomer(id);
-  res.json({ message: "Customer deleted" });
-});
-
-// add tax data to an existing customer
-app.post("/customers/:id/tax-data", async function (req, res) {
-  try {
-    const customerId = req.params.id;
-    const taxData = req.body;
-    const createdTaxData = await addTaxData(customerId, taxData);
-    res.json({ taxData: createdTaxData });
-  } catch (error) {
-    if (error.message === "TAX_ID_CANNOT_BE_EMPTY") {
-      res.status(400).json({
-        error: "Tax ID cannot be empty",
-      });
-    } else if (error.message === "CUSTOMER_NOT_FOUND") {
-      res.status(404).json({
-        error: "Customer not registered!",
-      });
-    } else {
-      throw error;
-    }
-  }
-});
-
-app.delete("/customers/:id/tax-data", async function (req, res) {
-  try {
-    const customerId = req.params.id;
-    await deleteTaxData(customerId);
-    res.json({ message: `Tax data removed for ${customerId}` });
-  } catch (error) {
-    if (error.message === "CUSTOMER_NOT_FOUND") {
-      res.status(404).json({
-        error: "Customer not registered!",
-      });
-    } else {
-      throw error;
-    }
-  }
-});
-
 app.put("/customers/:id/tax-data", async function (req, res) {
   try {
     const taxData = req.body;
     const customerId = req.params.id;
     const updatedTaxData = await updateTaxData(customerId, taxData);
     res.json({ taxData: updatedTaxData });
-  } catch (error) {
-    if (error.message === "CUSTOMER_NOT_FOUND") {
-      res.status(404).json({
-        error: "Customer not registered!",
-      });
-    } else {
-      throw error;
-    }
-  }
-});
-
-// add voucher to an existing customer
-app.post("/customers/:id/voucher-detail", async function (req, res) {
-  try {
-    const customerId = req.params.id;
-    const voucher = req.body;
-    const createdVoucher = await addVoucher(customerId, voucher);
-    res.json({ voucher: createdVoucher });
-  } catch (error) {
-    if (error.message === "VOUCHER_ID_CANNOT_BE_EMPTY") {
-      res.status(400).json({
-        error: "Voucher ID cannot be empty",
-      });
-    } else if (error.message === "CUSTOMER_NOT_FOUND") {
-      res.status(404).json({
-        error: "Customer not registered!",
-      });
-    } else {
-      throw error;
-    }
-  }
-});
-
-app.delete("/customers/:id/voucher-detail", async function (req, res) {
-  try {
-    const customerId = req.params.id;
-    await deleteVoucher(customerId);
-    res.json({ message: `Voucher removed for ${customerId}` });
   } catch (error) {
     if (error.message === "CUSTOMER_NOT_FOUND") {
       res.status(404).json({
@@ -252,26 +282,25 @@ app.put("/customers/:id/voucher-detail", async function (req, res) {
   }
 });
 
-app.post("/customers/:id/main-address", async function (req, res) {
+app.put("/customers/:id/main-address", async function (req, res) {
   try {
-    const customerId = req.params.id;
     const mainAddress = req.body;
-    const createdMainAddress = await addMainAddress(customerId, mainAddress);
-    res.json({ mainAddress: createdMainAddress });
+    const customerId = req.params.id;
+    const updatedMainAddress = await updateMainAddress(customerId, mainAddress);
+    res.json({ mainAddress: updatedMainAddress });
   } catch (error) {
-    throw error;
+    if (error.message === "CUSTOMER_NOT_FOUND") {
+      res.status(404).json({
+        error: "Customer not registered!",
+      });
+    } else {
+      throw error;
+    }
   }
 });
 
 app.listen(3000, function () {
   console.log("App started");
-});
-
-//USERS
-// Create a new user
-app.post("/users", function (req, res) {
-  // Add your code here
-  res.json({ success: "post call succeed!", url: req.url, body: req.body });
 });
 
 // Export the app object. When executing the application local this does nothing. However,

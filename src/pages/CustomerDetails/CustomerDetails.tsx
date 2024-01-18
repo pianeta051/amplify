@@ -17,6 +17,7 @@ import { CustomerTaxData } from "../../components/CustomerTaxData/CustomerTaxDat
 import { CustomerVoucher } from "../../components/CustomerVoucher/CustomerVoucher";
 import { CustomerInformation } from "../../components/CustomerInformation/CustomerInformation";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
+import { CustomerMainAddress } from "../../components/CustomerMainAddress/CustomerMainAddress";
 
 type CustomerDetailsParams = {
   id: string;
@@ -48,6 +49,7 @@ export const CustomerDetailsPage: FC = () => {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [error, setError] = useState<ErrorCode | null>(null);
   const [currentTab, setCurrentTab] = useState<TabName>("information");
+
   const { id } = useParams<CustomerDetailsParams>();
   const navigate = useNavigate();
   const { getCustomer } = useCustomers();
@@ -70,8 +72,6 @@ export const CustomerDetailsPage: FC = () => {
     }
   }, []);
 
-  const addMainAddressHandler = () =>
-    navigate(`/customers/${id}/main-address/add`);
   const addTaxDataHandler = () => navigate(`/customers/${id}/tax-data/add`);
   const addVoucherHandler = () =>
     navigate(`/customers/${id}/voucher-detail/add`);
@@ -150,9 +150,6 @@ export const CustomerDetailsPage: FC = () => {
               </Button>
             )}
           </CustomerSectionTab>
-          {/* <CustomerSectionTab value="voucher">
-            {customer && <CustomerInformation customer={customer} />}
-          </CustomerSectionTab> */}
           <CustomerSectionTab value="voucher">
             {customer.voucher ? (
               <CustomerVoucher
@@ -171,13 +168,7 @@ export const CustomerDetailsPage: FC = () => {
             )}
           </CustomerSectionTab>
           <CustomerSectionTab value="mainAddress">
-            <Button
-              variant="outlined"
-              startIcon={<AddIcon />}
-              onClick={addMainAddressHandler}
-            >
-              Add main address
-            </Button>
+            <CustomerMainAddress customerId={customer.id} />
           </CustomerSectionTab>
         </Stack>
       </TabContext>

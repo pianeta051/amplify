@@ -12,21 +12,20 @@ import {
 import { LoadingButton } from "@mui/lab";
 import { VOUCHER_TYPES, VoucherType } from "../../services/customers";
 
+export type VoucherFormValues = {
+  voucherId: string;
+  value: number;
+  type: string;
+};
 type VoucherFormProps = {
   onSubmit: (values: VoucherFormValues) => void;
   defaultValues?: VoucherFormValues;
   loading?: boolean;
 };
 
-export type VoucherFormValues = {
-  voucherId: string;
-  value: string;
-  type: string;
-};
-
 const INITIAL_VALUES: VoucherFormValues = {
   voucherId: "",
-  value: "1",
+  value: 1,
   type: "absolute",
 };
 

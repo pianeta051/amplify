@@ -4,7 +4,6 @@ import {
   CustomerAddress,
   TaxData,
   VoucherDetail,
-  deleteCustomerTaxData,
 } from "../services/customers";
 import { CustomerFormValues } from "../components/CustomerForm/CustomerForm";
 import { TaxDataFormValues } from "../components/TaxDataForm/TaxDataForm";
@@ -36,7 +35,6 @@ export type CustomersContextData = {
     customerId: string,
     formValues: TaxDataFormValues
   ) => Promise<TaxData>;
-
   addVoucher: (
     customerId: string,
     formValues: VoucherFormValues
@@ -49,7 +47,13 @@ export type CustomersContextData = {
     customerId: string,
     formValues: VoucherFormValues
   ) => Promise<VoucherDetail>;
+  editMainAddress: (
+    customerId: string,
+    formValues: CustomerAddressFormValues
+  ) => Promise<CustomerAddress>;
   deleteCustomerVoucher: (id: string) => Promise<void>;
+  getMainAddress: (customerId: string) => Promise<CustomerAddress | null>;
+  deleteCustomerMainAddress: (id: string) => Promise<void>;
 };
 
 export const CustomersContext = createContext<CustomersContextData>({
@@ -89,6 +93,13 @@ export const CustomersContext = createContext<CustomersContextData>({
       value: 54,
       type: "absolute",
     }),
+  editMainAddress: () =>
+    Promise.resolve({
+      street: "ddd",
+      number: "444",
+      city: "ddd",
+      postcode: "ddd",
+    }),
   addVoucher: () =>
     Promise.resolve({
       voucherId: "2",
@@ -97,6 +108,8 @@ export const CustomersContext = createContext<CustomersContextData>({
     }),
   deleteCustomerVoucher: () => Promise.resolve(),
   addMainAddress: () => Promise.resolve({} as CustomerAddress),
+  getMainAddress: () => Promise.resolve(null),
+  deleteCustomerMainAddress: () => Promise.resolve(),
 });
 
 export const useCustomers = () => useContext(CustomersContext);

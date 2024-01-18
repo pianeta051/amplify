@@ -30,7 +30,10 @@ const post = async (
   });
 };
 
-const put = async (path: string, body: { [param: string]: string } = {}) => {
+const put = async (
+  path: string,
+  body: { [param: string]: string | number } = {}
+) => {
   return API.put("dataapi", path, {
     body,
   });
@@ -116,6 +119,21 @@ const isCustomerAddress = (value: unknown): value is CustomerAddress => {
     typeof customerAddress.number === "string" &&
     typeof customerAddress.city === "string" &&
     typeof customerAddress.postcode === "string"
+  );
+};
+
+const isAddress = (value: unknown): value is CustomerAddress => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "street" in value &&
+    typeof (value as CustomerAddress)["street"] === "string" &&
+    "number" in value &&
+    typeof (value as CustomerAddress)["number"] === "string" &&
+    "city" in value &&
+    typeof (value as CustomerAddress)["city"] === "string" &&
+    "postcode" in value &&
+    typeof (value as CustomerAddress)["postcode"] === "string"
   );
 };
 
@@ -258,6 +276,10 @@ export const deleteCustomer = async (id: string): Promise<void> => {
   await del("/customers/" + id);
 };
 
+export const deleteCustomerMainAddress = async (id: string): Promise<void> => {
+  await del(`/customers/${id}/address_main`);
+};
+
 export const deleteCustomerTaxData = async (
   customerId: string
 ): Promise<void> => {
@@ -269,6 +291,7 @@ export const deleteCustomerVoucher = async (
 ): Promise<void> => {
   await del(`/customers/${customerId}/voucher-detail`);
 };
+
 export const editCustomer = async (
   id: string,
   formValues: CustomerFormValues
@@ -328,6 +351,24 @@ export const editVoucher = async (
   }
 };
 
+export const editMainAddress = async (
+  customerId: string,
+  formValues: CustomerAddressFormValues
+): Promise<CustomerAddress> => {
+  try {
+    const response = await put(
+      `/customers/${customerId}/main-address`,
+      formValues
+    );
+    if (!isAddress(response.mainAddress)) {
+      throw new Error("INTERNAL_ERROR");
+    }
+    return response.mainAddress;
+  } catch (error) {
+    throw new Error("INTERNAL_ERROR");
+  }
+};
+
 export const getCustomers = async (
   nextToken?: string,
   searchInput?: string,
@@ -371,6 +412,29 @@ export const getCustomer = async (id: string): Promise<Customer | null> => {
       }
     }
 
+    throw new Error("INTERNAL_ERROR");
+  }
+};
+
+export const getMainAddress = async (
+  customerId: string
+): Promise<CustomerAddress | null> => {
+  try {
+    const response = await get(`/customers/${customerId}/main-address`);
+    if (
+      !isCustomerAddress(response.mainAddress) &&
+      response.mainAddress !== null
+    ) {
+      throw new Error("INTERNAL_ERROR");
+    }
+    return response.mainAddress;
+  } catch (error) {
+    if (isErrorResponse(error)) {
+      const status = error.response.status;
+      if (status === 404) {
+        throw new Error("CUSTOMER_NOT_FOUND");
+      }
+    }
     throw new Error("INTERNAL_ERROR");
   }
 };

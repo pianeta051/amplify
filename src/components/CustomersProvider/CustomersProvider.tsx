@@ -18,7 +18,10 @@ import {
   deleteCustomerVoucher as deleteCustomerVoucherFromService,
   editTaxData as editTaxDataFromService,
   editVoucher as editVoucherFromService,
+  editMainAddress as editMainAddressFromService,
   addMainAddress as addMainAddressFromService,
+  getMainAddress as getMainAddressFromService,
+  deleteCustomerMainAddress as deleteCustomerMainAddressFromService,
 } from "../../services/customers";
 import { CustomerFormValues } from "../CustomerForm/CustomerForm";
 import { TaxDataFormValues } from "../TaxDataForm/TaxDataForm";
@@ -57,6 +60,10 @@ export const CustomersProvider: FC<CustomersProviderProps> = ({ children }) => {
 
   const [singleCustomerStore, setSingleCustomerStore] = useState<
     Record<string, { response: Customer | null; expiresAt: Date }>
+  >({});
+
+  const [mainAddressStore, setMainAddressStore] = useState<
+    Record<string, { response: CustomerAddress | null; expiresAt: Date }>
   >({});
 
   const getCustomers = async (
@@ -101,6 +108,25 @@ export const CustomersProvider: FC<CustomersProviderProps> = ({ children }) => {
     setSingleCustomerStore((singleCustomerStore) => ({
       ...singleCustomerStore,
       [args]: { response, expiresAt: expirationDate(MINUTES_TO_EXPIRE) },
+    }));
+    return response;
+  };
+
+  const getMainAddress = async (
+    customerId: string
+  ): Promise<CustomerAddress | null> => {
+    const args = JSON.stringify({ customerId });
+    if (
+      mainAddressStore[args] &&
+      !isExpired(mainAddressStore[args].expiresAt)
+    ) {
+      return mainAddressStore[args].response;
+    }
+    const response = await getMainAddressFromService(customerId);
+    const expiresAt = expirationDate(MINUTES_TO_EXPIRE);
+    setMainAddressStore((mainAddressStore) => ({
+      ...mainAddressStore,
+      [args]: { response, expiresAt },
     }));
     return response;
   };
@@ -153,6 +179,13 @@ export const CustomersProvider: FC<CustomersProviderProps> = ({ children }) => {
     setSingleCustomerStore({});
     return editVoucherFromService(customerId, formValues);
   };
+  const editMainAddress = async (
+    customerId: string,
+    formValues: CustomerAddressFormValues
+  ): Promise<CustomerAddress> => {
+    setMainAddressStore({});
+    return editMainAddressFromService(customerId, formValues);
+  };
   const deleteCustomerVoucher = async (id: string): Promise<void> => {
     setSingleCustomerStore({});
     return deleteCustomerVoucherFromService(id);
@@ -169,8 +202,15 @@ export const CustomersProvider: FC<CustomersProviderProps> = ({ children }) => {
     customerId: string,
     formValues: CustomerAddressFormValues
   ): Promise<CustomerAddress> => {
-    setSingleCustomerStore({});
+    setMainAddressStore({});
     return addMainAddressFromService(customerId, formValues);
+  };
+
+  const deleteCustomerMainAddress = async (
+    customerId: string
+  ): Promise<void> => {
+    setMainAddressStore({});
+    return deleteCustomerMainAddressFromService(customerId);
   };
 
   return (
@@ -179,6 +219,7 @@ export const CustomersProvider: FC<CustomersProviderProps> = ({ children }) => {
         getCustomers,
         getCustomer,
         editCustomer,
+        editMainAddress,
         createCustomer,
         deleteCustomer,
         deleteCustomerTaxData,
@@ -188,6 +229,8 @@ export const CustomersProvider: FC<CustomersProviderProps> = ({ children }) => {
         editTaxData,
         editVoucher,
         addMainAddress,
+        getMainAddress,
+        deleteCustomerMainAddress,
       }}
     >
       {children}
