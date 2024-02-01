@@ -15,7 +15,6 @@ import { CustomerInformation } from "../../components/CustomerInformation/Custom
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { CustomerMainAddress } from "../../components/CustomerMainAddress/CustomerMainAddress";
 import { useCustomer } from "../../hooks/useCustomer";
-import { useSWRConfig } from "swr";
 
 type CustomerDetailsParams = {
   id: string;
@@ -46,8 +45,6 @@ export const CustomerDetailsPage: FC = () => {
   const [currentTab, setCurrentTab] = useState<TabName>("information");
   const { id } = useParams<CustomerDetailsParams>();
   const { customer, error, loading } = useCustomer(id);
-  const { cache } = useSWRConfig();
-  console.log(cache);
 
   const navigate = useNavigate();
 
