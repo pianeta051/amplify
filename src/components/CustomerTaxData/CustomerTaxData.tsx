@@ -17,13 +17,11 @@ import { useNavigate } from "react-router-dom";
 type CustomerTaxDataProps = {
   taxData: TaxData;
   customerId: string;
-  onDelete: () => void;
 };
 
 export const CustomerTaxData: FC<CustomerTaxDataProps> = ({
   taxData,
   customerId,
-  onDelete,
 }) => {
   const [error, setError] = useState<ErrorCode | null>(null);
   const navigate = useNavigate();
@@ -45,7 +43,6 @@ export const CustomerTaxData: FC<CustomerTaxDataProps> = ({
         </Button>
         <DeleteCustomerTaxDataButton
           customerId={customerId}
-          onDelete={onDelete}
           onError={errorHandler}
         />
       </Stack>

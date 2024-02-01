@@ -1,34 +1,24 @@
 import LoadingButton from "@mui/lab/LoadingButton";
-import { FC, useState } from "react";
-import { useCustomers } from "../../context/CustomersContext";
-import { ErrorCode, isErrorCode } from "../../services/error";
+import { FC } from "react";
+import { useDeleteTaxData } from "../../hooks/useDeleteTaxData";
+import { ErrorCode } from "../../services/error";
 
 type DeleteCustomerTaxDataButtonProps = {
   customerId: string;
-  onDelete: () => void;
   onError: (code: ErrorCode) => void;
 };
 
 export const DeleteCustomerTaxDataButton: FC<
   DeleteCustomerTaxDataButtonProps
-> = ({ customerId, onDelete, onError }) => {
-  const [loading, setLoading] = useState(false);
-  const { deleteCustomerTaxData } = useCustomers();
+> = ({ customerId, onError }) => {
+  const { deleteCustomerTaxData, loading, error } =
+    useDeleteTaxData(customerId);
   const deleteHandler = () => {
-    setLoading(true);
-    deleteCustomerTaxData(customerId)
-      .then(() => {
-        setLoading(false);
-        onDelete();
-      })
-      .catch((error) => {
-        setLoading(false);
-        if (isErrorCode(error.message)) {
-          onError(error.message);
-        } else {
-          onError("INTERNAL_ERROR");
-        }
-      });
+    deleteCustomerTaxData().catch(() => {
+      if (error) {
+        onError(error);
+      }
+    });
   };
 
   return (

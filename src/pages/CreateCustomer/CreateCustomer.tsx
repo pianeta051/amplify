@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC } from "react";
 import { Typography } from "@mui/material";
 import {
   CustomerForm,
@@ -6,37 +6,22 @@ import {
 } from "../../components/CustomerForm/CustomerForm";
 import { useNavigate } from "react-router-dom";
 import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
-import { ErrorCode, isErrorCode } from "../../services/error";
-import { useCustomers } from "../../context/CustomersContext";
+import { useCreateCustomer } from "../../hooks/useCreateCustomer";
 
 export const CreateCustomerPage: FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<ErrorCode | null>(null);
   const navigate = useNavigate();
-  const { createCustomer } = useCustomers();
+  const { createCustomer, error, loading } = useCreateCustomer();
   const submitHandler = (formValues: CustomerFormValues) => {
-    setLoading(true);
-    setErrorMessage(null);
-    createCustomer(formValues)
-      .then((customer) => {
-        setLoading(false);
-        navigate(`/customers/${customer.id}`);
-      })
-      .catch((error) => {
-        setLoading(false);
-        if (isErrorCode(error.message)) {
-          setErrorMessage(error.message);
-        } else {
-          setErrorMessage("INTERNAL_ERROR");
-        }
-      });
+    createCustomer(formValues).then((customer) => {
+      navigate(`/customers/${customer.id}`);
+    });
   };
   return (
     <>
       <Typography variant="h3" gutterBottom>
         Customers
       </Typography>
-      {errorMessage && <ErrorAlert code={errorMessage} />}
+      {error && <ErrorAlert code={error} />}
       <CustomerForm onSubmit={submitHandler} loading={loading} />
     </>
   );

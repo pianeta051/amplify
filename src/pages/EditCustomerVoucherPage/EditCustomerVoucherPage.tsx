@@ -1,46 +1,26 @@
 import { CircularProgress, Typography } from "@mui/material";
-import { FC, useEffect, useState } from "react";
-import { ErrorCode, isErrorCode } from "../../services/error";
+import { FC, useState } from "react";
 import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 import { useCustomers } from "../../context/CustomersContext";
 import { useNavigate, useParams } from "react-router-dom";
-import { Customer } from "../../services/customers";
 import {
   VoucherForm,
   VoucherFormValues,
 } from "../../components/VoucherForm/VoucherForm";
+import { useCustomer } from "../../hooks/useCustomer";
 
 type EditCustomerVoucherParams = {
   id: string;
 };
 export const EditCustomerVoucherPage: FC = () => {
   const [submitting, setSubmitting] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<ErrorCode | null>(null);
-  const [customer, setCustomer] = useState<Customer | null>(null);
 
-  const { editVoucher, getCustomer } = useCustomers();
+  const { editVoucher } = useCustomers();
+
   const { id } = useParams<EditCustomerVoucherParams>();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (loading && id) {
-      getCustomer(id)
-        .then((customer: Customer | null) => {
-          setCustomer(customer);
-          setLoading(false);
-        })
-        .catch((error) => {
-          if (isErrorCode(error.message)) {
-            setError(error.message);
-          } else {
-            setError("INTERNAL_ERROR");
-          }
-          setLoading(false);
-        });
-    }
-  }, []);
-
+  const { customer, loading, error } = useCustomer(id);
   if (!id) {
     return <ErrorAlert code={"INTERNAL_ERROR"} />;
   }
@@ -70,13 +50,13 @@ export const EditCustomerVoucherPage: FC = () => {
           navigate(`/customers/${id}`);
           setSubmitting(false);
         })
-        .catch((error) => {
+        .catch(() => {
           setSubmitting(false);
-          if (isErrorCode(error.message)) {
-            setError(error.message);
-          } else {
-            setError("INTERNAL_ERROR");
-          }
+          // if (isErrorCode(error.message)) {
+          //   setError(error.message);
+          // } else {
+          //   setError("INTERNAL_ERROR");
+          // }
         });
     }
   };

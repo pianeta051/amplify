@@ -1,23 +1,24 @@
 import { Typography } from "@mui/material";
-import { FC, useState } from "react";
-import { ErrorCode, isErrorCode } from "../../services/error";
+import { FC } from "react";
 import {
   TaxDataForm,
   TaxDataFormValues,
 } from "../../components/TaxDataForm/TaxDataForm";
 import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
-import { useCustomers } from "../../context/CustomersContext";
+import { useAddCustomerTaxData } from "../../hooks/useAddCustomerTaxData";
 import { useNavigate, useParams } from "react-router-dom";
 
 type AddCustomerTaxDataParams = {
   id: string;
 };
 export const AddCustomerTaxDataPage: FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ErrorCode | null>(null);
-  const { addTaxData } = useCustomers();
   const { id } = useParams<AddCustomerTaxDataParams>();
   const navigate = useNavigate();
+  const {
+    addCustomerTaxData,
+    loading: loading,
+    error: error,
+  } = useAddCustomerTaxData(id);
 
   if (!id) {
     return <ErrorAlert code={"INTERNAL_ERROR"} />;
@@ -25,20 +26,9 @@ export const AddCustomerTaxDataPage: FC = () => {
 
   const submitHandler = (formValues: TaxDataFormValues) => {
     if (id) {
-      setLoading(true);
-      addTaxData(id, formValues)
-        .then(() => {
-          navigate(`/customers/${id}`);
-          setLoading(false);
-        })
-        .catch((error) => {
-          setLoading(false);
-          if (isErrorCode(error.message)) {
-            setError(error.message);
-          } else {
-            setError("INTERNAL_ERROR");
-          }
-        });
+      addCustomerTaxData(formValues).then(() => {
+        navigate(`/customers/${id}`);
+      });
     }
   };
 
