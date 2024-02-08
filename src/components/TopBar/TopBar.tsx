@@ -42,6 +42,7 @@ export const TopBar: FC = () => {
     closeUserMenu();
     navigate("/");
   };
+
   const getInitials = () => {
     if (!user?.attributes) {
       return "";
@@ -51,6 +52,7 @@ export const TopBar: FC = () => {
     }
     return user?.attributes.name[0].toUpperCase();
   };
+
   return (
     <AppBar position="static">
       <Container maxWidth="xl">

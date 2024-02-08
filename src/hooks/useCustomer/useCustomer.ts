@@ -1,6 +1,6 @@
 import useSWR from "swr";
-import { Customer, getCustomer } from "../services/customers";
-import { extractErrorCode } from "../services/error";
+import { Customer, getCustomer } from "../../services/customers";
+import { extractErrorCode } from "../../services/error";
 
 export const useCustomer = (id: string | undefined) => {
   const { data, isLoading, error } = useSWR<

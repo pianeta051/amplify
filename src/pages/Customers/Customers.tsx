@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 import { LoadingButton } from "@mui/lab";
 import { SearchBar } from "../../components/SearchBar/SearchBar";
-import { useCustomers } from "../../hooks/useCustomers";
+import { useCustomers } from "../../hooks/useCustomer/useCustomers";
 
 export const CustomersPage: FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");

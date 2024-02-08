@@ -1,7 +1,7 @@
 import useSWRMutation from "swr/mutation";
-import { Customer, createCustomer } from "../services/customers";
-import { CustomerFormValues } from "../components/CustomerForm/CustomerForm";
-import { extractErrorCode } from "../services/error";
+import { Customer, createCustomer } from "../../services/customers";
+import { CustomerFormValues } from "../../components/CustomerForm/CustomerForm";
+import { extractErrorCode } from "../../services/error";
 import { useSWRConfig } from "swr";
 
 export const useCreateCustomer = () => {

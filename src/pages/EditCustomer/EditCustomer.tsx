@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 import { Button, CircularProgress, Typography } from "@mui/material";
@@ -6,9 +6,8 @@ import {
   CustomerForm,
   CustomerFormValues,
 } from "../../components/CustomerForm/CustomerForm";
-import { useCustomers } from "../../context/CustomersContext";
-import { useCustomer } from "../../hooks/useCustomer";
-import { useEditCustomer } from "../../hooks/useEditCustomer";
+import { useCustomer } from "../../hooks/useCustomer/useCustomer";
+import { useEditCustomer } from "../../hooks/useCustomer/useEditCustomer";
 
 type EditCustomerParams = {
   id: string;

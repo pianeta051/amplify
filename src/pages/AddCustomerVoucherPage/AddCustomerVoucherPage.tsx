@@ -1,23 +1,25 @@
 import { Typography } from "@mui/material";
-import { FC, useState } from "react";
-import { ErrorCode, isErrorCode } from "../../services/error";
+import { FC } from "react";
+
 import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
-import { useCustomers } from "../../context/CustomersContext";
+
 import { useNavigate, useParams } from "react-router-dom";
 import {
   VoucherForm,
   VoucherFormValues,
 } from "../../components/VoucherForm/VoucherForm";
-
+import { useAddVoucher } from "../../hooks/useVoucher/useAddCustomerVoucher";
 type AddCustomerVoucherParams = {
   id: string;
 };
 export const AddCustomerVoucherPage: FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ErrorCode | null>(null);
-  const { addVoucher } = useCustomers();
   const { id } = useParams<AddCustomerVoucherParams>();
   const navigate = useNavigate();
+  const {
+    addCustomerVoucher,
+    loading: loading,
+    error: error,
+  } = useAddVoucher(id);
 
   if (!id) {
     return <ErrorAlert code={"INTERNAL_ERROR"} />;
@@ -25,21 +27,9 @@ export const AddCustomerVoucherPage: FC = () => {
 
   const submitHandler = (formValues: VoucherFormValues) => {
     if (id) {
-      setLoading(true);
-      setError(null);
-      addVoucher(id, formValues)
-        .then(() => {
-          navigate(`/customers/${id}`);
-          setLoading(false);
-        })
-        .catch((error) => {
-          setLoading(false);
-          if (isErrorCode(error.message)) {
-            setError(error.message);
-          } else {
-            setError("INTERNAL_ERROR");
-          }
-        });
+      addCustomerVoucher(formValues).then(() => {
+        navigate(`/customers/${id}`);
+      });
     }
   };
 

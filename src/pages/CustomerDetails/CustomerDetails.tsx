@@ -14,7 +14,7 @@ import { CustomerVoucher } from "../../components/CustomerVoucher/CustomerVouche
 import { CustomerInformation } from "../../components/CustomerInformation/CustomerInformation";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { CustomerMainAddress } from "../../components/CustomerMainAddress/CustomerMainAddress";
-import { useCustomer } from "../../hooks/useCustomer";
+import { useCustomer } from "../../hooks/useCustomer/useCustomer";
 
 type CustomerDetailsParams = {
   id: string;
@@ -51,18 +51,6 @@ export const CustomerDetailsPage: FC = () => {
   const addTaxDataHandler = () => navigate(`/customers/${id}/tax-data/add`);
   const addVoucherHandler = () =>
     navigate(`/customers/${id}/voucher-detail/add`);
-
-  const deleteVoucherHandler = () => {
-    // setCustomer((customer) => {
-    //   if (customer) {
-    //     return {
-    //       ...customer,
-    //       voucher: undefined,
-    //     };
-    //   }
-    //   return null;
-    // });
-  };
 
   const changeTabHandler = (_: React.SyntheticEvent, newValue: TabName) => {
     setCurrentTab(newValue);
@@ -117,7 +105,6 @@ export const CustomerDetailsPage: FC = () => {
             {customer.voucher ? (
               <CustomerVoucher
                 voucher={customer.voucher}
-                onDelete={deleteVoucherHandler}
                 customerId={customer.id}
               />
             ) : (

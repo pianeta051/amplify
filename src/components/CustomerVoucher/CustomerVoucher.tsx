@@ -17,13 +17,11 @@ import { DeleteCustomerVoucherButton } from "../DeleteCustomerVoucherButton/Dele
 type CustomerVoucherProps = {
   voucher: VoucherDetail;
   customerId: string;
-  onDelete: () => void;
 };
 
 export const CustomerVoucher: FC<CustomerVoucherProps> = ({
   voucher,
   customerId,
-  onDelete,
 }) => {
   const [error, setError] = useState<ErrorCode | null>(null);
   const navigate = useNavigate();
@@ -45,7 +43,6 @@ export const CustomerVoucher: FC<CustomerVoucherProps> = ({
         </Button>
         <DeleteCustomerVoucherButton
           customerId={customerId}
-          onDelete={onDelete}
           onError={errorHandler}
         />
       </Stack>

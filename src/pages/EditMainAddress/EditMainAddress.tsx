@@ -1,44 +1,28 @@
 import { CircularProgress, Typography } from "@mui/material";
-import { FC, useEffect, useState } from "react";
-import { ErrorCode, isErrorCode } from "../../services/error";
+import { FC } from "react";
+
 import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
-import { useCustomers } from "../../context/CustomersContext";
+
 import { useNavigate, useParams } from "react-router-dom";
-import { CustomerAddress } from "../../services/customers";
 import {
   CustomerAddressForm,
   CustomerAddressFormValues,
 } from "../../components/CustomerAddressForm/CustomerAddressForm";
+import { useEditMainAddress } from "../../hooks/useMainAddress/useEditMainAddress";
+import { useMainAddress } from "../../hooks/useMainAddress/useMainAddress";
 
 type EditMainAddressParams = {
   id: string;
 };
 export const EditMainAddress: FC = () => {
-  const [submitting, setSubmitting] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<ErrorCode | null>(null);
-  const [mainAddress, setMainAddress] = useState<CustomerAddress | null>(null);
-  const { editMainAddress, getMainAddress } = useCustomers();
   const { id } = useParams<EditMainAddressParams>();
+  const {
+    editMainAddress,
+    loading: submitting,
+    error: error,
+  } = useEditMainAddress(id);
+  const { mainAddress, loading } = useMainAddress(id);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (loading && id) {
-      getMainAddress(id)
-        .then((mainAddress: CustomerAddress | null) => {
-          setMainAddress(mainAddress);
-          setLoading(false);
-        })
-        .catch((error) => {
-          if (isErrorCode(error.message)) {
-            setError(error.message);
-          } else {
-            setError("INTERNAL_ERROR");
-          }
-          setLoading(false);
-        });
-    }
-  }, []);
 
   if (!id) {
     return <ErrorAlert code={"INTERNAL_ERROR"} />;
@@ -65,22 +49,9 @@ export const EditMainAddress: FC = () => {
   }
 
   const submitHandler = (formValues: CustomerAddressFormValues) => {
-    if (id) {
-      setSubmitting(true);
-      editMainAddress(id, formValues)
-        .then(() => {
-          navigate(`/customers/${id}`);
-          setSubmitting(false);
-        })
-        .catch((error) => {
-          setSubmitting(false);
-          if (isErrorCode(error.message)) {
-            setError(error.message);
-          } else {
-            setError("INTERNAL_ERROR");
-          }
-        });
-    }
+    editMainAddress(formValues).then(() => {
+      navigate(`/customers/${id}`);
+    });
   };
 
   return (

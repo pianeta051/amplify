@@ -1,6 +1,6 @@
-import { Customer, deleteCustomerTaxData } from "../services/customers";
+import { Customer, deleteCustomerTaxData } from "../../services/customers";
 import useSWRMutation from "swr/mutation";
-import { extractErrorCode } from "../services/error";
+import { extractErrorCode } from "../../services/error";
 
 export const useDeleteTaxData = (id: string | undefined) => {
   const { trigger, isMutating, error } = useSWRMutation<

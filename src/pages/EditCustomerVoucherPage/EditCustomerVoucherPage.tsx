@@ -1,23 +1,24 @@
 import { CircularProgress, Typography } from "@mui/material";
-import { FC, useState } from "react";
+import { FC } from "react";
 import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
-import { useCustomers } from "../../context/CustomersContext";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   VoucherForm,
   VoucherFormValues,
 } from "../../components/VoucherForm/VoucherForm";
-import { useCustomer } from "../../hooks/useCustomer";
+import { useCustomer } from "../../hooks/useCustomer/useCustomer";
+import { useEditCustomerVoucher } from "../../hooks/useVoucher/useEditCustomerVoucher";
 
 type EditCustomerVoucherParams = {
   id: string;
 };
 export const EditCustomerVoucherPage: FC = () => {
-  const [submitting, setSubmitting] = useState(false);
-
-  const { editVoucher } = useCustomers();
-
   const { id } = useParams<EditCustomerVoucherParams>();
+  const {
+    editCustomerVoucher,
+    loading: submitting,
+    error: editError,
+  } = useEditCustomerVoucher(id);
   const navigate = useNavigate();
 
   const { customer, loading, error } = useCustomer(id);
@@ -44,20 +45,9 @@ export const EditCustomerVoucherPage: FC = () => {
 
   const submitHandler = (formValues: VoucherFormValues) => {
     if (id) {
-      setSubmitting(true);
-      editVoucher(id, formValues)
-        .then(() => {
-          navigate(`/customers/${id}`);
-          setSubmitting(false);
-        })
-        .catch(() => {
-          setSubmitting(false);
-          // if (isErrorCode(error.message)) {
-          //   setError(error.message);
-          // } else {
-          //   setError("INTERNAL_ERROR");
-          // }
-        });
+      editCustomerVoucher(formValues).then(() => {
+        navigate(`/customers/${id}`);
+      });
     }
   };
 
@@ -66,7 +56,7 @@ export const EditCustomerVoucherPage: FC = () => {
       <Typography variant="h3" gutterBottom align="center">
         Edit Voucher
       </Typography>
-      {error && <ErrorAlert code={error} />}
+      {editError && <ErrorAlert code={editError} />}
       <VoucherForm
         loading={submitting}
         onSubmit={submitHandler}

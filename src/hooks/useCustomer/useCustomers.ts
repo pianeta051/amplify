@@ -1,6 +1,6 @@
 import useSWRInfinite from "swr/infinite";
-import { Customer, getCustomers } from "../services/customers";
-import { extractErrorCode } from "../services/error";
+import { Customer, getCustomers } from "../../services/customers";
+import { extractErrorCode } from "../../services/error";
 
 export const useCustomers = (
   searchInput?: string,

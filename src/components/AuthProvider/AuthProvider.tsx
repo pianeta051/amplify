@@ -6,6 +6,7 @@ import {
   logOut as serviceLogOut,
 } from "../../services/authentication";
 import { CircularProgress } from "@mui/material";
+import { useSWRConfig } from "swr";
 
 type AuthProviderProps = {
   children?: ReactNode;
@@ -16,6 +17,10 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [authStatus, setAuthStatus] = useState<
     "checking" | "authenticated" | "unauthenticated"
   >("checking");
+  const { mutate } = useSWRConfig();
+
+  const clearCache = () =>
+    mutate(() => true, undefined, { revalidate: false, populateCache: true });
 
   useEffect(() => {
     getAuthenticatedUser().then((user) => {
@@ -39,6 +44,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     } catch (e) {
       console.error(e);
     } finally {
+      clearCache();
       setUser(null);
       setAuthStatus("unauthenticated");
     }

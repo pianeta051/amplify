@@ -1,7 +1,7 @@
 import useSWRMutation from "swr/mutation";
-import { Customer, TaxData, addTaxData } from "../services/customers";
-import { extractErrorCode } from "../services/error";
-import { TaxDataFormValues } from "../components/TaxDataForm/TaxDataForm";
+import { Customer, TaxData, addTaxData } from "../../services/customers";
+import { extractErrorCode } from "../../services/error";
+import { TaxDataFormValues } from "../../components/TaxDataForm/TaxDataForm";
 
 export const useAddCustomerTaxData = (id: string | undefined) => {
   const { trigger, isMutating, error } = useSWRMutation<
