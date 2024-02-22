@@ -4,9 +4,10 @@ import { StyledForm } from "./Form.style";
 type FormProps = {
   children?: ReactNode;
   onSubmit?: React.FormEventHandler<HTMLFormElement>;
+  direction?: "row" | "column";
 };
 
-export const Form: FC<FormProps> = ({ children, onSubmit }) => {
+export const Form: FC<FormProps> = ({ children, onSubmit, direction }) => {
   const submitHandler: React.FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
     if (onSubmit) {
@@ -14,5 +15,9 @@ export const Form: FC<FormProps> = ({ children, onSubmit }) => {
     }
   };
 
-  return <StyledForm onSubmit={submitHandler}>{children}</StyledForm>;
+  return (
+    <StyledForm onSubmit={submitHandler} direction={direction}>
+      {children}
+    </StyledForm>
+  );
 };

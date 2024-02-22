@@ -15,6 +15,7 @@ export const useDeleteCustomer = (id: string | undefined) => {
     id ? ["customer", id] : null, // Clave: TIENE QUE SER LA MISMA CUYA CACHE QUEREMOS EDITAR
     async ([_operation, id]) => {
       await deleteCustomer(id);
+      // Modificar tambien la cache de la lista de customers (borrarla)
       await mutate<
         readonly [
           string,

@@ -2,20 +2,17 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { CustomersPage } from "./Customers";
 import { ThemeProvider } from "@mui/material";
 import { theme } from "../../theme/theme";
-import { CustomersProvider } from "../../components/CustomersProvider/CustomersProvider";
 import { API } from "aws-amplify";
 import { customerFactory } from "../../factories/customers";
 
 const mountComponent = () => {
   cy.mount(
     <ThemeProvider theme={theme}>
-      <CustomersProvider>
-        <MemoryRouter initialEntries={["/customers"]}>
-          <Routes>
-            <Route path="customers" element={<CustomersPage />} />
-          </Routes>
-        </MemoryRouter>
-      </CustomersProvider>
+      <MemoryRouter initialEntries={["/customers"]}>
+        <Routes>
+          <Route path="customers" element={<CustomersPage />} />
+        </Routes>
+      </MemoryRouter>
     </ThemeProvider>
   );
 };

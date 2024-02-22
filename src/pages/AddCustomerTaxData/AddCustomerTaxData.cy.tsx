@@ -1,7 +1,6 @@
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ThemeProvider } from "@mui/material";
 import { theme } from "../../theme/theme";
-import { CustomersProvider } from "../../components/CustomersProvider/CustomersProvider";
 import { API } from "aws-amplify";
 import { customerFactory } from "../../factories/customers";
 import { AddCustomerTaxDataPage } from "./AddCustomerTaxData";
@@ -11,14 +10,12 @@ const customer = customerFactory.build({ id: "2000" });
 const mountComponent = () => {
   cy.mount(
     <ThemeProvider theme={theme}>
-      <CustomersProvider>
-        <MemoryRouter initialEntries={["/tax-data/" + customer.id]}>
-          <Routes>
-            <Route path="/tax-data/:id" element={<AddCustomerTaxDataPage />} />
-            <Route path="/customers/:id" element={<div>Customer Page</div>} />
-          </Routes>
-        </MemoryRouter>
-      </CustomersProvider>
+      <MemoryRouter initialEntries={["/tax-data/" + customer.id]}>
+        <Routes>
+          <Route path="/tax-data/:id" element={<AddCustomerTaxDataPage />} />
+          <Route path="/customers/:id" element={<div>Customer Page</div>} />
+        </Routes>
+      </MemoryRouter>
     </ThemeProvider>
   );
 };

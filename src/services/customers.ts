@@ -49,6 +49,7 @@ export type Customer = {
   type: CustomerType;
   taxData?: TaxData;
   voucher?: VoucherDetail;
+  externalLinks?: string[];
 };
 export const CUSTOMER_TYPES = ["individual", "company", "other"] as const;
 export type CustomerType = typeof CUSTOMER_TYPES[number];
@@ -105,7 +106,9 @@ const isCustomer = (value: unknown): value is Customer => {
     CUSTOMER_TYPES.includes((value as Customer)["type"] as CustomerType) &&
     ((typeof (value as Customer).taxData === "object" &&
       isTaxData((value as Customer).taxData)) ||
-      (value as Customer).taxData === undefined)
+      (value as Customer).taxData === undefined) &&
+    ((value as Customer).externalLinks === undefined ||
+      Array.isArray((value as Customer).externalLinks))
   );
 };
 
@@ -167,6 +170,14 @@ const isVoucher = (value: unknown): value is VoucherDetail => {
 /**
  * AJAX FUNCTIONS
  */
+
+export const addExternalLink = async (
+  customerId: string,
+  url: string
+): Promise<string> => {
+  console.log(`Added ${url} for ${customerId}`);
+  return url;
+};
 
 export const addMainAddress = async (
   customerId: string,

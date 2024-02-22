@@ -1,7 +1,6 @@
 import { FC } from "react";
 import { Button, CircularProgress, Stack, Typography } from "@mui/material";
 import { CustomerAddress } from "../CustomerAddress/CustomerAddress";
-import { ErrorCode } from "../../services/error";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import { ErrorAlert } from "../ErrorAlert/ErrorAlert";
@@ -22,16 +21,10 @@ export const CustomerMainAddress: FC<CustomerMainAddressProps> = ({
   const addMainAddressHandler = () =>
     navigate(`/customers/${customerId}/main-address/add`);
 
-  const deleteErrorHandler = (code: ErrorCode) => {
-    console.log(code);
-  };
-
-  const deleteHandler = () => {
-    console.log("deleted");
-  };
   const editClickHandler = () => {
     navigate(`/customers/${customerId}/main-address/edit`);
   };
+
   if (loading) {
     return (
       <>
@@ -71,11 +64,7 @@ export const CustomerMainAddress: FC<CustomerMainAddressProps> = ({
         <Button variant="contained" onClick={editClickHandler}>
           Edit
         </Button>
-        <DeleteCustomerMainAddressButton
-          customerId={customerId}
-          onDelete={deleteHandler}
-          onError={deleteErrorHandler}
-        />
+        <DeleteCustomerMainAddressButton customerId={customerId} />
       </Stack>
       <CustomerAddress address={mainAddress} />
     </>

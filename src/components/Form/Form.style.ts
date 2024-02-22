@@ -1,6 +1,13 @@
 import styledComponents from "styled-components";
 
-export const StyledForm = styledComponents.form({
-  display: "flex",
-  flexDirection: "column",
-});
+type StyledFormProps = {
+  direction?: "column" | "row";
+};
+
+export const StyledForm = styledComponents.form<StyledFormProps>(
+  ({ direction = "column" }) => ({
+    display: "flex",
+    flexDirection: direction,
+    gap: direction === "row" ? "10px" : undefined,
+  })
+);

@@ -1,32 +1,27 @@
 import LoadingButton from "@mui/lab/LoadingButton";
-import { FC, useState } from "react";
-import { useCustomers } from "../../context/CustomersContext";
-import { ErrorCode, isErrorCode } from "../../services/error";
+import { FC } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDeleteMainAddress } from "../../hooks/useMainAddress/useDeleteMainAddress";
 
 type DeleteCustomerMainAddressButtonProps = {
   customerId: string;
-  onDelete: () => void;
-  onError: (code: ErrorCode) => void;
 };
 
 export const DeleteCustomerMainAddressButton: FC<
   DeleteCustomerMainAddressButtonProps
-> = ({ customerId, onDelete, onError }) => {
-  const [loading, setLoading] = useState(false);
-  const { deleteCustomerMainAddress } = useCustomers();
+> = ({ customerId }) => {
+  const { deleteCustomerMainAddress, error, loading } =
+    useDeleteMainAddress(customerId);
+  const navigate = useNavigate();
+
   const deleteHandler = () => {
-    setLoading(true);
-    deleteCustomerMainAddress(customerId)
+    deleteCustomerMainAddress()
       .then(() => {
-        setLoading(false);
-        onDelete();
+        navigate(`/customers/${customerId}`);
       })
-      .catch((error) => {
-        setLoading(false);
-        if (isErrorCode(error.message)) {
-          onError(error.message);
-        } else {
-          onError("INTERNAL_ERROR");
+      .catch(() => {
+        if (error) {
+          console.error(error);
         }
       });
   };

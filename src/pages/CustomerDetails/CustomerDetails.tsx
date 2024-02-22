@@ -15,18 +15,26 @@ import { CustomerInformation } from "../../components/CustomerInformation/Custom
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { CustomerMainAddress } from "../../components/CustomerMainAddress/CustomerMainAddress";
 import { useCustomer } from "../../hooks/useCustomer/useCustomer";
+import { CustomerExternalLinks } from "../../components/CustomerExternalLinks/CustomerExternalLinks";
 
 type CustomerDetailsParams = {
   id: string;
 };
 
-const tabNames = ["information", "taxData", "voucher", "mainAddress"] as const;
+const tabNames = [
+  "information",
+  "taxData",
+  "voucher",
+  "mainAddress",
+  "externalLinks",
+] as const;
 type TabName = typeof tabNames[number];
 const tabLabels: Record<TabName, string> = {
   information: "Information",
   taxData: "Tax data",
   voucher: "Voucher details",
   mainAddress: "Main Address",
+  externalLinks: "External links",
 };
 
 type CustomerSectionTabProps = {
@@ -119,6 +127,12 @@ export const CustomerDetailsPage: FC = () => {
           </CustomerSectionTab>
           <CustomerSectionTab value="mainAddress">
             <CustomerMainAddress customerId={customer.id} />
+          </CustomerSectionTab>
+          <CustomerSectionTab value="externalLinks">
+            <CustomerExternalLinks
+              links={["http://www.some-link.com"]}
+              customerId={customer.id}
+            />
           </CustomerSectionTab>
         </Stack>
       </TabContext>
