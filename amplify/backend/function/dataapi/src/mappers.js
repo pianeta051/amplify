@@ -17,6 +17,9 @@ const mapCustomer = (customerFromDb) => ({
         type: customerFromDb.voucher.M.type.S,
       }
     : undefined,
+  externalLinks: customerFromDb.externalLinks
+    ? customerFromDb.externalLinks.L.map((externalLink) => externalLink.S)
+    : undefined,
 });
 
 const mapCustomerAddress = (customerAddressFromDb) => ({

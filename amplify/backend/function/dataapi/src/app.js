@@ -11,6 +11,7 @@ const bodyParser = require("body-parser");
 const awsServerlessExpressMiddleware = require("aws-serverless-express/middleware");
 
 const {
+  addExternalLinkToCustomer,
   addMainAddress,
   addTaxData,
   addVoucher,
@@ -19,6 +20,7 @@ const {
   deleteTaxData,
   deleteVoucher,
   deleteCustomerMainAddress,
+  deleteCustomerExternalLink,
   getCustomers,
   getCustomer,
   updateCustomer,
@@ -88,6 +90,23 @@ app.delete("/customers/:id/voucher-detail", async function (req, res) {
     const customerId = req.params.id;
     await deleteVoucher(customerId);
     res.json({ message: `Voucher removed for ${customerId}` });
+  } catch (error) {
+    if (error.message === "CUSTOMER_NOT_FOUND") {
+      res.status(404).json({
+        error: "Customer not registered!",
+      });
+    } else {
+      throw error;
+    }
+  }
+});
+
+app.delete("/customers/:id/external-link/:index", async function (req, res) {
+  try {
+    const customerId = req.params.id;
+    const index = req.params.index;
+    await deleteCustomerExternalLink(customerId, index);
+    res.json({ message: `External link Deleted` });
   } catch (error) {
     if (error.message === "CUSTOMER_NOT_FOUND") {
       res.status(404).json({
@@ -170,6 +189,21 @@ app.post("/customers", async function (req, res) {
     } else {
       throw error;
     }
+  }
+});
+
+app.post("/customers/:id/external-link", async function (req, res) {
+  try {
+    const customerId = req.params.id;
+    const { url } = req.body;
+    const insertedUrl = await addExternalLinkToCustomer(customerId, url);
+    res.json({ url: insertedUrl });
+  } catch (e) {
+    if (e.message === "Customer not found") {
+      res.status(404).json({ error: e.message });
+      return;
+    }
+    throw e;
   }
 });
 

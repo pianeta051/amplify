@@ -23,7 +23,9 @@ export const CustomerAddExternalLink: FC<CustomerAddExternalLinkProps> = ({
   const closeForm = () => setShowForm(false);
 
   const submitHandler = (formValues: CustomerExternalLinkFormValues) => {
-    addExternalLink(formValues).then(() => closeForm());
+    addExternalLink(formValues)
+      .then(() => closeForm())
+      .catch(() => console.error(error));
   };
 
   return showForm ? (

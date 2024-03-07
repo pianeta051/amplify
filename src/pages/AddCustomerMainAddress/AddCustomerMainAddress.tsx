@@ -30,7 +30,7 @@ export const AddCustomerMainAddressPage: FC = () => {
 
   const submitHandler = (formValues: CustomerAddressFormValues) => {
     addMainAddress(formValues).then(() => {
-      navigate(`/customers/${customerId}`);
+      navigate(`/customers/${customerId}?tab=mainAddress`);
     });
   };
 

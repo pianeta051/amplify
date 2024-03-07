@@ -175,7 +175,17 @@ export const addExternalLink = async (
   customerId: string,
   url: string
 ): Promise<string> => {
-  console.log(`Added ${url} for ${customerId}`);
+  try {
+    await post(`/customers/${customerId}/external-link`, { url });
+  } catch (error) {
+    if (isErrorResponse(error)) {
+      const status = error.response.status;
+      if (status === 404) {
+        throw new Error("CUSTOMER_NOT_FOUND");
+      }
+    }
+    throw new Error("INTERNAL_ERROR");
+  }
   return url;
 };
 
@@ -301,6 +311,11 @@ export const deleteCustomerVoucher = async (
   customerId: string
 ): Promise<void> => {
   await del(`/customers/${customerId}/voucher-detail`);
+};
+
+export const deleteExternalLink = async (customerId: string, index: number) => {
+  await del(`/customers/${customerId}/external-link/${index}`);
+  return index;
 };
 
 export const editCustomer = async (

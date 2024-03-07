@@ -50,7 +50,7 @@ export const EditMainAddress: FC = () => {
 
   const submitHandler = (formValues: CustomerAddressFormValues) => {
     editMainAddress(formValues).then(() => {
-      navigate(`/customers/${id}`);
+      navigate(`/customers/${id}?tab=mainAddress`);
     });
   };
 

@@ -5,6 +5,35 @@ const uuid = require("node-uuid");
 
 const TABLE_NAME = "exercises-dev";
 
+const addExternalLinkToCustomer = async (customerId, url) => {
+  const customer = await getCustomer(customerId);
+  if (!customer) {
+    throw new Error("CUSTOMER_NOT_FOUND");
+  }
+  const params = {
+    TableName: TABLE_NAME,
+    Key: {
+      PK: {
+        S: `customer_${customerId}`,
+      },
+      SK: {
+        S: "profile",
+      },
+    },
+    ExpressionAttributeNames: {
+      "#EL": "externalLinks",
+    },
+    ExpressionAttributeValues: {
+      ":url": { L: [{ S: url }] },
+      ":empty_list": { L: [] },
+    },
+    UpdateExpression:
+      "SET #EL = list_append(if_not_exists(#EL, :empty_list), :url)",
+  };
+  await ddb.updateItem(params).promise();
+  return url;
+};
+
 const addMainAddress = async (customerId, mainAddress) => {
   const params = {
     TableName: TABLE_NAME,
@@ -220,6 +249,29 @@ const deleteCustomerMainAddress = async (id) => {
     },
   };
   await ddb.deleteItem(params).promise();
+};
+
+const deleteCustomerExternalLink = async (customerId, index) => {
+  const customer = await getCustomer(customerId);
+  if (!customer) {
+    throw new Error("CUSTOMER_NOT_FOUND");
+  }
+  const params = {
+    ExpressionAttributeNames: {
+      "#EL": "externalLinks",
+    },
+    Key: {
+      PK: {
+        S: `customer_${customerId}`,
+      },
+      SK: {
+        S: "profile",
+      },
+    },
+    TableName: TABLE_NAME,
+    UpdateExpression: `REMOVE #EL[${index}]`,
+  };
+  await ddb.updateItem(params).promise();
 };
 
 const getCustomers = async (
@@ -528,6 +580,7 @@ const updateMainAddress = async (customerId, updatedMainAddress) => {
 };
 
 module.exports = {
+  addExternalLinkToCustomer,
   addMainAddress,
   addTaxData,
   addVoucher,
@@ -535,6 +588,7 @@ module.exports = {
   deleteCustomer,
   deleteVoucher,
   deleteTaxData,
+  deleteCustomerExternalLink,
   getCustomer,
   getCustomers,
   queryCustomersByEmail,

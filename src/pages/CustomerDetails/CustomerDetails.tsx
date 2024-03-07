@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 import {
   Button,
@@ -46,31 +46,42 @@ const CustomerSectionTab: FC<CustomerSectionTabProps> = ({
   value,
   children,
 }) => {
-  return <TabPanel value={value}>{children}</TabPanel>;
+  return (
+    <>
+      <TabPanel value={value}>{children}</TabPanel>
+    </>
+  );
 };
-
 export const CustomerDetailsPage: FC = () => {
-  const [currentTab, setCurrentTab] = useState<TabName>("information");
   const { id } = useParams<CustomerDetailsParams>();
   const { customer, error, loading } = useCustomer(id);
 
   const navigate = useNavigate();
-
+  const [searchParams, setSearchParams] = useSearchParams();
   const addTaxDataHandler = () => navigate(`/customers/${id}/tax-data/add`);
   const addVoucherHandler = () =>
     navigate(`/customers/${id}/voucher-detail/add`);
+  const queryParams = searchParams.get("tab") || "";
+  let initialValue: TabName = "information";
+  if (tabNames.includes(queryParams as TabName)) {
+    initialValue = queryParams as TabName;
+  }
+  const [currentTab, setCurrentTab] = useState<TabName>(initialValue);
 
   const changeTabHandler = (_: React.SyntheticEvent, newValue: TabName) => {
+    setSearchParams({ tab: newValue });
     setCurrentTab(newValue);
   };
 
   if (loading) {
-    <>
-      <Typography variant="h3" gutterBottom>
-        Customer details page
-      </Typography>
-      <CircularProgress />
-    </>;
+    return (
+      <>
+        <Typography variant="h3" gutterBottom>
+          Customer details page
+        </Typography>
+        <CircularProgress />
+      </>
+    );
   }
   if (error) {
     return <ErrorAlert code={error} />;
@@ -81,6 +92,7 @@ export const CustomerDetailsPage: FC = () => {
   if (!customer) {
     return <ErrorAlert code="INTERNAL_ERROR" />;
   }
+
   return (
     <>
       <TabContext value={currentTab}>
@@ -90,9 +102,11 @@ export const CustomerDetailsPage: FC = () => {
               <Tab label={tabLabels[tabName]} value={tabName} key={tabName} />
             ))}
           </TabList>
+
           <CustomerSectionTab value="information">
             {customer && <CustomerInformation customer={customer} />}
           </CustomerSectionTab>
+
           <CustomerSectionTab value="taxData">
             {customer.taxData ? (
               <CustomerTaxData
@@ -109,6 +123,7 @@ export const CustomerDetailsPage: FC = () => {
               </Button>
             )}
           </CustomerSectionTab>
+
           <CustomerSectionTab value="voucher">
             {customer.voucher ? (
               <CustomerVoucher
@@ -125,12 +140,14 @@ export const CustomerDetailsPage: FC = () => {
               </Button>
             )}
           </CustomerSectionTab>
+
           <CustomerSectionTab value="mainAddress">
             <CustomerMainAddress customerId={customer.id} />
           </CustomerSectionTab>
+
           <CustomerSectionTab value="externalLinks">
             <CustomerExternalLinks
-              links={["http://www.some-link.com"]}
+              links={customer.externalLinks ?? []}
               customerId={customer.id}
             />
           </CustomerSectionTab>
