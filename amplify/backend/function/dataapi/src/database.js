@@ -478,7 +478,6 @@ const updateCustomer = async (id, updatedCustomer) => {
       "SET #N = :name, #E = :email, #T = :type, #NL = :name_lowercase, #EL = :email_lowercase ",
     Key: {
       PK: { S: `customer_${id}` },
-      SK: { S: "profile" },
     },
   };
   await ddb.updateItem(params).promise();
@@ -579,6 +578,35 @@ const updateMainAddress = async (customerId, updatedMainAddress) => {
   return updatedMainAddress;
 };
 
+const updateExternalLink = async (customerId, url, index) => {
+  const customer = await getCustomer(customerId);
+  console.log(`customer: ${customer}, index: ${index}`);
+  if (!customer) {
+    throw new Error("CUSTOMER_NOT_FOUND");
+  }
+
+  const params = {
+    TableName: TABLE_NAME,
+    Key: {
+      PK: {
+        S: `customer_${customerId}`,
+      },
+      SK: {
+        S: "profile",
+      },
+    },
+    ExpressionAttributeNames: {
+      "#EL": "externalLinks",
+    },
+    ExpressionAttributeValues: {
+      ":url": { S: url },
+    },
+    UpdateExpression: `SET #EL[${index}] = :url`,
+  };
+  await ddb.updateItem(params).promise();
+  return url;
+};
+
 module.exports = {
   addExternalLinkToCustomer,
   addMainAddress,
@@ -596,6 +624,7 @@ module.exports = {
   updateTaxData,
   updateVoucher,
   updateMainAddress,
+  updateExternalLink,
   getCustomerMainAddress,
   deleteCustomerMainAddress,
 };

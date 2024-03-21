@@ -46,7 +46,7 @@ export const EditCustomerVoucherPage: FC = () => {
   const submitHandler = (formValues: VoucherFormValues) => {
     if (id) {
       editCustomerVoucher(formValues).then(() => {
-        navigate(`/customers/${id}`);
+        navigate(`/customers/${id}?tab=voucher`);
       });
     }
   };

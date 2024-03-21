@@ -3,6 +3,7 @@ import { CustomerFormValues } from "../components/CustomerForm/CustomerForm";
 import { TaxDataFormValues } from "../components/TaxDataForm/TaxDataForm";
 import { VoucherFormValues } from "../components/VoucherForm/VoucherForm";
 import { CustomerAddressFormValues } from "../components/CustomerAddressForm/CustomerAddressForm";
+import { CustomerExternalLinkFormValues } from "../components/CustomerExternalLinkForm/CustomerExternalLinkForm";
 
 /**
  * GENERAL API FUNCTIONS
@@ -390,6 +391,22 @@ export const editMainAddress = async (
       throw new Error("INTERNAL_ERROR");
     }
     return response.mainAddress;
+  } catch (error) {
+    throw new Error("INTERNAL_ERROR");
+  }
+};
+
+export const editCustomerExternalLink = async (
+  customerId: string,
+  formValues: CustomerExternalLinkFormValues,
+  index: number
+): Promise<{ url: string; index: number }> => {
+  try {
+    const response = await put(
+      `/customers/${customerId}/external-link/${index}`,
+      formValues
+    );
+    return { url: response.url, index };
   } catch (error) {
     throw new Error("INTERNAL_ERROR");
   }

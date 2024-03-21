@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { CustomerAddExternalLink } from "../CustomerAddExternalLink/CustomerAddExternalLink";
-import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
+import { List, ListItem } from "@mui/material";
 import { CustomerExternalLink } from "../CustomerExternalLink/CustomerExternalLink";
 
 type CustomerExternalLinksProps = {

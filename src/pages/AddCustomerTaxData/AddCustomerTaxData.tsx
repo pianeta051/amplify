@@ -27,7 +27,7 @@ export const AddCustomerTaxDataPage: FC = () => {
   const submitHandler = (formValues: TaxDataFormValues) => {
     if (id) {
       addCustomerTaxData(formValues).then(() => {
-        navigate(`/customers/${id}`);
+        navigate(`/customers/${id}?tab=taxData`);
       });
     }
   };

@@ -29,7 +29,7 @@
         },
         "dataapi": {
           "deploymentBucketName": "amplify-exercises-dev-164240-deployment",
-          "s3Key": "amplify-builds/dataapi-7868446d6d4c72306643-build.zip"
+          "s3Key": "amplify-builds/dataapi-626e4f69793342646931-build.zip"
         }
       },
       "api": {

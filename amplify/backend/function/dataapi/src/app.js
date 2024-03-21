@@ -27,12 +27,14 @@ const {
   updateTaxData,
   updateVoucher,
   updateMainAddress,
+  updateExternalLink,
   getCustomerMainAddress,
 } = require("./database");
 
 const { mapCustomer, mapCustomerAddress } = require("./mappers");
 
 const { generateToken, parseToken } = require("./token");
+const { stringify } = require("querystring");
 
 // declare a new express app
 const app = express();
@@ -330,6 +332,27 @@ app.put("/customers/:id/main-address", async function (req, res) {
     } else {
       throw error;
     }
+  }
+});
+app.put("/customers/:id/external-link/:index", async function (req, res) {
+  try {
+    const customerId = req.params.id;
+    const index = req.params.index;
+    const { url } = req.body;
+    console.log(`customer: ${customerId}, index: ${index}, url: ${url}`);
+    const updatedExternalLink = await updateExternalLink(
+      customerId,
+      url,
+      +index
+    );
+
+    res.json({ url: updatedExternalLink });
+  } catch (error) {
+    if (error.message === "Customer not found") {
+      res.status(404).json({ error: error.message });
+      return;
+    }
+    throw error;
   }
 });
 
