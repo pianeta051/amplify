@@ -29,7 +29,16 @@ const mapCustomerAddress = (customerAddressFromDb) => ({
   street: customerAddressFromDb.street.S,
 });
 
+const mapSecondaryAddress = (secondaryAddress) => ({
+  id: secondaryAddress.SK.S.replace("address_secondary_", ""),
+  street: secondaryAddress.street.S,
+  number: secondaryAddress.number.S,
+  city: secondaryAddress.city.S,
+  postcode: secondaryAddress.postcode.S,
+});
+
 module.exports = {
   mapCustomer,
   mapCustomerAddress,
+  mapSecondaryAddress,
 };

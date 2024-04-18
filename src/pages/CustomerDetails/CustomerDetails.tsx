@@ -16,6 +16,7 @@ import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { CustomerMainAddress } from "../../components/CustomerMainAddress/CustomerMainAddress";
 import { useCustomer } from "../../hooks/useCustomer/useCustomer";
 import { CustomerExternalLinks } from "../../components/CustomerExternalLinks/CustomerExternalLinks";
+import { CustomerSecondaryAddresses } from "../../components/CustomerSecondaryAddresses/CustomerSecondaryAddresses";
 
 type CustomerDetailsParams = {
   id: string;
@@ -27,6 +28,7 @@ const tabNames = [
   "voucher",
   "mainAddress",
   "externalLinks",
+  "secondaryAddresses",
 ] as const;
 type TabName = typeof tabNames[number];
 const tabLabels: Record<TabName, string> = {
@@ -35,6 +37,7 @@ const tabLabels: Record<TabName, string> = {
   voucher: "Voucher details",
   mainAddress: "Main Address",
   externalLinks: "External links",
+  secondaryAddresses: "Secondary addresses",
 };
 
 type CustomerSectionTabProps = {
@@ -150,6 +153,9 @@ export const CustomerDetailsPage: FC = () => {
               links={customer.externalLinks ?? []}
               customerId={customer.id}
             />
+          </CustomerSectionTab>
+          <CustomerSectionTab value="secondaryAddresses">
+            <CustomerSecondaryAddresses customerId={customer.id} />
           </CustomerSectionTab>
         </Stack>
       </TabContext>

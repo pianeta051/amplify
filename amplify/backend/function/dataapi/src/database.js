@@ -183,6 +183,26 @@ const createCustomer = async (customer) => {
   };
 };
 
+const createCustomerSecondaryAddress = async (customerId, address) => {
+  if (!(await getCustomer(customerId))) {
+    throw new Error("Customer not found");
+  }
+  const addressId = uuid.v1();
+  const params = {
+    TableName: TABLE_NAME,
+    Item: {
+      PK: { S: `customer_${customerId}` },
+      SK: { S: `address_secondary_${addressId}` },
+      street: { S: address.street },
+      city: { S: address.city },
+      number: { S: address.number },
+      postcode: { S: address.postcode },
+    },
+  };
+  await ddb.putItem(params).promise();
+  return { ...address, id: addressId };
+};
+
 const deleteTaxData = async (customerId) => {
   const customer = await getCustomer(customerId);
   if (!customer) {
@@ -373,7 +393,11 @@ const getCustomers = async (
     items.push(...result.Items);
   }
 
-  const nextItem = await getNextCustomer(result.LastEvaluatedKey);
+  const nextItem = await getNextValue(result.LastEvaluatedKey, {
+    filterExpression: params.FilterExpression,
+    expressionAttributeNames: params.ExpressionAttributeNames,
+    expressionAttributeValues: params.ExpressionAttributeValues,
+  });
   return {
     items,
     lastEvaluatedKey: nextItem ? result.LastEvaluatedKey : null,
@@ -408,11 +432,42 @@ const getCustomerMainAddress = async (customerId) => {
   return mainAddress.Item;
 };
 
-const getNextCustomer = async (lastEvaluatedKey) => {
+const getCustomerSecondaryAddresses = async (customerId, exclusiveStartKey) => {
+  const PAGE_SIZE = 5;
+  const params = {
+    TableName: TABLE_NAME,
+    ExpressionAttributeValues: {
+      ":pk": { S: `customer_${customerId}` },
+      ":sk": { S: "address_secondary_" },
+    },
+    ExpressionAttributeNames: {
+      "#PK": "PK",
+      "#SK": "SK",
+    },
+    KeyConditionExpression: "#PK = :pk AND begins_with(#SK, :sk)",
+    Limit: PAGE_SIZE,
+    ExclusiveStartKey: exclusiveStartKey,
+  };
+  const result = await ddb.query(params).promise();
+  const nextItem = await getNextValue(result.LastEvaluatedKey, {
+    filterExpression: params.KeyConditionExpression,
+    expressionAttributeNames: params.ExpressionAttributeNames,
+    expressionAttributeValues: params.ExpressionAttributeValues,
+  });
+  return {
+    items: result.Items,
+    lastEvaluatedKey: nextItem ? result.LastEvaluatedKey : null,
+  };
+};
+
+const getNextValue = async (lastEvaluatedKey, filter) => {
   const params = {
     TableName: TABLE_NAME,
     Limit: 1,
     ExclusiveStartKey: lastEvaluatedKey,
+    FilterExpression: filter.filterExpression,
+    ExpressionAttributeNames: filter.expressionAttributeNames,
+    ExpressionAttributeValues: filter.expressionAttributeValues,
   };
   const result = await ddb.scan(params).promise();
   if (result.Items.length) {
@@ -478,6 +533,7 @@ const updateCustomer = async (id, updatedCustomer) => {
       "SET #N = :name, #E = :email, #T = :type, #NL = :name_lowercase, #EL = :email_lowercase ",
     Key: {
       PK: { S: `customer_${id}` },
+      SK: { S: "profile" },
     },
   };
   await ddb.updateItem(params).promise();
@@ -613,12 +669,14 @@ module.exports = {
   addTaxData,
   addVoucher,
   createCustomer,
+  createCustomerSecondaryAddress,
   deleteCustomer,
   deleteVoucher,
   deleteTaxData,
   deleteCustomerExternalLink,
   getCustomer,
   getCustomers,
+  getCustomerSecondaryAddresses,
   queryCustomersByEmail,
   updateCustomer,
   updateTaxData,

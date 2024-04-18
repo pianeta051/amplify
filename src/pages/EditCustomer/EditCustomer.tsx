@@ -57,9 +57,13 @@ export const EditCustomerPage: FC = () => {
   }
 
   const submitHandler = (formValues: CustomerFormValues) => {
-    editCustomer(formValues).then((customer) => {
-      navigate(`/customers/${customer.id}`);
-    });
+    editCustomer(formValues)
+      .then((customer) => {
+        navigate(`/customers/${customer.id}`);
+      })
+      .catch(() => {
+        // Hook handles the error
+      });
   };
 
   return (

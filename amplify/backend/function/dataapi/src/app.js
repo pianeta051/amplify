@@ -16,6 +16,7 @@ const {
   addTaxData,
   addVoucher,
   createCustomer,
+  createCustomerSecondaryAddress,
   deleteCustomer,
   deleteTaxData,
   deleteVoucher,
@@ -23,6 +24,7 @@ const {
   deleteCustomerExternalLink,
   getCustomers,
   getCustomer,
+  getCustomerSecondaryAddresses,
   updateCustomer,
   updateTaxData,
   updateVoucher,
@@ -31,7 +33,11 @@ const {
   getCustomerMainAddress,
 } = require("./database");
 
-const { mapCustomer, mapCustomerAddress } = require("./mappers");
+const {
+  mapCustomer,
+  mapCustomerAddress,
+  mapSecondaryAddress,
+} = require("./mappers");
 
 const { generateToken, parseToken } = require("./token");
 const { stringify } = require("querystring");
@@ -174,6 +180,28 @@ app.get("/customers/:id/main-address", async function (req, res) {
   }
 });
 
+// Get a single customer's secondary addresses
+app.get("/customers/:id/secondary-addresses", async function (req, res) {
+  const id = req.params.id;
+  const nextToken = req.query?.nextToken;
+  const exclusiveStartKey = parseToken(nextToken);
+  const { items, lastEvaluatedKey } = await getCustomerSecondaryAddresses(
+    id,
+    exclusiveStartKey
+  );
+  const secondaryAddresses = items.map(mapSecondaryAddress);
+  const responseToken = generateToken(lastEvaluatedKey);
+  try {
+    res.json({ secondaryAddresses, nextToken: responseToken });
+  } catch (e) {
+    if (e.message === "Customer not found") {
+      res.status(404).json({ error: e.message });
+      return;
+    }
+    throw e;
+  }
+});
+
 // Create a new customer
 app.post("/customers", async function (req, res) {
   try {
@@ -254,6 +282,26 @@ app.post("/customers/:id/voucher-detail", async function (req, res) {
         error: "Voucher ID cannot be empty",
       });
     } else if (error.message === "CUSTOMER_NOT_FOUND") {
+      res.status(404).json({
+        error: "Customer not registered!",
+      });
+    } else {
+      throw error;
+    }
+  }
+});
+
+app.post("/customers/:id/secondary-address", async function (req, res) {
+  try {
+    const customerId = req.params.id;
+    const secondaryAddress = req.body;
+    const createdAddress = await createCustomerSecondaryAddress(
+      customerId,
+      secondaryAddress
+    );
+    res.json({ secondaryAddress: createdAddress });
+  } catch (error) {
+    if (error.message === "CUSTOMER_NOT_FOUND") {
       res.status(404).json({
         error: "Customer not registered!",
       });
