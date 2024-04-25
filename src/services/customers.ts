@@ -344,6 +344,17 @@ export const deleteCustomerMainAddress = async (id: string): Promise<void> => {
   await del(`/customers/${id}/address_main`);
 };
 
+export const deleteSecondaryAddress = async (
+  customerId: string,
+  addressId: string
+): Promise<void> => {
+  try {
+    await del(`/customers/${customerId}/secondary-address/${addressId}`);
+  } catch (error) {
+    throw new Error("INTERNAL_ERROR");
+  }
+};
+
 export const deleteCustomerTaxData = async (
   customerId: string
 ): Promise<void> => {
@@ -433,6 +444,25 @@ export const editMainAddress = async (
       throw new Error("INTERNAL_ERROR");
     }
     return response.mainAddress;
+  } catch (error) {
+    throw new Error("INTERNAL_ERROR");
+  }
+};
+
+export const editCustomerSecondaryAddress = async (
+  customerId: string,
+  addressId: string,
+  formValues: CustomerAddressFormValues
+): Promise<CustomerSecondaryAddress> => {
+  try {
+    const response = await put(
+      `/customers/${customerId}/secondary-address/${addressId}`,
+      formValues
+    );
+    if (!isAddress(response.secondaryAddress)) {
+      throw new Error("INTERNAL_ERROR");
+    }
+    return response.secondaryAddress;
   } catch (error) {
     throw new Error("INTERNAL_ERROR");
   }

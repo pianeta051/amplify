@@ -15,6 +15,7 @@ export const CustomerSecondaryAddresses: FC<
   CustomerSecondaryAddressesProps
 > = ({ customerId }) => {
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingAddressId, setEditingAddresId] = useState<string | null>(null);
   const {
     customerSecondaryAddresses,
     loading,
@@ -24,8 +25,15 @@ export const CustomerSecondaryAddresses: FC<
     loadingMore,
   } = useCustomerSecondaryAddresses(customerId);
 
-  const openModal = () => setModalOpen(true);
-  const closeModal = () => setModalOpen(false);
+  const openModal = (addressId?: string) => {
+    setEditingAddresId(addressId ?? null);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditingAddresId(null);
+  };
 
   if (loading) {
     return (
@@ -40,19 +48,37 @@ export const CustomerSecondaryAddresses: FC<
   if (error || !customerSecondaryAddresses) {
     return <ErrorAlert code={error ?? "INTERNAL_ERROR"} />;
   }
+
+  const editClickHandler = (addressId: string) => {
+    openModal(addressId);
+  };
+
+  const editingAddress = customerSecondaryAddresses.find(
+    (address) => address.id === editingAddressId
+  );
+
   return (
     <>
       <Typography variant="h3" gutterBottom>
         Secondary addresses
       </Typography>
-      <Button variant="outlined" startIcon={<AddIcon />} onClick={openModal}>
+      <Button
+        variant="outlined"
+        startIcon={<AddIcon />}
+        onClick={() => openModal()}
+      >
         Add new
       </Button>
-      <CustomerSecondaryAddressesTable addresses={customerSecondaryAddresses} />
+      <CustomerSecondaryAddressesTable
+        addresses={customerSecondaryAddresses}
+        customerId={customerId}
+        onEditClick={editClickHandler}
+      />
       <CustomerSecondaryAddressModal
         customerId={customerId}
         onClose={closeModal}
         open={modalOpen}
+        address={editingAddress}
       />
       {moreToLoad && (
         <LoadingButton variant="text" onClick={loadMore} loading={loadingMore}>

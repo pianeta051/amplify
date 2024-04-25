@@ -1,6 +1,7 @@
 import { FC } from "react";
 import { CustomerSecondaryAddress } from "../../services/customers";
 import {
+  IconButton,
   Paper,
   TableBody,
   TableCell,
@@ -8,14 +9,18 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import { DeleteCustomerSecondaryAddressButton } from "../DeleteCustomerSecondaryAddressButton/DeleteCustomerSecondaryAddressButton";
 
 type CustomerSecondaryAddressesTableProps = {
   addresses: CustomerSecondaryAddress[];
+  customerId: string;
+  onEditClick: (addressId: string) => void;
 };
 
 export const CustomerSecondaryAddressesTable: FC<
   CustomerSecondaryAddressesTableProps
-> = ({ addresses }) => {
+> = ({ addresses, customerId, onEditClick }) => {
   return (
     <TableContainer component={Paper}>
       <TableHead>
@@ -24,6 +29,7 @@ export const CustomerSecondaryAddressesTable: FC<
           <TableCell>Number</TableCell>
           <TableCell>Postal code</TableCell>
           <TableCell>City</TableCell>
+          <TableCell>Action</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -33,6 +39,19 @@ export const CustomerSecondaryAddressesTable: FC<
             <TableCell>{address.number}</TableCell>
             <TableCell>{address.postcode}</TableCell>
             <TableCell>{address.city}</TableCell>
+            <TableCell>
+              <IconButton
+                edge="end"
+                aria-label="update"
+                onClick={() => onEditClick(address.id)}
+              >
+                <EditIcon />
+              </IconButton>
+              <DeleteCustomerSecondaryAddressButton
+                customerId={customerId}
+                addressId={address.id}
+              />
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

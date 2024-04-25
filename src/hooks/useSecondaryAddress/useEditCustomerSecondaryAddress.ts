@@ -1,24 +1,34 @@
 import useSWRMutation from "swr/mutation";
 import {
   CustomerSecondaryAddress,
-  addSecondaryAddress,
+  editCustomerSecondaryAddress,
 } from "../../services/customers";
-import { CustomerAddressFormValues } from "../../components/CustomerAddressForm/CustomerAddressForm";
 import { extractErrorCode } from "../../services/error";
+import { CustomerAddressFormValues } from "../../components/CustomerAddressForm/CustomerAddressForm";
 import { useSWRConfig } from "swr";
-import { keyFunctionGenerator } from "./useCustomerSecondaryAddresses";
 import { unstable_serialize } from "swr/infinite";
-export const useAddSecondaryAddress = (customerId: string) => {
+import { keyFunctionGenerator } from "./useCustomerSecondaryAddresses";
+
+export const useEditCustomerSecondaryAddress = (
+  customerId: string | undefined,
+  addressId: string | undefined
+) => {
   const { mutate } = useSWRConfig();
   const { trigger, isMutating, error } = useSWRMutation<
-    CustomerSecondaryAddress, // lo que devuelve el metodo del servicio
+    CustomerSecondaryAddress,
     Error,
-    readonly [string, string] | null,
+    readonly [string, string, string] | null,
     CustomerAddressFormValues
   >(
-    ["add-customer-secondary-address", customerId],
-    async (_operation, { arg: formValues }) => {
-      const address = await addSecondaryAddress(customerId, formValues);
+    addressId && customerId
+      ? ["customer-secondary-address", customerId, addressId]
+      : null,
+    async ([_operation, customerId, addressId], { arg: formValues }) => {
+      const address = editCustomerSecondaryAddress(
+        customerId,
+        addressId,
+        formValues
+      );
       await mutate<
         readonly [string, string, string | undefined],
         {
@@ -38,12 +48,12 @@ export const useAddSecondaryAddress = (customerId: string) => {
     },
     {
       revalidate: false,
-      populateCache: false,
+      populateCache: true,
     }
   );
 
   return {
-    addSecondaryAddress: trigger,
+    editCustomerSecondaryAddress: trigger,
     loading: isMutating,
     error: extractErrorCode(error),
   };

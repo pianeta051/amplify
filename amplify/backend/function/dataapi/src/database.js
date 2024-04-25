@@ -294,6 +294,17 @@ const deleteCustomerExternalLink = async (customerId, index) => {
   await ddb.updateItem(params).promise();
 };
 
+const deleteSecondaryAddressFromCustomer = async (customerId, addressId) => {
+  const params = {
+    TableName: TABLE_NAME,
+    Key: {
+      PK: { S: `customer_${customerId}` },
+      SK: { S: `address_secondary_${addressId}` },
+    },
+  };
+  await ddb.deleteItem(params).promise();
+};
+
 const getCustomers = async (
   exclusiveStartKey,
   limit,
@@ -663,6 +674,41 @@ const updateExternalLink = async (customerId, url, index) => {
   return url;
 };
 
+const updateSecondaryAddress = async (
+  customerId,
+  secondaryAddress,
+  addressId
+) => {
+  const customer = await getCustomer(customerId);
+  if (!customer) {
+    throw new Error("CUSTOMER_NOT_FOUND");
+  }
+
+  const params = {
+    TableName: TABLE_NAME,
+    ExpressionAttributeNames: {
+      "#S": "street",
+      "#C": "city",
+      "#P": "postcode",
+      "#N": "number",
+    },
+    ExpressionAttributeValues: {
+      ":street": { S: secondaryAddress.street },
+      ":city": { S: secondaryAddress.city },
+      ":postcode": { S: secondaryAddress.postcode },
+      ":number": { S: secondaryAddress.number },
+    },
+    UpdateExpression:
+      "SET #S = :street, #C = :city, #P = :postcode, #N = :number",
+    Key: {
+      PK: { S: `customer_${customerId}` },
+      SK: { S: `address_secondary_${addressId}` },
+    },
+  };
+  await ddb.updateItem(params).promise();
+  return secondaryAddress;
+};
+
 module.exports = {
   addExternalLinkToCustomer,
   addMainAddress,
@@ -674,6 +720,7 @@ module.exports = {
   deleteVoucher,
   deleteTaxData,
   deleteCustomerExternalLink,
+  deleteSecondaryAddressFromCustomer,
   getCustomer,
   getCustomers,
   getCustomerSecondaryAddresses,
@@ -685,4 +732,5 @@ module.exports = {
   updateExternalLink,
   getCustomerMainAddress,
   deleteCustomerMainAddress,
+  updateSecondaryAddress,
 };

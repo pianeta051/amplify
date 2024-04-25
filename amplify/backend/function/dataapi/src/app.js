@@ -22,6 +22,7 @@ const {
   deleteVoucher,
   deleteCustomerMainAddress,
   deleteCustomerExternalLink,
+  deleteSecondaryAddressFromCustomer,
   getCustomers,
   getCustomer,
   getCustomerSecondaryAddresses,
@@ -30,6 +31,7 @@ const {
   updateVoucher,
   updateMainAddress,
   updateExternalLink,
+  updateSecondaryAddress,
   getCustomerMainAddress,
 } = require("./database");
 
@@ -125,6 +127,26 @@ app.delete("/customers/:id/external-link/:index", async function (req, res) {
     }
   }
 });
+
+app.delete(
+  "/customers/:id/secondary-address/:addressId",
+  async function (req, res) {
+    try {
+      const customerId = req.params.id;
+      const addressId = req.params.addressId;
+      await deleteSecondaryAddressFromCustomer(customerId, addressId);
+      res.json({ message: `Secondary Address Deleted` });
+    } catch (error) {
+      if (error.message === "CUSTOMER_NOT_FOUND") {
+        res.status(404).json({
+          error: "Customer not registered!",
+        });
+      } else {
+        throw error;
+      }
+    }
+  }
+);
 
 // List all customers
 app.get("/customers", async function (req, res) {
@@ -366,6 +388,30 @@ app.put("/customers/:id/voucher-detail", async function (req, res) {
   }
 });
 
+app.put(
+  "/customers/:id/secondary-address/:addressId",
+  async function (req, res) {
+    try {
+      const secondaryAddress = req.body;
+      const customerId = req.params.id;
+      const addressId = req.params.addressId;
+      const updatedSecondaryAddress = await updateSecondaryAddress(
+        customerId,
+        secondaryAddress,
+        addressId
+      );
+      res.json({ secondaryAddress: updatedSecondaryAddress });
+    } catch (error) {
+      if (error.message === "CUSTOMER_NOT_FOUND") {
+        res.status(404).json({
+          error: "Customer not registered!",
+        });
+      } else {
+        throw error;
+      }
+    }
+  }
+);
 app.put("/customers/:id/main-address", async function (req, res) {
   try {
     const mainAddress = req.body;

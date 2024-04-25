@@ -1,24 +1,24 @@
+import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 import {
   CustomerSecondaryAddress,
-  addSecondaryAddress,
+  deleteSecondaryAddress,
 } from "../../services/customers";
-import { CustomerAddressFormValues } from "../../components/CustomerAddressForm/CustomerAddressForm";
-import { extractErrorCode } from "../../services/error";
-import { useSWRConfig } from "swr";
 import { keyFunctionGenerator } from "./useCustomerSecondaryAddresses";
 import { unstable_serialize } from "swr/infinite";
-export const useAddSecondaryAddress = (customerId: string) => {
+import { extractErrorCode } from "../../services/error";
+
+export const useDeleteCustomerSecondaryAddress = (customerId: string) => {
   const { mutate } = useSWRConfig();
   const { trigger, isMutating, error } = useSWRMutation<
-    CustomerSecondaryAddress, // lo que devuelve el metodo del servicio
+    void,
     Error,
     readonly [string, string] | null,
-    CustomerAddressFormValues
+    string
   >(
-    ["add-customer-secondary-address", customerId],
-    async (_operation, { arg: formValues }) => {
-      const address = await addSecondaryAddress(customerId, formValues);
+    ["delete-customer-secondary-address", customerId],
+    async (_operation, { arg: addressId }) => {
+      await deleteSecondaryAddress(customerId, addressId);
       await mutate<
         readonly [string, string, string | undefined],
         {
@@ -34,16 +34,14 @@ export const useAddSecondaryAddress = (customerId: string) => {
           populateCache: false,
         }
       );
-      return address;
     },
     {
       revalidate: false,
       populateCache: false,
     }
   );
-
   return {
-    addSecondaryAddress: trigger,
+    deleteSecondaryAddress: trigger,
     loading: isMutating,
     error: extractErrorCode(error),
   };
