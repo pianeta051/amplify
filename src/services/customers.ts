@@ -484,6 +484,34 @@ export const editCustomerExternalLink = async (
   }
 };
 
+export const getAddresses = async (
+  customerId: string,
+  nextToken?: string
+): Promise<{ items: CustomerSecondaryAddress[]; nextToken?: string }> => {
+  try {
+    const response = await get(`/customers/${customerId}/addresses`, {
+      nextToken,
+    });
+    if (
+      !response.addresses ||
+      !Array.isArray(response.addresses) ||
+      response.addresses.some(
+        (element: unknown) => !isCustomerAddress(element)
+      ) ||
+      (response.nextToken !== undefined &&
+        typeof response.nextToken !== "string")
+    ) {
+      throw new Error("INTERNAL_ERROR");
+    }
+    return {
+      items: response.addresses,
+      nextToken: response.nextToken,
+    };
+  } catch (error) {
+    throw new Error("INTERNAL_ERROR");
+  }
+};
+
 export const getCustomers = async (
   nextToken?: string,
   searchInput?: string,
@@ -531,6 +559,26 @@ export const getCustomer = async (id: string): Promise<Customer | null> => {
   }
 };
 
+export const getSecondaryAddress = async (
+  customerId: string,
+  addressId: string
+): Promise<CustomerSecondaryAddress> => {
+  try {
+    const response = await get(
+      `/customers/${customerId}/secondary-address/${addressId}`
+    );
+    if (
+      !response.secondaryAddress ||
+      !isCustomerAddress(response.secondaryAddress)
+    ) {
+      throw new Error("INTERNAL_ERROR");
+    }
+    return response.secondaryAddress;
+  } catch (error) {
+    throw new Error("INTERNAL_ERROR");
+  }
+};
+
 export const getMainAddress = async (
   customerId: string
 ): Promise<CustomerAddress | null> => {
@@ -543,40 +591,6 @@ export const getMainAddress = async (
       throw new Error("INTERNAL_ERROR");
     }
     return response.mainAddress;
-  } catch (error) {
-    if (isErrorResponse(error)) {
-      const status = error.response.status;
-      if (status === 404) {
-        throw new Error("CUSTOMER_NOT_FOUND");
-      }
-    }
-    throw new Error("INTERNAL_ERROR");
-  }
-};
-
-export const getSecondaryAddresses = async (
-  customerId: string,
-  nextToken?: string
-): Promise<{ items: CustomerSecondaryAddress[]; nextToken?: string }> => {
-  try {
-    const response = await get(`/customers/${customerId}/secondary-addresses`, {
-      nextToken,
-    });
-    if (
-      !response.secondaryAddresses ||
-      !Array.isArray(response.secondaryAddresses) ||
-      response.secondaryAddresses.some(
-        (element: unknown) => !isCustomerAddress(element)
-      ) ||
-      (response.nextToken !== undefined &&
-        typeof response.nextToken !== "string")
-    ) {
-      throw new Error("INTERNAL_ERROR");
-    }
-    return {
-      items: response.secondaryAddresses,
-      nextToken: response.nextToken,
-    };
   } catch (error) {
     if (isErrorResponse(error)) {
       const status = error.response.status;

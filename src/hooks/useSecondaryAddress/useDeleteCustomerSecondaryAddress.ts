@@ -4,9 +4,9 @@ import {
   CustomerSecondaryAddress,
   deleteSecondaryAddress,
 } from "../../services/customers";
-import { keyFunctionGenerator } from "./useCustomerSecondaryAddresses";
 import { unstable_serialize } from "swr/infinite";
 import { extractErrorCode } from "../../services/error";
+import { keyFunctionGenerator } from "../useAddress/useCustomerAddresses";
 
 export const useDeleteCustomerSecondaryAddress = (customerId: string) => {
   const { mutate } = useSWRConfig();

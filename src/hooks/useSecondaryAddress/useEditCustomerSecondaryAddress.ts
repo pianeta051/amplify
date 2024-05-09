@@ -7,7 +7,7 @@ import { extractErrorCode } from "../../services/error";
 import { CustomerAddressFormValues } from "../../components/CustomerAddressForm/CustomerAddressForm";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
-import { keyFunctionGenerator } from "./useCustomerSecondaryAddresses";
+import { keyFunctionGenerator } from "../useAddress/useCustomerAddresses";
 
 export const useEditCustomerSecondaryAddress = (
   customerId: string | undefined,

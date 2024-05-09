@@ -305,6 +305,26 @@ const deleteSecondaryAddressFromCustomer = async (customerId, addressId) => {
   await ddb.deleteItem(params).promise();
 };
 
+const getAddresses = async (customerId, exclusiveStartKey) => {
+  const items = [];
+  let pageSize = 5;
+  if (!exclusiveStartKey) {
+    const mainAddress = await getCustomerMainAddress(customerId);
+    if (mainAddress) {
+      items.push({ ...mainAddress, SK: { S: "address_secondary_main" } });
+      pageSize = 4;
+    }
+  }
+  const { items: secondaryAddresses, lastEvaluatedKey } =
+    await getCustomerSecondaryAddresses(
+      customerId,
+      exclusiveStartKey,
+      pageSize
+    );
+  items.push(...secondaryAddresses);
+  return { items, lastEvaluatedKey };
+};
+
 const getCustomers = async (
   exclusiveStartKey,
   limit,
@@ -443,8 +463,11 @@ const getCustomerMainAddress = async (customerId) => {
   return mainAddress.Item;
 };
 
-const getCustomerSecondaryAddresses = async (customerId, exclusiveStartKey) => {
-  const PAGE_SIZE = 5;
+const getCustomerSecondaryAddresses = async (
+  customerId,
+  exclusiveStartKey,
+  pageSize = 5
+) => {
   const params = {
     TableName: TABLE_NAME,
     ExpressionAttributeValues: {
@@ -456,7 +479,7 @@ const getCustomerSecondaryAddresses = async (customerId, exclusiveStartKey) => {
       "#SK": "SK",
     },
     KeyConditionExpression: "#PK = :pk AND begins_with(#SK, :sk)",
-    Limit: PAGE_SIZE,
+    Limit: pageSize,
     ExclusiveStartKey: exclusiveStartKey,
   };
   const result = await ddb.query(params).promise();
@@ -469,6 +492,19 @@ const getCustomerSecondaryAddresses = async (customerId, exclusiveStartKey) => {
     items: result.Items,
     lastEvaluatedKey: nextItem ? result.LastEvaluatedKey : null,
   };
+};
+
+const getCustomerSecondaryAddress = async (customerId, addressId) => {
+  const params = {
+    TableName: TABLE_NAME,
+    Key: {
+      PK: { S: `customer_${customerId}` },
+      SK: { S: `address_secondary_${addressId}` },
+    },
+  };
+  const result = await ddb.getItem(params).promise();
+  if (!result.Item) return null;
+  return result.Item;
 };
 
 const getNextValue = async (lastEvaluatedKey, filter) => {
@@ -721,8 +757,10 @@ module.exports = {
   deleteTaxData,
   deleteCustomerExternalLink,
   deleteSecondaryAddressFromCustomer,
+  getAddresses,
   getCustomer,
   getCustomers,
+  getCustomerSecondaryAddress,
   getCustomerSecondaryAddresses,
   queryCustomersByEmail,
   updateCustomer,

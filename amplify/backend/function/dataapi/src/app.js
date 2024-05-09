@@ -23,9 +23,10 @@ const {
   deleteCustomerMainAddress,
   deleteCustomerExternalLink,
   deleteSecondaryAddressFromCustomer,
+  getAddresses,
   getCustomers,
   getCustomer,
-  getCustomerSecondaryAddresses,
+  getCustomerSecondaryAddress,
   updateCustomer,
   updateTaxData,
   updateVoucher,
@@ -42,7 +43,6 @@ const {
 } = require("./mappers");
 
 const { generateToken, parseToken } = require("./token");
-const { stringify } = require("querystring");
 
 // declare a new express app
 const app = express();
@@ -182,6 +182,29 @@ app.get("/customers/:id", async function (req, res) {
   }
 });
 
+app.get("/customers/:id/addresses", async function (req, res) {
+  try {
+    const id = req.params.id;
+    const nextTokenParam = req.query?.nextToken;
+    const exclusiveStartKey = parseToken(nextTokenParam);
+    const { items: addresses, lastEvaluatedKey } = await getAddresses(
+      id,
+      exclusiveStartKey
+    );
+    const responseToken = generateToken(lastEvaluatedKey);
+    res.json({
+      addresses: addresses.map(mapSecondaryAddress),
+      nextToken: responseToken,
+    });
+  } catch (e) {
+    if (e.message === "Customer not found") {
+      res.status(404).json({ error: e.message });
+      return;
+    }
+    throw e;
+  }
+});
+
 // Get a single customer's main address
 app.get("/customers/:id/main-address", async function (req, res) {
   const id = req.params.id;
@@ -202,27 +225,26 @@ app.get("/customers/:id/main-address", async function (req, res) {
   }
 });
 
-// Get a single customer's secondary addresses
-app.get("/customers/:id/secondary-addresses", async function (req, res) {
-  const id = req.params.id;
-  const nextToken = req.query?.nextToken;
-  const exclusiveStartKey = parseToken(nextToken);
-  const { items, lastEvaluatedKey } = await getCustomerSecondaryAddresses(
-    id,
-    exclusiveStartKey
-  );
-  const secondaryAddresses = items.map(mapSecondaryAddress);
-  const responseToken = generateToken(lastEvaluatedKey);
-  try {
-    res.json({ secondaryAddresses, nextToken: responseToken });
-  } catch (e) {
-    if (e.message === "Customer not found") {
-      res.status(404).json({ error: e.message });
-      return;
+app.get(
+  "/customers/:id/secondary-address/:addressId",
+  async function (req, res) {
+    try {
+      const customerId = req.params.id;
+      const addressId = req.params.addressId;
+      const secondaryAddress = await getCustomerSecondaryAddress(
+        customerId,
+        addressId
+      );
+      res.json({ secondaryAddress: mapSecondaryAddress(secondaryAddress) });
+    } catch (e) {
+      if (e.message === "Customer not found") {
+        res.status(404).json({ error: e.message });
+        return;
+      }
+      throw e;
     }
-    throw e;
   }
-});
+);
 
 // Create a new customer
 app.post("/customers", async function (req, res) {

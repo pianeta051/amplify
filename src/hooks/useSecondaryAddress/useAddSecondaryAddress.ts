@@ -6,8 +6,8 @@ import {
 import { CustomerAddressFormValues } from "../../components/CustomerAddressForm/CustomerAddressForm";
 import { extractErrorCode } from "../../services/error";
 import { useSWRConfig } from "swr";
-import { keyFunctionGenerator } from "./useCustomerSecondaryAddresses";
 import { unstable_serialize } from "swr/infinite";
+import { keyFunctionGenerator } from "../useAddress/useCustomerAddresses";
 export const useAddSecondaryAddress = (customerId: string) => {
   const { mutate } = useSWRConfig();
   const { trigger, isMutating, error } = useSWRMutation<

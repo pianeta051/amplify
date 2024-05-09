@@ -13,31 +13,28 @@ import { CustomerTaxData } from "../../components/CustomerTaxData/CustomerTaxDat
 import { CustomerVoucher } from "../../components/CustomerVoucher/CustomerVoucher";
 import { CustomerInformation } from "../../components/CustomerInformation/CustomerInformation";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { CustomerMainAddress } from "../../components/CustomerMainAddress/CustomerMainAddress";
 import { useCustomer } from "../../hooks/useCustomer/useCustomer";
 import { CustomerExternalLinks } from "../../components/CustomerExternalLinks/CustomerExternalLinks";
-import { CustomerSecondaryAddresses } from "../../components/CustomerSecondaryAddresses/CustomerSecondaryAddresses";
+import { CustomerAddresses } from "../../components/CustomerAddresses/CustomerAddresses";
 
 type CustomerDetailsParams = {
-  id: string;
+  customerId: string;
 };
 
 const tabNames = [
   "information",
   "taxData",
   "voucher",
-  "mainAddress",
   "externalLinks",
-  "secondaryAddresses",
+  "addresses",
 ] as const;
 type TabName = typeof tabNames[number];
 const tabLabels: Record<TabName, string> = {
   information: "Information",
   taxData: "Tax data",
   voucher: "Voucher details",
-  mainAddress: "Main Address",
   externalLinks: "External links",
-  secondaryAddresses: "Secondary addresses",
+  addresses: "Addresses",
 };
 
 type CustomerSectionTabProps = {
@@ -56,14 +53,15 @@ const CustomerSectionTab: FC<CustomerSectionTabProps> = ({
   );
 };
 export const CustomerDetailsPage: FC = () => {
-  const { id } = useParams<CustomerDetailsParams>();
-  const { customer, error, loading } = useCustomer(id);
+  const { customerId } = useParams<CustomerDetailsParams>();
+  const { customer, error, loading } = useCustomer(customerId);
 
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const addTaxDataHandler = () => navigate(`/customers/${id}/tax-data/add`);
+  const addTaxDataHandler = () =>
+    navigate(`/customers/${customerId}/tax-data/add`);
   const addVoucherHandler = () =>
-    navigate(`/customers/${id}/voucher-detail/add`);
+    navigate(`/customers/${customerId}/voucher-detail/add`);
   const queryParams = searchParams.get("tab") || "";
   let initialValue: TabName = "information";
   if (tabNames.includes(queryParams as TabName)) {
@@ -89,7 +87,7 @@ export const CustomerDetailsPage: FC = () => {
   if (error) {
     return <ErrorAlert code={error} />;
   }
-  if (!id) {
+  if (!customerId) {
     return <ErrorAlert code="INTERNAL_ERROR" />;
   }
   if (!customer) {
@@ -105,11 +103,9 @@ export const CustomerDetailsPage: FC = () => {
               <Tab label={tabLabels[tabName]} value={tabName} key={tabName} />
             ))}
           </TabList>
-
           <CustomerSectionTab value="information">
             {customer && <CustomerInformation customer={customer} />}
           </CustomerSectionTab>
-
           <CustomerSectionTab value="taxData">
             {customer.taxData ? (
               <CustomerTaxData
@@ -126,7 +122,6 @@ export const CustomerDetailsPage: FC = () => {
               </Button>
             )}
           </CustomerSectionTab>
-
           <CustomerSectionTab value="voucher">
             {customer.voucher ? (
               <CustomerVoucher
@@ -143,19 +138,14 @@ export const CustomerDetailsPage: FC = () => {
               </Button>
             )}
           </CustomerSectionTab>
-
-          <CustomerSectionTab value="mainAddress">
-            <CustomerMainAddress customerId={customer.id} />
-          </CustomerSectionTab>
-
           <CustomerSectionTab value="externalLinks">
             <CustomerExternalLinks
               links={customer.externalLinks ?? []}
               customerId={customer.id}
             />
           </CustomerSectionTab>
-          <CustomerSectionTab value="secondaryAddresses">
-            <CustomerSecondaryAddresses customerId={customer.id} />
+          <CustomerSectionTab value="addresses">
+            <CustomerAddresses customerId={customer.id} />
           </CustomerSectionTab>
         </Stack>
       </TabContext>

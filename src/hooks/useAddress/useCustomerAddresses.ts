@@ -1,9 +1,9 @@
+import useSWRInfinite from "swr/infinite";
 import {
   CustomerSecondaryAddress,
-  getSecondaryAddresses,
+  getAddresses,
 } from "../../services/customers";
 import { extractErrorCode } from "../../services/error";
-import useSWRInfinite from "swr/infinite";
 
 type KeyFunction = (
   index: number,
@@ -15,9 +15,9 @@ type KeyFunction = (
 
 export const keyFunctionGenerator: (customerId: string) => KeyFunction =
   (customerId: string) => (_index, previousRequest) =>
-    ["customer-secondary-addresses", customerId, previousRequest?.nextToken];
+    ["customer-addresses", customerId, previousRequest?.nextToken];
 
-export const useCustomerSecondaryAddresses = (customerId: string) => {
+export const useCustomerAddresses = (customerId: string) => {
   const {
     data,
     error,
@@ -31,10 +31,10 @@ export const useCustomerSecondaryAddresses = (customerId: string) => {
   >(
     keyFunctionGenerator(customerId),
     async ([_operation, customerId, nextToken]) =>
-      getSecondaryAddresses(customerId, nextToken)
+      getAddresses(customerId, nextToken)
   );
 
-  const customerSecondaryAddresses: CustomerSecondaryAddress[] =
+  const addresses: CustomerSecondaryAddress[] =
     data?.reduce((acc, { items }) => {
       return [...acc, ...items];
     }, [] as CustomerSecondaryAddress[]) ?? [];
@@ -44,7 +44,7 @@ export const useCustomerSecondaryAddresses = (customerId: string) => {
   const loadMore = () => setSize((size) => size + 1);
 
   return {
-    customerSecondaryAddresses,
+    addresses,
     error: extractErrorCode(error),
     loading,
     moreToLoad,

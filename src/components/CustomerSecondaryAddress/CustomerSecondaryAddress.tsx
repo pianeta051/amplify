@@ -1,38 +1,43 @@
 import { Typography, CircularProgress } from "@mui/material";
 import { FC } from "react";
+import { useCustomerSecondaryAddress } from "../../hooks/useSecondaryAddress/useCustomerSecondaryAddress";
 import { CustomerAddress } from "../CustomerAddress/CustomerAddress";
-import { useMainAddress } from "../../hooks/useMainAddress/useMainAddress";
 import { ErrorAlert } from "../ErrorAlert/ErrorAlert";
 
-type CustomerMainAddressProps = {
+type CustomerSecondaryAddressProps = {
   customerId: string;
+  addressId: string;
 };
 
-export const CustomerMainAddress: FC<CustomerMainAddressProps> = ({
+export const CustomerSecondaryAddress: FC<CustomerSecondaryAddressProps> = ({
   customerId,
+  addressId,
 }) => {
-  const { mainAddress, error, loading } = useMainAddress(customerId);
+  const { secondaryAddress, loading, error } = useCustomerSecondaryAddress(
+    customerId,
+    addressId
+  );
   if (loading) {
     return (
       <>
         <Typography variant="h3" gutterBottom>
-          Main address
+          Secondary address
         </Typography>
         <CircularProgress />
       </>
     );
   }
 
-  if (error || !mainAddress) {
+  if (error || !secondaryAddress) {
     return <ErrorAlert code={error ?? "INTERNAL_ERROR"} />;
   }
 
   return (
     <>
       <Typography variant="h3" gutterBottom>
-        Main address
+        Secondary address
       </Typography>
-      <CustomerAddress address={mainAddress} />
+      <CustomerAddress address={secondaryAddress} />
     </>
   );
 };
