@@ -48,7 +48,7 @@ export const useEditCustomerSecondaryAddress = (
     },
     {
       revalidate: false,
-      populateCache: true,
+      populateCache: false,
     }
   );
 

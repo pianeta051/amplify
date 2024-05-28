@@ -26,6 +26,7 @@ const {
   getAddresses,
   getCustomers,
   getCustomer,
+  getCustomerAddresses,
   getCustomerSecondaryAddress,
   updateCustomer,
   updateTaxData,
@@ -37,6 +38,8 @@ const {
 } = require("./database");
 
 const {
+  mapAddressIDsFromQuery,
+  mapAddress,
   mapCustomer,
   mapCustomerAddress,
   mapSecondaryAddress,
@@ -148,6 +151,22 @@ app.delete(
   }
 );
 
+app.get("/addresses", async function (req, res) {
+  const nextTokenParam = req.query?.nextToken;
+  const searchInput = req.query?.search;
+  const excludedAddresses = mapAddressIDsFromQuery(req.query?.excludedIds);
+  const includedAddresses = mapAddressIDsFromQuery(req.query?.includedIds);
+  const exclusiveStartKey = parseToken(nextTokenParam);
+  const { items, lastEvaluatedKey } = await getAddresses(
+    exclusiveStartKey,
+    searchInput,
+    excludedAddresses,
+    includedAddresses
+  );
+  const nextToken = generateToken(lastEvaluatedKey);
+  res.json({ addresses: items.map(mapAddress), nextToken });
+});
+
 // List all customers
 app.get("/customers", async function (req, res) {
   const nextToken = req.query?.nextToken;
@@ -187,7 +206,7 @@ app.get("/customers/:id/addresses", async function (req, res) {
     const id = req.params.id;
     const nextTokenParam = req.query?.nextToken;
     const exclusiveStartKey = parseToken(nextTokenParam);
-    const { items: addresses, lastEvaluatedKey } = await getAddresses(
+    const { items: addresses, lastEvaluatedKey } = await getCustomerAddresses(
       id,
       exclusiveStartKey
     );

@@ -6,10 +6,35 @@
       "lambdaFunction": "dataapi",
       "permissions": {
         "setting": "private",
-        "auth": ["create", "read", "update", "delete"],
+        "auth": [
+          "create",
+          "read",
+          "update",
+          "delete"
+        ],
         "groups": {
-          "Admin": ["create", "read", "update", "delete"]
+          "Admin": [
+            "create",
+            "read",
+            "update",
+            "delete"
+          ]
         }
+      }
+    },
+    "/addresses": {
+      "name": "/addresses",
+      "lambdaFunction": "dataapi",
+      "permissions": {
+        "groups": {
+          "Admin": [
+            "create",
+            "read",
+            "update",
+            "delete"
+          ]
+        },
+        "setting": "private"
       }
     }
   }

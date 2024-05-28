@@ -1,44 +1,10 @@
-import { API } from "aws-amplify";
 import { CustomerFormValues } from "../components/CustomerForm/CustomerForm";
 import { TaxDataFormValues } from "../components/TaxDataForm/TaxDataForm";
 import { VoucherFormValues } from "../components/VoucherForm/VoucherForm";
 import { CustomerAddressFormValues } from "../components/CustomerAddressForm/CustomerAddressForm";
 import { CustomerExternalLinkFormValues } from "../components/CustomerExternalLinkForm/CustomerExternalLinkForm";
+import { del, get, post, put } from "./api";
 
-/**
- * GENERAL API FUNCTIONS
- */
-
-const del = async (path: string) => {
-  return API.del("dataapi", path, {});
-};
-
-const get = async (
-  path: string,
-  queryParams: { [param: string]: string | undefined } = {}
-) => {
-  return API.get("dataapi", path, {
-    queryStringParameters: queryParams,
-  });
-};
-
-const post = async (
-  path: string,
-  body: { [param: string]: string | number } = {}
-) => {
-  return API.post("dataapi", path, {
-    body,
-  });
-};
-
-const put = async (
-  path: string,
-  body: { [param: string]: string | number } = {}
-) => {
-  return API.put("dataapi", path, {
-    body,
-  });
-};
 /**
  * TYPES AND TYPE GUARDS
  */
@@ -76,6 +42,7 @@ export type CustomerAddress = {
   number: string;
   city: string;
   postcode: string;
+  customerId?: string;
 };
 
 export type CustomerSecondaryAddress = CustomerAddress & {
@@ -117,7 +84,7 @@ const isCustomer = (value: unknown): value is Customer => {
   );
 };
 
-const isCustomerAddress = (value: unknown): value is CustomerAddress => {
+export const isCustomerAddress = (value: unknown): value is CustomerAddress => {
   if (typeof value !== "object" || value === null) {
     return false;
   }
@@ -126,7 +93,9 @@ const isCustomerAddress = (value: unknown): value is CustomerAddress => {
     typeof customerAddress.street === "string" &&
     typeof customerAddress.number === "string" &&
     typeof customerAddress.city === "string" &&
-    typeof customerAddress.postcode === "string"
+    typeof customerAddress.postcode === "string" &&
+    (typeof customerAddress.customerId === "string" ||
+      customerAddress.customerId === undefined)
   );
 };
 

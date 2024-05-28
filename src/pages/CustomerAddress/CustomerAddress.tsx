@@ -4,6 +4,7 @@ import { CustomerMainAddress } from "../../components/CustomerMainAddress/Custom
 import { CustomerSecondaryAddress } from "../../components/CustomerSecondaryAddress/CustomerSecondaryAddress";
 import { Breadcrumbs, Typography } from "@mui/material";
 import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
+import { AddressJobs } from "../../components/AddressJobs/AddressJobs";
 
 type CustomerAddressParams = {
   customerId: string;
@@ -33,6 +34,7 @@ export const CustomerAddressPage: FC = () => {
         <Typography color="textPrimary">Address</Typography>
       </Breadcrumbs>
       {addressComponent}
+      <AddressJobs addressId={addressId} customerId={customerId} />
     </>
   );
 };

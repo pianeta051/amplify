@@ -1,3 +1,15 @@
+const mapAddressIDsFromQuery = (query) => {
+  const ids =
+    query
+      ?.split(",")
+      .filter((id) => id.length > 0)
+      .map((compositeId) => {
+        const [customerId, addressId] = compositeId.split("_");
+        return { customerId, addressId };
+      }) ?? [];
+  return ids;
+};
+
 const mapCustomer = (customerFromDb) => ({
   id: customerFromDb.PK.S.replace("customer_", ""),
   name: customerFromDb.name.S,
@@ -22,7 +34,15 @@ const mapCustomer = (customerFromDb) => ({
     : undefined,
 });
 
+const mapAddress = (address) => {
+  if (address.SK.S === "address_main") {
+    return { ...mapCustomerAddress(address), id: "main" };
+  }
+  return mapSecondaryAddress(address);
+};
+
 const mapCustomerAddress = (customerAddressFromDb) => ({
+  customerId: customerAddressFromDb.PK.S.replace("customer_", ""),
   city: customerAddressFromDb.city.S,
   postcode: customerAddressFromDb.postcode.S,
   number: customerAddressFromDb.number.S,
@@ -30,6 +50,7 @@ const mapCustomerAddress = (customerAddressFromDb) => ({
 });
 
 const mapSecondaryAddress = (secondaryAddress) => ({
+  customerId: secondaryAddress.PK.S.replace("customer_", ""),
   id: secondaryAddress.SK.S.replace("address_secondary_", ""),
   street: secondaryAddress.street.S,
   number: secondaryAddress.number.S,
@@ -38,6 +59,8 @@ const mapSecondaryAddress = (secondaryAddress) => ({
 });
 
 module.exports = {
+  mapAddressIDsFromQuery,
+  mapAddress,
   mapCustomer,
   mapCustomerAddress,
   mapSecondaryAddress,

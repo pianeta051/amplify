@@ -305,7 +305,119 @@ const deleteSecondaryAddressFromCustomer = async (customerId, addressId) => {
   await ddb.deleteItem(params).promise();
 };
 
-const getAddresses = async (customerId, exclusiveStartKey) => {
+const getAddresses = async (
+  exclusiveStartKey,
+  searchInput,
+  excludedAddresses,
+  includedAddresses
+) => {
+  const PAGE_SIZE = 5;
+  let params = {
+    TableName: TABLE_NAME,
+    Limit: PAGE_SIZE,
+    ExclusiveStartKey: exclusiveStartKey,
+  };
+
+  let searchParams = {
+    ExpressionAttributeNames: {
+      "#PK": "PK",
+      "#SK": "SK",
+    },
+    ExpressionAttributeValues: {
+      ":pk": { S: "customer_" },
+      ":sk": { S: "address_" },
+    },
+    FilterExpression: "begins_with(#PK, :pk) AND begins_with(#SK, :sk)",
+  };
+
+  if (searchInput) {
+    searchParams = {
+      ExpressionAttributeNames: {
+        ...searchParams.ExpressionAttributeNames,
+        "#S": "street",
+      },
+      ExpressionAttributeValues: {
+        ...searchParams.ExpressionAttributeValues,
+        ":street": { S: searchInput.toLowerCase() },
+      },
+      FilterExpression:
+        searchParams.FilterExpression + " AND contains(#S, :street)",
+    };
+  }
+
+  if (includedAddresses?.length) {
+    const filterExpressions = [];
+    for (let i = 0; i < includedAddresses.length; i++) {
+      const includedAddress = includedAddresses[i];
+      searchParams = {
+        ...searchParams,
+        ExpressionAttributeValues: {
+          ...searchParams.ExpressionAttributeValues,
+          [`:includedAddressId${i}`]: { S: includedAddress.addressId },
+          [`:includedCustomerId${i}`]: {
+            S: includedAddress.customerId,
+          },
+        },
+      };
+      filterExpressions.push(
+        `(contains(#SK, :includedAddressId${i}) AND contains(#PK, :includedCustomerId${i}))`
+      );
+    }
+    searchParams = {
+      ...searchParams,
+      FilterExpression: `${searchParams.FilterExpression} AND ${
+        filterExpressions.length > 1 ? "(" : ""
+      }${filterExpressions.join(" OR ")}${
+        filterExpressions.length > 1 ? ")" : ""
+      }`,
+    };
+  } else if (excludedAddresses?.length) {
+    for (let i = 0; i < excludedAddresses.length; i++) {
+      const excludedAddress = excludedAddresses[i];
+      searchParams = {
+        ...searchParams,
+        ExpressionAttributeValues: {
+          ...searchParams.ExpressionAttributeValues,
+          [`:excludedAddressId${i}`]: { S: excludedAddress.addressId },
+          [`:excludedCustomerId${i}`]: {
+            S: excludedAddress.customerId,
+          },
+        },
+        FilterExpression: `${searchParams.FilterExpression} AND (NOT contains(#SK, :excludedAddressId${i}) OR NOT contains(#PK, :excludedCustomerId${i}))`,
+      };
+    }
+  }
+
+  params = {
+    ...params,
+    ...searchParams,
+  };
+
+  let result = await ddb.scan(params).promise();
+  const items = result.Items;
+  while (result.LastEvaluatedKey && items.length < PAGE_SIZE) {
+    const exclusiveStartKey = result.LastEvaluatedKey;
+    params = {
+      ...params,
+      ExclusiveStartKey: exclusiveStartKey,
+      Limit: PAGE_SIZE - items.length,
+    };
+    result = await ddb.scan(params).promise();
+    items.push(...result.Items);
+  }
+
+  const nextItem = await getNextValue(result.LastEvaluatedKey, {
+    filterExpression: params.FilterExpression,
+    expressionAttributeNames: params.ExpressionAttributeNames,
+    expressionAttributeValues: params.ExpressionAttributeValues,
+  });
+  return {
+    items,
+    lastEvaluatedKey: nextItem ? result.LastEvaluatedKey : null,
+  };
+};
+
+const getCustomerAddresses = async (customerId, exclusiveStartKey) => {
   const items = [];
   let pageSize = 5;
   if (!exclusiveStartKey) {
@@ -759,6 +871,7 @@ module.exports = {
   deleteSecondaryAddressFromCustomer,
   getAddresses,
   getCustomer,
+  getCustomerAddresses,
   getCustomers,
   getCustomerSecondaryAddress,
   getCustomerSecondaryAddresses,
