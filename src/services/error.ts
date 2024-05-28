@@ -13,6 +13,7 @@ const ERROR_CODES = [
   "NO_CUSTOMERS",
   "TAX_ID_CANNOT_BE_EMPTY",
   "VOUCHER_ID_CANNOT_BE_EMPTY",
+  "JOB_NOT_EXISTS",
 ] as const;
 
 export type ErrorCode = typeof ERROR_CODES[number];

@@ -57,9 +57,11 @@ export const AddressJobs: FC<AddressJobsProps> = ({
       </Link>
       <List>
         {jobs.map((job) => (
-          <ListItemButton key={job.id}>
-            <ListItemText primary={job.name} />
-          </ListItemButton>
+          <Link to={`/jobs/${job.id}`} key={job.id}>
+            <ListItemButton>
+              <ListItemText primary={job.name} />
+            </ListItemButton>
+          </Link>
         ))}
       </List>
       {moreToLoad && (

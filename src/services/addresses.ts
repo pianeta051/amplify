@@ -24,3 +24,26 @@ export const searchAddresses = async (
     throw new Error("INTERNAL_ERROR");
   }
 };
+
+export const getJobAddresses = async (
+  jobId: string,
+  nextToken?: string
+): Promise<{ addresses: CustomerSecondaryAddress[]; nextToken?: string }> => {
+  try {
+    const response = await get(`/jobs/${jobId}/addresses`, { nextToken });
+    if (
+      !response.addresses ||
+      !Array.isArray(response.addresses) ||
+      response.addresses.some(
+        (element: unknown) => !isCustomerAddress(element)
+      ) ||
+      (response.nextToken !== undefined &&
+        typeof response.nextToken !== "string")
+    ) {
+      throw new Error("INTERNAL_ERROR");
+    }
+    return response;
+  } catch (error) {
+    throw new Error("INTERNAL_ERROR");
+  }
+};

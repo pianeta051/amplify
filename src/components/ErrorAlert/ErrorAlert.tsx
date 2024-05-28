@@ -117,6 +117,13 @@ export const ErrorAlert: FC<ErrorAlertProps> = ({ code }) => {
       </Alert>
     );
   }
+  if (code === "JOB_NOT_EXISTS") {
+    return (
+      <Alert severity="warning">
+        <Typography>This Job doesn&apos;t exist or has been deleted</Typography>
+      </Alert>
+    );
+  }
   return (
     <Alert severity="error">
       <Typography>Internal error</Typography>
