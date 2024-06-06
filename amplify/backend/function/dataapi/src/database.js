@@ -176,7 +176,7 @@ const createCustomer = async (customer) => {
     },
   };
 
-  const data = await ddb.putItem(params).promise();
+  await ddb.putItem(params).promise();
   return {
     ...customer,
     id,
@@ -201,6 +201,54 @@ const createCustomerSecondaryAddress = async (customerId, address) => {
   };
   await ddb.putItem(params).promise();
   return { ...address, id: addressId };
+};
+
+const createJob = async (job) => {
+  const id = uuid.v1();
+  const addresses = job.addresses;
+  const params = {
+    TableName: TABLE_NAME,
+    Item: {
+      PK: {
+        S: `job_${id}`,
+      },
+      SK: {
+        S: "description",
+      },
+      name: {
+        S: job.name,
+      },
+    },
+  };
+  await ddb.putItem(params).promise();
+
+  for (let index = 0; index < addresses.length; index++) {
+    const addressParams = {
+      TableName: TABLE_NAME,
+      Item: {
+        PK: {
+          S: `job_${id}`,
+        },
+        SK: {
+          S: `address_assignation_${index}`,
+        },
+        address_id: {
+          S: addresses[index].addressId,
+        },
+        customer_id: {
+          S: addresses[index].customerId,
+        },
+      },
+    };
+    await ddb.putItem(addressParams).promise();
+  }
+
+  // Bucle que vaya creando las filas para las addresses
+
+  return {
+    name: job.name,
+    id,
+  };
 };
 
 const deleteTaxData = async (customerId) => {
@@ -864,6 +912,7 @@ module.exports = {
   addVoucher,
   createCustomer,
   createCustomerSecondaryAddress,
+  createJob,
   deleteCustomer,
   deleteVoucher,
   deleteTaxData,

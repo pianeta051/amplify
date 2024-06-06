@@ -17,6 +17,7 @@ const {
   addVoucher,
   createCustomer,
   createCustomerSecondaryAddress,
+  createJob,
   deleteCustomer,
   deleteTaxData,
   deleteVoucher,
@@ -372,6 +373,13 @@ app.post("/customers/:id/secondary-address", async function (req, res) {
       throw error;
     }
   }
+});
+
+app.post("/jobs", async function (req, res) {
+  const job = req.body;
+  const customerId = req.params.customerId;
+  const createdJob = await createJob(job);
+  res.json({ job: { ...createdJob, customerId } });
 });
 
 // Update a customer
