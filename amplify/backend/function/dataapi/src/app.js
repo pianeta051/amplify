@@ -29,6 +29,7 @@ const {
   getCustomer,
   getCustomerAddresses,
   getCustomerSecondaryAddress,
+  getJobAddresses,
   updateCustomer,
   updateTaxData,
   updateVoucher,
@@ -265,6 +266,14 @@ app.get(
     }
   }
 );
+
+app.get("/jobs/:id/addresses", async function (req, res) {
+  const jobId = req.params.id;
+  const jobAddresses = await getJobAddresses(jobId);
+  res.json({
+    addresses: jobAddresses.map(mapAddress),
+  });
+});
 
 // Create a new customer
 app.post("/customers", async function (req, res) {

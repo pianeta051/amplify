@@ -667,6 +667,40 @@ const getCustomerSecondaryAddress = async (customerId, addressId) => {
   return result.Item;
 };
 
+const getJobAddresses = async (jobId) => {
+  const params = {
+    TableName: TABLE_NAME,
+    ExpressionAttributeNames: {
+      "#PK": "PK",
+      "#SK": "SK",
+    },
+    ExpressionAttributeValues: {
+      ":pk": { S: `job_${jobId}` },
+      ":sk": { S: "address_assignation" },
+    },
+    FilterExpression: "#PK = :pk AND begins_with(#SK, :sk)",
+  };
+
+  const result = await ddb.scan(params).promise();
+  const addresses = [];
+
+  for (const item of result.Items) {
+    const addressId = item.address_id.S;
+    const customerId = item.customer_id.S;
+    if (addressId === "main") {
+      const mainAddress = await getCustomerMainAddress(customerId);
+      addresses.push(mainAddress);
+    } else {
+      const secondaryAddress = await getCustomerSecondaryAddress(
+        customerId,
+        addressId
+      );
+      addresses.push(secondaryAddress);
+    }
+  }
+  return addresses;
+};
+
 const getNextValue = async (lastEvaluatedKey, filter) => {
   const params = {
     TableName: TABLE_NAME,
@@ -924,6 +958,7 @@ module.exports = {
   getCustomers,
   getCustomerSecondaryAddress,
   getCustomerSecondaryAddresses,
+  getJobAddresses,
   queryCustomersByEmail,
   updateCustomer,
   updateTaxData,
