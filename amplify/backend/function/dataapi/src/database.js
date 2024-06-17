@@ -310,14 +310,37 @@ const deleteCustomer = async (id) => {
 };
 
 const deleteCustomerMainAddress = async (id) => {
-  const params = {
+  const deleteAddressRowParams = {
     TableName: TABLE_NAME,
     Key: {
       PK: { S: `customer_${id}` },
       SK: { S: "address_main" },
     },
   };
-  await ddb.deleteItem(params).promise();
+  await ddb.deleteItem(deleteAddressRowParams).promise();
+  const searchParams = {
+    TableName: TABLE_NAME,
+    ExpressionAttributeNames: {
+      "#SK": "SK",
+      "#AI": "address_id",
+      "#CI": "customer_id",
+    },
+    ExpressionAttributeValues: {
+      ":sk": { S: `address_assignation` },
+      ":ai": { S: "main" },
+      ":ci": { S: customerId },
+    },
+    FilterExpression: "begins_with(#SK, :sk) and #AI = :ai and #CI = :ci",
+  };
+  const items = await getAllRows(searchParams);
+
+  for (const item of items) {
+    const params = {
+      TableName: TABLE_NAME,
+      Key: { PK: { S: item.PK.S }, SK: { S: item.SK.S } },
+    };
+    await ddb.deleteItem(params).promise();
+  }
 };
 
 const deleteCustomerExternalLink = async (customerId, index) => {
@@ -354,8 +377,7 @@ const deleteJob = async (jobId) => {
     },
     FilterExpression: "#PK =:pk",
   };
-  const result = await getAllRows(searchParams);
-  const items = result.Items;
+  const items = await getAllRows(searchParams);
 
   for (const item of items) {
     const params = {
@@ -367,14 +389,39 @@ const deleteJob = async (jobId) => {
 };
 
 const deleteSecondaryAddressFromCustomer = async (customerId, addressId) => {
-  const params = {
+  // Delete the address row
+  const deleteAddressRowParams = {
     TableName: TABLE_NAME,
     Key: {
       PK: { S: `customer_${customerId}` },
       SK: { S: `address_secondary_${addressId}` },
     },
   };
-  await ddb.deleteItem(params).promise();
+  await ddb.deleteItem(deleteAddressRowParams).promise();
+  // Delete the address assignations
+  const searchParams = {
+    TableName: TABLE_NAME,
+    ExpressionAttributeNames: {
+      "#SK": "SK",
+      "#AI": "address_id",
+      "#CI": "customer_id",
+    },
+    ExpressionAttributeValues: {
+      ":sk": { S: `address_assignation` },
+      ":ai": { S: addressId },
+      ":ci": { S: customerId },
+    },
+    FilterExpression: "begins_with(#SK, :sk) and #AI = :ai and #CI = :ci",
+  };
+  const items = await getAllRows(searchParams);
+
+  for (const item of items) {
+    const params = {
+      TableName: TABLE_NAME,
+      Key: { PK: { S: item.PK.S }, SK: { S: item.SK.S } },
+    };
+    await ddb.deleteItem(params).promise();
+  }
 };
 
 const getAddresses = async (
