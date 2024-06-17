@@ -51,16 +51,15 @@ export const editJob = async (
 };
 
 export const getJob = async (jobId: string): Promise<Job> => {
-  // try {
-  //   const response = await get(`/jobs/${jobId}`);
-  //   if (!isJob(response.job)) {
-  //     throw new Error("INTERNAL_ERROR");
-  //   }
-  //   return response.job;
-  // } catch (error) {
-  //   throw new Error("INTERNAL_ERROR");
-  // }
-  return { id: "1", name: "Job 1" };
+  try {
+    const response = await get(`/jobs/${jobId}`);
+    if (!isJob(response.job)) {
+      throw new Error("INTERNAL_ERROR");
+    }
+    return response.job;
+  } catch (error) {
+    throw new Error("INTERNAL_ERROR");
+  }
 };
 
 export const getJobs = async (

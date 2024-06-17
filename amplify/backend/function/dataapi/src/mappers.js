@@ -58,10 +58,16 @@ const mapSecondaryAddress = (secondaryAddress) => ({
   postcode: secondaryAddress.postcode.S,
 });
 
+const mapJob = (jobFromDb) => ({
+  id: jobFromDb.PK.S.replace("job_", ""),
+  name: jobFromDb.name.S,
+});
+
 module.exports = {
   mapAddressIDsFromQuery,
   mapAddress,
   mapCustomer,
   mapCustomerAddress,
   mapSecondaryAddress,
+  mapJob,
 };

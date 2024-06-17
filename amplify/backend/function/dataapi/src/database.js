@@ -4,6 +4,7 @@ const ddb = new AWS.DynamoDB();
 const uuid = require("node-uuid");
 
 const TABLE_NAME = "exercises-dev";
+const PAGE_SIZE = 5;
 
 const addExternalLinkToCustomer = async (customerId, url) => {
   const customer = await getCustomer(customerId);
@@ -342,6 +343,29 @@ const deleteCustomerExternalLink = async (customerId, index) => {
   await ddb.updateItem(params).promise();
 };
 
+const deleteJob = async (jobId) => {
+  const searchParams = {
+    TableName: TABLE_NAME,
+    ExpressionAttributeNames: {
+      "#PK": "PK",
+    },
+    ExpressionAttributeValues: {
+      ":pk": { S: `job_${jobId}` },
+    },
+    FilterExpression: "#PK =:pk",
+  };
+  const result = await getAllRows(searchParams);
+  const items = result.Items;
+
+  for (const item of items) {
+    const params = {
+      TableName: TABLE_NAME,
+      Key: { PK: { S: item.PK.S }, SK: { S: item.SK.S } },
+    };
+    await ddb.deleteItem(params).promise();
+  }
+};
+
 const deleteSecondaryAddressFromCustomer = async (customerId, addressId) => {
   const params = {
     TableName: TABLE_NAME,
@@ -359,7 +383,6 @@ const getAddresses = async (
   excludedAddresses,
   includedAddresses
 ) => {
-  const PAGE_SIZE = 5;
   let params = {
     TableName: TABLE_NAME,
     Limit: PAGE_SIZE,
@@ -463,6 +486,21 @@ const getAddresses = async (
     items,
     lastEvaluatedKey: nextItem ? result.LastEvaluatedKey : null,
   };
+};
+
+const getAllRows = async (params) => {
+  let result = await ddb.scan(params).promise();
+  const items = result.Items;
+  while (result.LastEvaluatedKey) {
+    const exclusiveStartKey = result.LastEvaluatedKey;
+    params = {
+      ...params,
+      ExclusiveStartKey: exclusiveStartKey,
+    };
+    result = await ddb.scan(params).promise();
+    items.push(...result.Items);
+  }
+  return items;
 };
 
 const getCustomerAddresses = async (customerId, exclusiveStartKey) => {
@@ -667,9 +705,23 @@ const getCustomerSecondaryAddress = async (customerId, addressId) => {
   return result.Item;
 };
 
-const getJobAddresses = async (jobId) => {
+const getJob = async (jobId) => {
   const params = {
     TableName: TABLE_NAME,
+    Key: {
+      PK: { S: `job_${jobId}` },
+      SK: { S: "description" },
+    },
+  };
+  const result = await ddb.getItem(params).promise();
+  return result.Item;
+};
+
+const getJobAddresses = async (jobId, exclusiveStartKey) => {
+  let params = {
+    TableName: TABLE_NAME,
+    Limit: PAGE_SIZE,
+    ExclusiveStartKey: exclusiveStartKey,
     ExpressionAttributeNames: {
       "#PK": "PK",
       "#SK": "SK",
@@ -681,10 +733,31 @@ const getJobAddresses = async (jobId) => {
     FilterExpression: "#PK = :pk AND begins_with(#SK, :sk)",
   };
 
-  const result = await ddb.scan(params).promise();
+  let result = await ddb.scan(params).promise();
+  const items = result.Items;
+  while (result.LastEvaluatedKey && items.length < PAGE_SIZE) {
+    const exclusiveStartKey = result.LastEvaluatedKey;
+    params = {
+      ...params,
+      ExclusiveStartKey: exclusiveStartKey,
+      Limit: PAGE_SIZE - items.length,
+    };
+    result = await ddb.scan(params).promise();
+    items.push(...result.Items);
+  }
+
+  const nextItem = await getNextValue(result.LastEvaluatedKey, {
+    filterExpression: params.FilterExpression,
+    expressionAttributeNames: params.ExpressionAttributeNames,
+    expressionAttributeValues: params.ExpressionAttributeValues,
+  });
+
+  const lastEvaluatedKey = nextItem ? result.LastEvaluatedKey : null;
+
+  // Antes de aqui
   const addresses = [];
 
-  for (const item of result.Items) {
+  for (const item of items) {
     const addressId = item.address_id.S;
     const customerId = item.customer_id.S;
     if (addressId === "main") {
@@ -698,7 +771,7 @@ const getJobAddresses = async (jobId) => {
       addresses.push(secondaryAddress);
     }
   }
-  return addresses;
+  return { addresses, lastEvaluatedKey };
 };
 
 const getNextValue = async (lastEvaluatedKey, filter) => {
@@ -951,6 +1024,7 @@ module.exports = {
   deleteVoucher,
   deleteTaxData,
   deleteCustomerExternalLink,
+  deleteJob,
   deleteSecondaryAddressFromCustomer,
   getAddresses,
   getCustomer,
@@ -958,6 +1032,7 @@ module.exports = {
   getCustomers,
   getCustomerSecondaryAddress,
   getCustomerSecondaryAddresses,
+  getJob,
   getJobAddresses,
   queryCustomersByEmail,
   updateCustomer,

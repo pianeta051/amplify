@@ -23,12 +23,14 @@ const {
   deleteVoucher,
   deleteCustomerMainAddress,
   deleteCustomerExternalLink,
+  deleteJob,
   deleteSecondaryAddressFromCustomer,
   getAddresses,
   getCustomers,
   getCustomer,
   getCustomerAddresses,
   getCustomerSecondaryAddress,
+  getJob,
   getJobAddresses,
   updateCustomer,
   updateTaxData,
@@ -45,6 +47,7 @@ const {
   mapCustomer,
   mapCustomerAddress,
   mapSecondaryAddress,
+  mapJob,
 } = require("./mappers");
 
 const { generateToken, parseToken } = require("./token");
@@ -153,6 +156,12 @@ app.delete(
   }
 );
 
+app.delete("/jobs/:id", async function (req, res) {
+  const id = req.params.id;
+  await deleteJob(id);
+  res.json({ message: "Job deleted" });
+});
+
 app.get("/addresses", async function (req, res) {
   const nextTokenParam = req.query?.nextToken;
   const searchInput = req.query?.search;
@@ -256,6 +265,10 @@ app.get(
         customerId,
         addressId
       );
+      if (!secondaryAddress) {
+        res.status(404).json({ error: "Address not found" });
+        return;
+      }
       res.json({ secondaryAddress: mapSecondaryAddress(secondaryAddress) });
     } catch (e) {
       if (e.message === "Customer not found") {
@@ -269,10 +282,24 @@ app.get(
 
 app.get("/jobs/:id/addresses", async function (req, res) {
   const jobId = req.params.id;
-  const jobAddresses = await getJobAddresses(jobId);
+  const nextTokenParam = req.query?.nextToken;
+  const exclusiveStartKey = parseToken(nextTokenParam);
+  const { addresses, lastEvaluatedKey } = await getJobAddresses(
+    jobId,
+    exclusiveStartKey
+  );
+  const nextToken = generateToken(lastEvaluatedKey);
   res.json({
-    addresses: jobAddresses.map(mapAddress),
+    addresses: addresses.map(mapAddress),
+    nextToken,
   });
+});
+// Get a single job
+
+app.get("/jobs/:id", async function (req, res) {
+  const jobId = req.params.id;
+  const job = await getJob(jobId);
+  res.json({ job: mapJob(job) });
 });
 
 // Create a new customer
