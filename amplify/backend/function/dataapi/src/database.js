@@ -864,7 +864,6 @@ const getJobAddresses = async (jobId, exclusiveStartKey) => {
 const getNextValue = async (lastEvaluatedKey, filter) => {
   const params = {
     TableName: TABLE_NAME,
-    Limit: 1,
     ExclusiveStartKey: lastEvaluatedKey,
     FilterExpression: filter.filterExpression,
     ExpressionAttributeNames: filter.expressionAttributeNames,

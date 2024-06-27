@@ -72,7 +72,7 @@ export const getJobs = async (
     if (!Array.isArray(response.jobs) || !response.jobs.every(isJob)) {
       throw new Error("INTERNAL_ERROR");
     }
-    return { jobs: response.jobs };
+    return { jobs: response.jobs, nextToken: response.nextToken };
   } catch (error) {
     throw new Error("INTERNAL_ERROR");
   }
