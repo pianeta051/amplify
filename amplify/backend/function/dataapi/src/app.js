@@ -285,8 +285,14 @@ app.get(
 
 app.get("/jobs", async function (req, res) {
   const nextToken = req.query?.nextToken;
+  const addressId = req.query?.addressId;
+  const customerId = req.query?.customerId;
   const exclusiveStartKey = parseToken(nextToken);
-  const { items, lastEvaluatedKey } = await getJobs(exclusiveStartKey);
+  const { items, lastEvaluatedKey } = await getJobs(
+    exclusiveStartKey,
+    addressId,
+    customerId
+  );
   const responseToken = generateToken(lastEvaluatedKey);
   JSON.stringify({ responseToken }, null, 2);
   res.json({ jobs: items.map(mapJob), nextToken: responseToken });

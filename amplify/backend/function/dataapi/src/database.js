@@ -423,6 +423,45 @@ const deleteSecondaryAddressFromCustomer = async (customerId, addressId) => {
   }
 };
 
+const getAddressJobIDs = async (exclusiveStartKey, addressId, customerId) => {
+  let params = {
+    FilterExpression: "#AI = :ai AND #CI = :ci",
+    ExpressionAttributeNames: {
+      "#AI": "address_id",
+      "#CI": "customer_id",
+    },
+    ExpressionAttributeValues: {
+      ":ai": { S: addressId },
+      ":ci": { S: customerId },
+    },
+    TableName: TABLE_NAME,
+    Limit: PAGE_SIZE,
+    ExclusiveStartKey: exclusiveStartKey,
+  };
+  let result = await ddb.scan(params).promise();
+  const items = result.Items;
+
+  while (result.LastEvaluatedKey && items.length < PAGE_SIZE) {
+    const exclusiveStartKey = result.LastEvaluatedKey;
+    params = {
+      ...params,
+      ExclusiveStartKey: exclusiveStartKey,
+      Limit: PAGE_SIZE - items.length,
+    };
+    result = await ddb.scan(params).promise();
+    items.push(...result.Items);
+  }
+  const nextItem = await getNextValue(result.LastEvaluatedKey, {
+    filterExpression: params.FilterExpression,
+    expressionAttributeNames: params.ExpressionAttributeNames,
+    expressionAttributeValues: params.ExpressionAttributeValues,
+  });
+  const lastEvaluatedKey = nextItem ? result.LastEvaluatedKey : null;
+
+  const jobIds = items.map((item) => item.PK.S.split("_")[1]);
+  return { jobIds, lastEvaluatedKey };
+};
+
 const getAddresses = async (
   exclusiveStartKey,
   searchInput,
@@ -763,7 +802,20 @@ const getJob = async (jobId) => {
   return result.Item;
 };
 
-const getJobs = async (exclusiveStartKey) => {
+const getJobs = async (exclusiveStartKey, addressId, customerId) => {
+  if (addressId && customerId) {
+    const { jobIds, lastEvaluatedKey } = await getAddressJobIDs(
+      exclusiveStartKey,
+      addressId,
+      customerId
+    );
+    const items = [];
+    for (const jobId of jobIds) {
+      const job = await getJob(jobId);
+      items.push(job);
+    }
+    return { items, lastEvaluatedKey };
+  }
   let params = {
     TableName: TABLE_NAME,
     Limit: PAGE_SIZE,
