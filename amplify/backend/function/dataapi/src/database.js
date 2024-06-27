@@ -223,6 +223,7 @@ const createJob = async (job) => {
   };
   await ddb.putItem(params).promise();
 
+  // Bucle que vaya creando las filas para las addresses
   for (let index = 0; index < addresses.length; index++) {
     const addressParams = {
       TableName: TABLE_NAME,
@@ -243,8 +244,6 @@ const createJob = async (job) => {
     };
     await ddb.putItem(addressParams).promise();
   }
-
-  // Bucle que vaya creando las filas para las addresses
 
   return {
     name: job.name,
@@ -1106,7 +1105,7 @@ const updateJob = async (id, updatedJob) => {
     throw new Error("JOB_NOT_FOUND");
   }
 
-  const params = {
+  const updateJobParams = {
     TableName: TABLE_NAME,
     ExpressionAttributeNames: {
       "#N": "name",
@@ -1122,7 +1121,54 @@ const updateJob = async (id, updatedJob) => {
       SK: { S: "description" },
     },
   };
-  await ddb.updateItem(params).promise();
+  await ddb.updateItem(updateJobParams).promise();
+
+  // Borrar todos los address_assignation que tiene ahora mismo (ya lo hacemos en delete job)
+  const searchAddressParams = {
+    TableName: TABLE_NAME,
+    ExpressionAttributeNames: {
+      "#PK": "PK",
+      "#SK": "SK",
+    },
+    ExpressionAttributeValues: {
+      ":pk": { S: `job_${id}` },
+      ":sk": { S: "address_assignation_" },
+    },
+    FilterExpression: "#PK =:pk  AND begins_with(#SK, :sk)",
+  };
+  const items = await getAllRows(searchAddressParams);
+
+  for (const item of items) {
+    const deleteAdressParams = {
+      TableName: TABLE_NAME,
+      Key: { PK: { S: item.PK.S }, SK: { S: item.SK.S } },
+    };
+    await ddb.deleteItem(deleteAdressParams).promise();
+  }
+  // Insertar todos los address_assignation que vienen en el body (ya lo hacemos en create job)
+  // Bucle que vaya creando las filas para las addresses
+
+  const addresses = updatedJob.addresses;
+  for (let index = 0; index < addresses.length; index++) {
+    const addressParams = {
+      TableName: TABLE_NAME,
+      Item: {
+        PK: {
+          S: `job_${id}`,
+        },
+        SK: {
+          S: `address_assignation_${index}`,
+        },
+        address_id: {
+          S: addresses[index].addressId,
+        },
+        customer_id: {
+          S: addresses[index].customerId,
+        },
+      },
+    };
+    await ddb.putItem(addressParams).promise();
+  }
   return {
     id,
     ...updatedJob,
