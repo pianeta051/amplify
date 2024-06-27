@@ -23,7 +23,11 @@ export const EditJobPage: FC = () => {
     error: errorLoadingAddresses,
     loading: loadingAddresses,
   } = useJobAddresses(jobId);
-  const { editJob, loading: editingJob, error: errorEditingJob } = useEditJob();
+  const {
+    editJob,
+    loading: editingJob,
+    error: errorEditingJob,
+  } = useEditJob(jobId as string);
   const navigate = useNavigate();
 
   if (!jobId) {
@@ -67,7 +71,8 @@ export const EditJobPage: FC = () => {
       .then(() => {
         navigate(`/jobs/${jobId}`);
       })
-      .catch(() => {
+      .catch((error) => {
+        return error;
         // The hook should handle the error and set the error state
       });
   };
@@ -75,7 +80,7 @@ export const EditJobPage: FC = () => {
   return (
     <>
       <Typography variant="h3" gutterBottom>
-        Create new job
+        Edit job
       </Typography>
       {errorEditingJob && <ErrorAlert code={errorEditingJob} />}
       <JobForm

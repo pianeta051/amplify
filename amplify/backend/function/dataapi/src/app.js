@@ -32,7 +32,10 @@ const {
   getCustomerSecondaryAddress,
   getJob,
   getJobAddresses,
+  getJobs,
   updateCustomer,
+  updateJob,
+
   updateTaxData,
   updateVoucher,
   updateMainAddress,
@@ -279,6 +282,15 @@ app.get(
     }
   }
 );
+
+app.get("/jobs", async function (req, res) {
+  const nextToken = req.query?.nextToken;
+  const exclusiveStartKey = parseToken(nextToken);
+  const { items, lastEvaluatedKey } = await getJobs(exclusiveStartKey);
+  const responseToken = generateToken(lastEvaluatedKey);
+  JSON.stringify({ responseToken }, null, 2);
+  res.json({ jobs: items.map(mapJob), nextToken: responseToken });
+});
 
 app.get("/jobs/:id/addresses", async function (req, res) {
   const jobId = req.params.id;
@@ -537,6 +549,23 @@ app.put("/customers/:id/external-link/:index", async function (req, res) {
 
 app.listen(3000, function () {
   console.log("App started");
+});
+
+// Update a Job
+app.put("/jobs/:id", async function (req, res) {
+  try {
+    const id = req.params.id;
+    const updatedJob = await updateJob(id, req.body);
+    res.json({ job: updatedJob });
+  } catch (error) {
+    if (error.message === "JOB_NOT_FOUND") {
+      res.status(404).json({
+        error: "Job not Found!",
+      });
+    } else {
+      throw error;
+    }
+  }
 });
 
 // Export the app object. When executing the application local this does nothing. However,

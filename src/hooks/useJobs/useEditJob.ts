@@ -7,7 +7,7 @@ import { unstable_serialize } from "swr/infinite";
 import { keyFunctionGenerator } from "./useJobs";
 import { extractErrorCode } from "../../services/error";
 
-export const useEditJob = (jobId?: string) => {
+export const useEditJob = (jobId: string) => {
   const { mutate } = useSWRConfig();
   const { trigger, isMutating, error } = useSWRMutation<
     Job,

@@ -24,6 +24,7 @@ export const AddressJobs: FC<AddressJobsProps> = ({
 }) => {
   const { jobs, loading, loadMore, loadingMore, error, moreToLoad } = useJobs({
     addressId,
+    customerId,
   });
 
   if (loading) {

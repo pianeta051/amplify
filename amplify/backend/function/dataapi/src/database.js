@@ -764,6 +764,47 @@ const getJob = async (jobId) => {
   return result.Item;
 };
 
+const getJobs = async (exclusiveStartKey) => {
+  let params = {
+    TableName: TABLE_NAME,
+    Limit: PAGE_SIZE,
+    ExpressionAttributeNames: {
+      "#PK": "PK",
+      "#SK": "SK",
+    },
+    ExpressionAttributeValues: {
+      ":pk": { S: "job_" },
+      ":sk": { S: "description" },
+    },
+    FilterExpression: "begins_with(#PK, :pk) and #SK = :sk",
+    ExclusiveStartKey: exclusiveStartKey,
+  };
+  let result = await ddb.scan(params).promise();
+
+  const items = result.Items;
+  while (result.LastEvaluatedKey && items.length < PAGE_SIZE) {
+    const exclusiveStartKey = result.LastEvaluatedKey;
+    params = {
+      ...params,
+      ExclusiveStartKey: exclusiveStartKey,
+      Limit: PAGE_SIZE - items.length,
+    };
+    result = await ddb.scan(params).promise();
+    items.push(...result.Items);
+  }
+
+  const nextItem = await getNextValue(result.LastEvaluatedKey, {
+    filterExpression: params.FilterExpression,
+    expressionAttributeNames: params.ExpressionAttributeNames,
+    expressionAttributeValues: params.ExpressionAttributeValues,
+  });
+
+  return {
+    items,
+    lastEvaluatedKey: nextItem ? result.LastEvaluatedKey : null,
+  };
+};
+
 const getJobAddresses = async (jobId, exclusiveStartKey) => {
   let params = {
     TableName: TABLE_NAME,
@@ -997,7 +1038,6 @@ const updateMainAddress = async (customerId, updatedMainAddress) => {
 
 const updateExternalLink = async (customerId, url, index) => {
   const customer = await getCustomer(customerId);
-  console.log(`customer: ${customer}, index: ${index}`);
   if (!customer) {
     throw new Error("CUSTOMER_NOT_FOUND");
   }
@@ -1059,6 +1099,35 @@ const updateSecondaryAddress = async (
   return secondaryAddress;
 };
 
+//Update Job
+const updateJob = async (id, updatedJob) => {
+  const job = await getJob(id);
+  if (!job) {
+    throw new Error("JOB_NOT_FOUND");
+  }
+
+  const params = {
+    TableName: TABLE_NAME,
+    ExpressionAttributeNames: {
+      "#N": "name",
+    },
+    ExpressionAttributeValues: {
+      ":name": {
+        S: updatedJob.name,
+      },
+    },
+    UpdateExpression: "SET #N = :name ",
+    Key: {
+      PK: { S: `job_${id}` },
+      SK: { S: "description" },
+    },
+  };
+  await ddb.updateItem(params).promise();
+  return {
+    id,
+    ...updatedJob,
+  };
+};
 module.exports = {
   addExternalLinkToCustomer,
   addMainAddress,
@@ -1071,23 +1140,25 @@ module.exports = {
   deleteVoucher,
   deleteTaxData,
   deleteCustomerExternalLink,
+  deleteCustomerMainAddress,
   deleteJob,
   deleteSecondaryAddressFromCustomer,
   getAddresses,
   getCustomer,
   getCustomerAddresses,
   getCustomers,
+  getCustomerMainAddress,
   getCustomerSecondaryAddress,
   getCustomerSecondaryAddresses,
   getJob,
   getJobAddresses,
+  getJobs,
   queryCustomersByEmail,
   updateCustomer,
+  updateJob,
   updateTaxData,
   updateVoucher,
   updateMainAddress,
   updateExternalLink,
-  getCustomerMainAddress,
-  deleteCustomerMainAddress,
   updateSecondaryAddress,
 };
