@@ -219,6 +219,12 @@ const createJob = async (job) => {
       name: {
         S: job.name,
       },
+      start: {
+        N: job.start.toString(),
+      },
+      end: {
+        N: job.end.toString(),
+      },
     },
   };
   await ddb.putItem(params).promise();
@@ -1160,13 +1166,21 @@ const updateJob = async (id, updatedJob) => {
     TableName: TABLE_NAME,
     ExpressionAttributeNames: {
       "#N": "name",
+      "#ST": "start",
+      "#ET": "end",
     },
     ExpressionAttributeValues: {
       ":name": {
         S: updatedJob.name,
       },
+      ":start": {
+        N: updatedJob.start.toString(),
+      },
+      ":end": {
+        N: updatedJob.end.toString(),
+      },
     },
-    UpdateExpression: "SET #N = :name ",
+    UpdateExpression: "SET #N = :name, #ST = :start, #ET = :end",
     Key: {
       PK: { S: `job_${id}` },
       SK: { S: "description" },

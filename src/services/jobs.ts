@@ -4,6 +4,9 @@ import { del, get, post, put } from "./api";
 export type Job = {
   id: string;
   name: string;
+  date: string;
+  startTime: string;
+  endTime: string;
 };
 
 const isJob = (value: unknown): value is Job => {
@@ -13,7 +16,13 @@ const isJob = (value: unknown): value is Job => {
     !job.id ||
     typeof job.id !== "string" ||
     !job.name ||
-    typeof job.name !== "string"
+    typeof job.name !== "string" ||
+    !job.date ||
+    typeof job.date !== "string" ||
+    !job.startTime ||
+    typeof job.startTime !== "string" ||
+    !job.endTime ||
+    typeof job.endTime !== "string"
   )
     return false;
   return true;
@@ -26,7 +35,7 @@ export type JobFilters = {
 
 export const createJob = async (formValues: JobFormValues): Promise<Job> => {
   try {
-    const response = await post("/jobs", formValues);
+    const response = await post("/jobs", transformFormValues(formValues));
     if (!isJob(response.job)) {
       throw new Error("INTERNAL_ERROR");
     }
@@ -41,7 +50,10 @@ export const editJob = async (
   formValues: JobFormValues
 ): Promise<Job> => {
   try {
-    const response = await put("/jobs/" + jobId, formValues);
+    const response = await put(
+      "/jobs/" + jobId,
+      transformFormValues(formValues)
+    );
     if (!isJob(response.job)) {
       throw new Error("INTERNAL_ERROR");
     }
@@ -84,4 +96,13 @@ export const deleteJob = async (jobId: string): Promise<void> => {
   } catch (error) {
     throw new Error("INTERNAL_ERROR");
   }
+};
+
+const transformFormValues = (formValues: JobFormValues) => {
+  return {
+    ...formValues,
+    date: formValues.date.format("YYYY-MM-DD"),
+    startTime: formValues.startTime.format("HH:mm"),
+    endTime: formValues.endTime.format("HH:mm"),
+  };
 };

@@ -51,6 +51,7 @@ const {
   mapCustomerAddress,
   mapSecondaryAddress,
   mapJob,
+  mapJobFromRequestBody,
 } = require("./mappers");
 
 const { generateToken, parseToken } = require("./token");
@@ -430,7 +431,7 @@ app.post("/customers/:id/secondary-address", async function (req, res) {
 });
 
 app.post("/jobs", async function (req, res) {
-  const job = req.body;
+  const job = mapJobFromRequestBody(req.body);
   const customerId = req.params.customerId;
   const createdJob = await createJob(job);
   res.json({ job: { ...createdJob, customerId } });
@@ -561,7 +562,8 @@ app.listen(3000, function () {
 app.put("/jobs/:id", async function (req, res) {
   try {
     const id = req.params.id;
-    const updatedJob = await updateJob(id, req.body);
+    const job = mapJobFromRequestBody(req.body);
+    const updatedJob = await updateJob(id, job);
     res.json({ job: updatedJob });
   } catch (error) {
     if (error.message === "JOB_NOT_FOUND") {

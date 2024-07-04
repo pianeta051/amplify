@@ -1,3 +1,5 @@
+const dayjs = require("dayjs");
+
 const mapAddressIDsFromQuery = (query) => {
   const ids =
     query
@@ -58,9 +60,22 @@ const mapSecondaryAddress = (secondaryAddress) => ({
   postcode: secondaryAddress.postcode.S,
 });
 
-const mapJob = (jobFromDb) => ({
-  id: jobFromDb.PK.S.replace("job_", ""),
-  name: jobFromDb.name.S,
+const mapJob = (jobFromDb) => {
+  const start = dayjs(+jobFromDb.start.N);
+  const end = dayjs(+jobFromDb.end.N);
+  return {
+    id: jobFromDb.PK.S.replace("job_", ""),
+    name: jobFromDb.name.S,
+    date: start.format("YYYY-MM-DD"),
+    startTime: start.format("HH:mm"),
+    endTime: end.format("HH:mm"),
+  };
+};
+
+const mapJobFromRequestBody = (job) => ({
+  ...job,
+  start: +new Date(`${job.date} ${job.startTime}`),
+  end: +new Date(`${job.date} ${job.endTime}`),
 });
 
 module.exports = {
@@ -70,4 +85,5 @@ module.exports = {
   mapCustomerAddress,
   mapSecondaryAddress,
   mapJob,
+  mapJobFromRequestBody,
 };

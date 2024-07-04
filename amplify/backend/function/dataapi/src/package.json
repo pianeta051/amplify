@@ -8,6 +8,7 @@
     "aws-sdk": "^2.1413.0",
     "aws-serverless-express": "^3.3.5",
     "body-parser": "^1.17.1",
+    "dayjs": "^1.11.11",
     "express": "^4.15.2",
     "node-uuid": "^1.4.8"
   },
