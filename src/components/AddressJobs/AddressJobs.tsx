@@ -22,10 +22,13 @@ export const AddressJobs: FC<AddressJobsProps> = ({
   addressId,
   customerId,
 }) => {
-  const { jobs, loading, loadMore, loadingMore, error, moreToLoad } = useJobs({
-    addressId,
-    customerId,
-  });
+  const { jobs, loading, loadMore, loadingMore, error, moreToLoad } = useJobs(
+    {
+      addressId,
+      customerId,
+    },
+    "desc"
+  );
 
   if (loading) {
     return (

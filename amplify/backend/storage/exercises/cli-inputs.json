@@ -16,6 +16,17 @@
         "fieldName": "email_lowercase",
         "fieldType": "string"
       }
+    },
+    {
+      "name": "job_start_time",
+      "partitionKey": {
+        "fieldName": "SK",
+        "fieldType": "string"
+      },
+      "sortKey": {
+        "fieldName": "start",
+        "fieldType": "number"
+      }
     }
   ],
   "triggerFunctions": []

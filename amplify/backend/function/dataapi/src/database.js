@@ -252,7 +252,7 @@ const createJob = async (job) => {
   }
 
   return {
-    name: job.name,
+    ...job,
     id,
   };
 };
@@ -429,8 +429,8 @@ const deleteSecondaryAddressFromCustomer = async (customerId, addressId) => {
   }
 };
 
-const getAddressJobIDs = async (exclusiveStartKey, addressId, customerId) => {
-  let params = {
+const getAddressJobIDs = async (addressId, customerId) => {
+  const params = {
     FilterExpression: "#AI = :ai AND #CI = :ci",
     ExpressionAttributeNames: {
       "#AI": "address_id",
@@ -442,30 +442,11 @@ const getAddressJobIDs = async (exclusiveStartKey, addressId, customerId) => {
     },
     TableName: TABLE_NAME,
     Limit: PAGE_SIZE,
-    ExclusiveStartKey: exclusiveStartKey,
   };
-  let result = await ddb.scan(params).promise();
-  const items = result.Items;
-
-  while (result.LastEvaluatedKey && items.length < PAGE_SIZE) {
-    const exclusiveStartKey = result.LastEvaluatedKey;
-    params = {
-      ...params,
-      ExclusiveStartKey: exclusiveStartKey,
-      Limit: PAGE_SIZE - items.length,
-    };
-    result = await ddb.scan(params).promise();
-    items.push(...result.Items);
-  }
-  const nextItem = await getNextValue(result.LastEvaluatedKey, {
-    filterExpression: params.FilterExpression,
-    expressionAttributeNames: params.ExpressionAttributeNames,
-    expressionAttributeValues: params.ExpressionAttributeValues,
-  });
-  const lastEvaluatedKey = nextItem ? result.LastEvaluatedKey : null;
+  const items = await getAllRows(params);
 
   const jobIds = items.map((item) => item.PK.S.split("_")[1]);
-  return { jobIds, lastEvaluatedKey };
+  return jobIds;
 };
 
 const getAddresses = async (
@@ -808,57 +789,65 @@ const getJob = async (jobId) => {
   return result.Item;
 };
 
-const getJobs = async (exclusiveStartKey, addressId, customerId) => {
-  if (addressId && customerId) {
-    const { jobIds, lastEvaluatedKey } = await getAddressJobIDs(
-      exclusiveStartKey,
-      addressId,
-      customerId
-    );
-    const items = [];
-    for (const jobId of jobIds) {
-      const job = await getJob(jobId);
-      items.push(job);
-    }
-    return { items, lastEvaluatedKey };
-  }
-  let params = {
+const getJobs = async (exclusiveStartKey, addressId, customerId, order) => {
+  // KeyConditionExpression - obligatoria - atributos de la clave: SK y start
+  // FilterExpression - opcional - atributos fuera de clave
+  const params = {
     TableName: TABLE_NAME,
-    Limit: PAGE_SIZE,
+    IndexName: "job_start_time",
+    ScanIndexForward: order !== "desc", // cuando order es undefined, esto se pone a true, por lo que el default seria true
     ExpressionAttributeNames: {
       "#PK": "PK",
       "#SK": "SK",
     },
     ExpressionAttributeValues: {
-      ":pk": { S: "job_" },
       ":sk": { S: "description" },
     },
-    FilterExpression: "begins_with(#PK, :pk) and #SK = :sk",
+    KeyConditionExpression: "#SK = :sk",
     ExclusiveStartKey: exclusiveStartKey,
   };
-  let result = await ddb.scan(params).promise();
 
-  const items = result.Items;
-  while (result.LastEvaluatedKey && items.length < PAGE_SIZE) {
-    const exclusiveStartKey = result.LastEvaluatedKey;
-    params = {
-      ...params,
-      ExclusiveStartKey: exclusiveStartKey,
-      Limit: PAGE_SIZE - items.length,
-    };
-    result = await ddb.scan(params).promise();
-    items.push(...result.Items);
+  if (addressId && customerId) {
+    const jobIds = await getAddressJobIDs(addressId, customerId);
+    if (jobIds.length === 0) {
+      return {
+        items: [],
+      };
+    }
+    for (let i = 0; i < jobIds.length; i++) {
+      const id = jobIds[i];
+      params.ExpressionAttributeValues[`:jobId${i}`] = { S: `job_${id}` };
+    }
+    params.FilterExpression = `#PK IN (${jobIds
+      .map((_id, index) => `:jobId${index}`)
+      .join(", ")})`;
+  } else {
+    params.ExpressionAttributeValues[":pk"] = { S: "job_" };
+    params.FilterExpression = "begins_with(#PK, :pk)";
   }
 
-  const nextItem = await getNextValue(result.LastEvaluatedKey, {
-    filterExpression: params.FilterExpression,
-    expressionAttributeNames: params.ExpressionAttributeNames,
-    expressionAttributeValues: params.ExpressionAttributeValues,
-  });
+  let result = await ddb.query(params).promise();
+  const items = result.Items;
+  // while (result.LastEvaluatedKey && items.length < PAGE_SIZE) {
+  //   const exclusiveStartKey = result.LastEvaluatedKey;
+  //   params = {
+  //     ...params,
+  //     ExclusiveStartKey: exclusiveStartKey,
+  //     Limit: PAGE_SIZE - items.length,
+  //   };
+  //   result = await ddb.scan(params).promise();
+  //   items.push(...result.Items);
+  // }
+
+  // const nextItem = await getNextValue(result.LastEvaluatedKey, {
+  //   filterExpression: params.FilterExpression,
+  //   expressionAttributeNames: params.ExpressionAttributeNames,
+  //   expressionAttributeValues: params.ExpressionAttributeValues,
+  // });
 
   return {
     items,
-    lastEvaluatedKey: nextItem ? result.LastEvaluatedKey : null,
+    // lastEvaluatedKey: nextItem ? result.LastEvaluatedKey : null,
   };
 };
 
