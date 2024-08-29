@@ -1,17 +1,9 @@
-import {
-  Button,
-  CircularProgress,
-  List,
-  ListItemButton,
-  ListItemText,
-  Typography,
-} from "@mui/material";
-import { FC } from "react";
-import { LoadingButton } from "@mui/lab";
-import { ErrorAlert } from "../ErrorAlert/ErrorAlert";
-import { useJobs } from "../../hooks/useJobs/useJobs";
+import { Box, Button, Tab, Tabs, Typography } from "@mui/material";
+import { FC, useState } from "react";
 import { Link } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
+import { UpcomingAddressJobs } from "../UpcomingAddressJobs/UpcomingAddressJobs";
+import { PastAddressJobs } from "../PastAddressJobs/PastAddressJobs";
 
 type AddressJobsProps = {
   addressId: string;
@@ -22,29 +14,12 @@ export const AddressJobs: FC<AddressJobsProps> = ({
   addressId,
   customerId,
 }) => {
-  const { jobs, loading, loadMore, loadingMore, error, moreToLoad } = useJobs({
-    addressId,
-    customerId,
-  });
+  const [selectedTab, setSelectedTab] = useState("upComing");
+  const changeTabHandler = (_event: React.SyntheticEvent, value: string) => {
+    setSelectedTab(value);
+  };
 
-  if (loading) {
-    return (
-      <>
-        <CircularProgress />
-      </>
-    );
-  }
-
-  if (error || !jobs) {
-    return (
-      <>
-        <Typography variant="h4" gutterBottom>
-          Jobs
-        </Typography>
-        <ErrorAlert code={error ?? "INTERNAL_ERROR"} />
-      </>
-    );
-  }
+  // -----
 
   return (
     <>
@@ -56,19 +31,16 @@ export const AddressJobs: FC<AddressJobsProps> = ({
           Add new
         </Button>
       </Link>
-      <List>
-        {jobs.map((job) => (
-          <Link to={`/jobs/${job.id}`} key={job.id}>
-            <ListItemButton>
-              <ListItemText primary={job.name} />
-            </ListItemButton>
-          </Link>
-        ))}
-      </List>
-      {moreToLoad && (
-        <LoadingButton loading={loadingMore} onClick={loadMore}>
-          Load more
-        </LoadingButton>
+      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+        <Tabs value={selectedTab} onChange={changeTabHandler}>
+          <Tab label="Upcoming" value="upComing" />
+          <Tab label="Past" value="past" />
+        </Tabs>
+      </Box>
+      {selectedTab === "upComing" ? (
+        <UpcomingAddressJobs addressId={addressId} customerId={customerId} />
+      ) : (
+        <PastAddressJobs addressId={addressId} customerId={customerId} />
       )}
     </>
   );
