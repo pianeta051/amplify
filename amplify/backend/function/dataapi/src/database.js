@@ -789,9 +789,8 @@ const getJob = async (jobId) => {
   return result.Item;
 };
 
-const getJobs = async (exclusiveStartKey, addressId, customerId, order) => {
-  // KeyConditionExpression - obligatoria - atributos de la clave: SK y start
-  // FilterExpression - opcional - atributos fuera de clave
+const getJobs = async (filters, order, exclusiveStartKey) => {
+  const { addressId, customerId, from, to } = filters;
   const params = {
     TableName: TABLE_NAME,
     IndexName: "job_start_time",
@@ -826,8 +825,32 @@ const getJobs = async (exclusiveStartKey, addressId, customerId, order) => {
     params.FilterExpression = "begins_with(#PK, :pk)";
   }
 
+  if (from && to) {
+    params.ExpressionAttributeNames["#S"] = "start";
+    params.ExpressionAttributeValues[":from"] = {
+      N: from.toString(),
+    };
+    params.ExpressionAttributeValues[":to"] = {
+      N: to.toString(),
+    };
+    params.KeyConditionExpression = `${params.KeyConditionExpression} AND #S BETWEEN :from AND :to`;
+  } else if (from) {
+    params.ExpressionAttributeNames["#S"] = "start";
+    params.ExpressionAttributeValues[":from"] = {
+      N: from.toString(),
+    };
+    params.KeyConditionExpression = `${params.KeyConditionExpression} AND #S >= :from`;
+  } else if (to) {
+    params.ExpressionAttributeNames["#S"] = "start";
+    params.ExpressionAttributeValues[":to"] = {
+      N: to.toString(),
+    };
+    params.KeyConditionExpression = `${params.KeyConditionExpression} AND #S <= :to`;
+  }
+
   let result = await ddb.query(params).promise();
   const items = result.Items;
+
   // while (result.LastEvaluatedKey && items.length < PAGE_SIZE) {
   //   const exclusiveStartKey = result.LastEvaluatedKey;
   //   params = {

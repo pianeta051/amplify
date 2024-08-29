@@ -31,6 +31,8 @@ const isJob = (value: unknown): value is Job => {
 export type JobFilters = {
   addressId?: string;
   customerId?: string;
+  from?: string;
+  to?: string;
 };
 
 export const createJob = async (formValues: JobFormValues): Promise<Job> => {

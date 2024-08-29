@@ -52,6 +52,7 @@ const {
   mapSecondaryAddress,
   mapJob,
   mapJobFromRequestBody,
+  mapJobTemporalFilters,
 } = require("./mappers");
 
 const { generateToken, parseToken } = require("./token");
@@ -288,13 +289,20 @@ app.get("/jobs", async function (req, res) {
   const nextToken = req.query?.nextToken;
   const addressId = req.query?.addressId;
   const customerId = req.query?.customerId;
+  const fromParameter = req.query?.from;
+  const toParameter = req.query?.to;
+  const { from, to } = mapJobTemporalFilters(fromParameter, toParameter);
   const order = req.query?.order;
   const exclusiveStartKey = parseToken(nextToken);
   const { items, lastEvaluatedKey } = await getJobs(
-    exclusiveStartKey,
-    addressId,
-    customerId,
-    order
+    {
+      addressId,
+      customerId,
+      from,
+      to,
+    },
+    order,
+    exclusiveStartKey
   );
   const responseToken = generateToken(lastEvaluatedKey);
   JSON.stringify({ responseToken }, null, 2);

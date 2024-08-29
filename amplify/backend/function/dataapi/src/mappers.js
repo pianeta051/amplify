@@ -72,6 +72,15 @@ const mapJob = (jobFromDb) => {
   };
 };
 
+const mapJobTemporalFilters = (from, to) => {
+  const fromNumeric = +new Date(from);
+  const toNumeric = +new Date(to);
+  return {
+    from: fromNumeric,
+    to: toNumeric,
+  };
+};
+
 const mapJobFromRequestBody = (job) => ({
   ...job,
   start: +new Date(`${job.date} ${job.startTime}`),
@@ -86,4 +95,5 @@ module.exports = {
   mapSecondaryAddress,
   mapJob,
   mapJobFromRequestBody,
+  mapJobTemporalFilters,
 };
