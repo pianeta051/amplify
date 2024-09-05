@@ -29,6 +29,7 @@ export const TopBar: FC = () => {
 
   const toUsers = () => navigate("/users");
   const toCustomers = () => navigate("/customers");
+  const toJobs = () => navigate("/jobs");
 
   const toProfile = () => {
     closeUserMenu();
@@ -63,6 +64,7 @@ export const TopBar: FC = () => {
           <Navigation>
             <NavigationItem onClick={toUsers}>Users</NavigationItem>
             <NavigationItem onClick={toCustomers}>Customers</NavigationItem>
+            <NavigationItem onClick={toJobs}>Jobs</NavigationItem>
           </Navigation>
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">

@@ -16,6 +16,7 @@ export const CreateJobPage: FC = () => {
   const [searchParams] = useSearchParams();
   const addressId = searchParams.get("addressId");
   const customerId = searchParams.get("customerId");
+  const date = searchParams.get("date");
 
   const submitHandler = (formValues: JobFormValues) => {
     createJob(formValues)
@@ -32,6 +33,8 @@ export const CreateJobPage: FC = () => {
     initialAddresses.push({ addressId, customerId });
   }
 
+  const defaultDate = date ? dayjs(date) : dayjs();
+
   return (
     <>
       <Typography variant="h3" gutterBottom>
@@ -44,7 +47,7 @@ export const CreateJobPage: FC = () => {
         initialValues={{
           name: "",
           addresses: initialAddresses,
-          date: dayjs(),
+          date: defaultDate,
           startTime: dayjs(),
           endTime: dayjs().add(1, "hour"),
         }}

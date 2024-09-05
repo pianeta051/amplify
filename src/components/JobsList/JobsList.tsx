@@ -1,4 +1,4 @@
-import { List, ListItemButton, ListItemText } from "@mui/material";
+import { Alert, List, ListItemButton, ListItemText } from "@mui/material";
 import { FC } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Job } from "../../services/jobs";
@@ -7,6 +7,9 @@ type JobsListProps = { jobs: Job[] };
 
 export const JobsList: FC<JobsListProps> = ({ jobs }) => {
   const navigate = useNavigate();
+  if (jobs.length === 0) {
+    return <Alert severity="warning">There are no jobs</Alert>;
+  }
   return (
     <List>
       {jobs.map((job) => (

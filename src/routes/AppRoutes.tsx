@@ -27,6 +27,7 @@ import { CustomerAddressPage } from "../pages/CustomerAddress/CustomerAddress";
 import { CreateJobPage } from "../pages/CreateJob/CreateJob";
 import { JobDetailsPage } from "../pages/JobDetails/JobDetails";
 import { EditJobPage } from "../pages/EditJobPage/EditJobPage";
+import { JobsPage } from "../pages/Jobs/Jobs";
 
 export const AppRoutes: FC = () => (
   <Routes>
@@ -99,6 +100,7 @@ export const AppRoutes: FC = () => (
         </AuthenticatedRoute>
       }
     >
+      <Route index element={<JobsPage />} />
       <Route path="create" element={<CreateJobPage />} />
       <Route path=":jobId">
         <Route index element={<JobDetailsPage />} />
