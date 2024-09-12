@@ -291,6 +291,7 @@ app.get("/jobs", async function (req, res) {
   const customerId = req.query?.customerId;
   const fromParameter = req.query?.from;
   const toParameter = req.query?.to;
+  const paginate = req.query?.paginate !== "false";
   const { from, to } = mapJobTemporalFilters(fromParameter, toParameter);
   const order = req.query?.order;
   const exclusiveStartKey = parseToken(nextToken);
@@ -302,7 +303,8 @@ app.get("/jobs", async function (req, res) {
       to,
     },
     order,
-    exclusiveStartKey
+    exclusiveStartKey,
+    paginate
   );
   const responseToken = generateToken(lastEvaluatedKey);
   JSON.stringify({ responseToken }, null, 2);

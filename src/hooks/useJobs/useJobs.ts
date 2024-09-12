@@ -5,27 +5,39 @@ import { extractErrorCode } from "../../services/error";
 type KeyFunction = (
   index: number,
   previousPageData: { jobs: Job[]; nextToken?: string } | null
-) => readonly [string, JobFilters, "desc" | "asc", string | undefined];
+) => readonly [
+  string,
+  JobFilters,
+  "desc" | "asc",
+  string | undefined,
+  boolean | undefined
+];
 
 export const keyFunctionGenerator: (
   filters: JobFilters,
-  order?: "desc" | "asc"
+  order?: "desc" | "asc",
+  paginate?: boolean
 ) => KeyFunction =
-  (filters: JobFilters, order: "desc" | "asc" = "asc") =>
+  (filters: JobFilters, order: "desc" | "asc" = "asc", paginate = true) =>
   (_index, previousRequest) =>
-    ["jobs", filters, order, previousRequest?.nextToken];
+    ["jobs", filters, order, previousRequest?.nextToken, paginate];
 
-export const useJobs = (filters: JobFilters, order: "desc" | "asc" = "asc") => {
+export const useJobs = (
+  filters: JobFilters,
+  order: "desc" | "asc" = "asc",
+  paginate = true
+) => {
   const {
     data,
     error,
     isLoading: loading,
     isValidating: loadingMore,
     setSize,
+    mutate,
   } = useSWRInfinite<{ jobs: Job[]; nextToken?: string }, Error, KeyFunction>(
-    keyFunctionGenerator(filters, order),
-    async ([_operation, filters, order, nextToken]) =>
-      getJobs(filters, order, nextToken)
+    keyFunctionGenerator(filters, order, paginate),
+    async ([_operation, filters, order, nextToken, paginate]) =>
+      getJobs(filters, order, { nextToken, paginate })
   );
 
   const loadMore = () => setSize((size) => size + 1);
@@ -44,5 +56,6 @@ export const useJobs = (filters: JobFilters, order: "desc" | "asc" = "asc") => {
     loading,
     loadMore,
     loadingMore,
+    reload: mutate,
   };
 };

@@ -789,7 +789,7 @@ const getJob = async (jobId) => {
   return result.Item;
 };
 
-const getJobs = async (filters, order, exclusiveStartKey) => {
+const getJobs = async (filters, order, exclusiveStartKey, paginate) => {
   const { addressId, customerId, from, to } = filters;
   const params = {
     TableName: TABLE_NAME,
@@ -803,8 +803,12 @@ const getJobs = async (filters, order, exclusiveStartKey) => {
       ":sk": { S: "description" },
     },
     KeyConditionExpression: "#SK = :sk",
-    ExclusiveStartKey: exclusiveStartKey,
   };
+
+  if (paginate) {
+    params.ExclusiveStartKey = exclusiveStartKey;
+    params.Limit = PAGE_SIZE;
+  }
 
   if (addressId && customerId) {
     const jobIds = await getAddressJobIDs(addressId, customerId);
@@ -850,27 +854,46 @@ const getJobs = async (filters, order, exclusiveStartKey) => {
 
   let result = await ddb.query(params).promise();
   const items = result.Items;
+  let lastEvaluatedKey;
 
-  // while (result.LastEvaluatedKey && items.length < PAGE_SIZE) {
-  //   const exclusiveStartKey = result.LastEvaluatedKey;
-  //   params = {
-  //     ...params,
-  //     ExclusiveStartKey: exclusiveStartKey,
-  //     Limit: PAGE_SIZE - items.length,
-  //   };
-  //   result = await ddb.scan(params).promise();
-  //   items.push(...result.Items);
-  // }
-
-  // const nextItem = await getNextValue(result.LastEvaluatedKey, {
-  //   filterExpression: params.FilterExpression,
-  //   expressionAttributeNames: params.ExpressionAttributeNames,
-  //   expressionAttributeValues: params.ExpressionAttributeValues,
-  // });
+  if (paginate) {
+    // Extract enough items to fill a page
+    while (result.LastEvaluatedKey && items.length < PAGE_SIZE) {
+      result = await ddb
+        .query({
+          ...params,
+          ExclusiveStartKey: result.LastEvaluatedKey,
+          Limit: PAGE_SIZE - items.length,
+        })
+        .promise();
+      items.push(...result.Items);
+    }
+    const nextItem = await ddb
+      .query({
+        ...params,
+        ExclusiveStartKey: result.LastEvaluatedKey,
+        Limit: 1,
+      })
+      .promise();
+    if (nextItem.Items.length > 0) {
+      lastEvaluatedKey = result.LastEvaluatedKey;
+    }
+  } else {
+    // Extract all items
+    while (result.LastEvaluatedKey && result.Items.length > 0) {
+      result = await ddb
+        .query({
+          ...params,
+          ExclusiveStartKey: result.LastEvaluatedKey,
+        })
+        .promise();
+      items.push(...result.Items);
+    }
+  }
 
   return {
     items,
-    // lastEvaluatedKey: nextItem ? result.LastEvaluatedKey : null,
+    lastEvaluatedKey,
   };
 };
 

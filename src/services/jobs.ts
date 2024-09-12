@@ -35,6 +35,11 @@ export type JobFilters = {
   to?: string;
 };
 
+type JobsPaginationArguments = {
+  nextToken?: string;
+  paginate?: boolean;
+};
+
 export const createJob = async (formValues: JobFormValues): Promise<Job> => {
   try {
     const response = await post("/jobs", transformFormValues(formValues));
@@ -80,10 +85,15 @@ export const getJob = async (jobId: string): Promise<Job> => {
 export const getJobs = async (
   filters: JobFilters,
   order: "asc" | "desc" = "asc",
-  nextToken?: string
+  { nextToken, paginate }: JobsPaginationArguments = { paginate: true }
 ): Promise<{ jobs: Job[]; nextToken?: string }> => {
   try {
-    const response = await get("/jobs", { ...filters, nextToken, order });
+    const response = await get("/jobs", {
+      ...filters,
+      nextToken,
+      order,
+      paginate: paginate === false ? "false" : "true",
+    });
     if (!Array.isArray(response.jobs) || !response.jobs.every(isJob)) {
       throw new Error("INTERNAL_ERROR");
     }
