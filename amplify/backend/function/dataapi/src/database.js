@@ -204,7 +204,7 @@ const createCustomerSecondaryAddress = async (customerId, address) => {
   return { ...address, id: addressId };
 };
 
-const createJob = async (job) => {
+const createJob = async (job, assignedTo) => {
   const id = uuid.v1();
   const addresses = job.addresses;
   const params = {
@@ -215,6 +215,9 @@ const createJob = async (job) => {
       },
       SK: {
         S: "description",
+      },
+      assignedTo: {
+        S: assignedTo,
       },
       name: {
         S: job.name,

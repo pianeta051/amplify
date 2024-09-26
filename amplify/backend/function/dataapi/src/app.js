@@ -64,6 +64,14 @@ app.use(awsServerlessExpressMiddleware.eventContext());
 
 // Enable CORS for all methods
 app.use(function (req, res, next) {
+  // Extract the last element separating by :
+  const authProvider =
+    req.apiGateway.event.requestContext.identity.cognitoAuthenticationProvider;
+  const providerParts = authProvider.split(":");
+  const userSub = providerParts[providerParts.length - 1];
+  req.authData = {
+    userSub,
+  };
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "*");
   next();
@@ -307,7 +315,6 @@ app.get("/jobs", async function (req, res) {
     paginate
   );
   const responseToken = generateToken(lastEvaluatedKey);
-  JSON.stringify({ responseToken }, null, 2);
   res.json({ jobs: items.map(mapJob), nextToken: responseToken });
 });
 
@@ -445,7 +452,8 @@ app.post("/customers/:id/secondary-address", async function (req, res) {
 app.post("/jobs", async function (req, res) {
   const job = mapJobFromRequestBody(req.body);
   const customerId = req.params.customerId;
-  const createdJob = await createJob(job);
+  const userSub = req.authData?.userSub;
+  const createdJob = await createJob(job, userSub);
   res.json({ job: { ...createdJob, customerId } });
 });
 

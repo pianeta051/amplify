@@ -1,14 +1,45 @@
 {
   "version": 1,
   "paths": {
+    "/jobs": {
+      "name": "/jobs",
+      "lambdaFunction": "dataapi",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "create",
+          "read",
+          "update",
+          "delete"
+        ],
+        "groups": {
+          "Admin": [
+            "create",
+            "read",
+            "update",
+            "delete"
+          ]
+        }
+      }
+    },
     "/customers": {
       "name": "/customers",
       "lambdaFunction": "dataapi",
       "permissions": {
         "setting": "private",
-        "auth": ["create", "read", "update", "delete"],
+        "auth": [
+          "create",
+          "read",
+          "update",
+          "delete"
+        ],
         "groups": {
-          "Admin": ["create", "read", "update", "delete"]
+          "Admin": [
+            "create",
+            "read",
+            "update",
+            "delete"
+          ]
         }
       }
     },
@@ -16,20 +47,21 @@
       "name": "/addresses",
       "lambdaFunction": "dataapi",
       "permissions": {
+        "setting": "private",
+        "auth": [
+          "create",
+          "read",
+          "update",
+          "delete"
+        ],
         "groups": {
-          "Admin": ["create", "read", "update", "delete"]
-        },
-        "setting": "private"
-      }
-    },
-    "/jobs": {
-      "name": "/jobs",
-      "lambdaFunction": "dataapi",
-      "permissions": {
-        "groups": {
-          "Admin": ["create", "read", "update", "delete"]
-        },
-        "setting": "private"
+          "Admin": [
+            "create",
+            "read",
+            "update",
+            "delete"
+          ]
+        }
       }
     }
   }
