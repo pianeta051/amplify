@@ -4,6 +4,7 @@ import { VoucherFormValues } from "../components/VoucherForm/VoucherForm";
 import { CustomerAddressFormValues } from "../components/CustomerAddressForm/CustomerAddressForm";
 import { CustomerExternalLinkFormValues } from "../components/CustomerExternalLinkForm/CustomerExternalLinkForm";
 import { del, get, post, put } from "./api";
+import { isErrorResponse } from "./error";
 
 /**
  * TYPES AND TYPE GUARDS
@@ -20,22 +21,6 @@ export type Customer = {
 };
 export const CUSTOMER_TYPES = ["individual", "company", "other"] as const;
 export type CustomerType = typeof CUSTOMER_TYPES[number];
-
-type ErrorResponse = {
-  response: { status: number };
-};
-
-const isErrorResponse = (value: unknown): value is ErrorResponse => {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "response" in value &&
-    typeof (value as ErrorResponse)["response"] === "object" &&
-    (value as ErrorResponse)["response"] !== null &&
-    "status" in (value as ErrorResponse)["response"] &&
-    typeof (value as ErrorResponse)["response"]["status"] === "number"
-  );
-};
 
 export type CustomerAddress = {
   street: string;

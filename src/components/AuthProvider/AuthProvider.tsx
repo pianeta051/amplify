@@ -7,6 +7,7 @@ import {
 } from "../../services/authentication";
 import { CircularProgress } from "@mui/material";
 import { useSWRConfig } from "swr";
+import { mutate } from "swr";
 
 type AuthProviderProps = {
   children?: ReactNode;
@@ -17,7 +18,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [authStatus, setAuthStatus] = useState<
     "checking" | "authenticated" | "unauthenticated"
   >("checking");
-  const { mutate } = useSWRConfig();
 
   const clearCache = () =>
     mutate(() => true, undefined, { revalidate: false, populateCache: true });

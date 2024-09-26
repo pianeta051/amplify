@@ -303,12 +303,14 @@ app.get("/jobs", async function (req, res) {
   const { from, to } = mapJobTemporalFilters(fromParameter, toParameter);
   const order = req.query?.order;
   const exclusiveStartKey = parseToken(nextToken);
+  const userSub = req.authData?.userSub;
   const { items, lastEvaluatedKey } = await getJobs(
     {
       addressId,
       customerId,
       from,
       to,
+      assignedTo: userSub,
     },
     order,
     exclusiveStartKey,
@@ -337,7 +339,12 @@ app.get("/jobs/:id/addresses", async function (req, res) {
 app.get("/jobs/:id", async function (req, res) {
   const jobId = req.params.id;
   const job = await getJob(jobId);
-  res.json({ job: mapJob(job) });
+  const userSub = req.authData?.userSub;
+  if (job.assigned_to.S !== userSub) {
+    res.status(403).json({ message: "You're not authorized to see this job" });
+  } else {
+    res.json({ job: mapJob(job) });
+  }
 });
 
 // Create a new customer

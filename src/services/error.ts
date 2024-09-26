@@ -28,3 +28,19 @@ export const extractErrorCode = (error: Error | undefined) => {
   }
   return errorCode;
 };
+
+export type ErrorResponse = {
+  response: { status: number };
+};
+
+export const isErrorResponse = (value: unknown): value is ErrorResponse => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "response" in value &&
+    typeof (value as ErrorResponse)["response"] === "object" &&
+    (value as ErrorResponse)["response"] !== null &&
+    "status" in (value as ErrorResponse)["response"] &&
+    typeof (value as ErrorResponse)["response"]["status"] === "number"
+  );
+};

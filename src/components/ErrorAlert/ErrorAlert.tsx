@@ -124,6 +124,7 @@ export const ErrorAlert: FC<ErrorAlertProps> = ({ code }) => {
       </Alert>
     );
   }
+
   return (
     <Alert severity="error">
       <Typography>Internal error</Typography>

@@ -216,7 +216,7 @@ const createJob = async (job, assignedTo) => {
       SK: {
         S: "description",
       },
-      assignedTo: {
+      assigned_to: {
         S: assignedTo,
       },
       name: {
@@ -793,7 +793,7 @@ const getJob = async (jobId) => {
 };
 
 const getJobs = async (filters, order, exclusiveStartKey, paginate) => {
-  const { addressId, customerId, from, to } = filters;
+  const { addressId, customerId, from, to, assignedTo } = filters;
   const params = {
     TableName: TABLE_NAME,
     IndexName: "job_start_time",
@@ -813,6 +813,15 @@ const getJobs = async (filters, order, exclusiveStartKey, paginate) => {
     params.Limit = PAGE_SIZE;
   }
 
+  const filterExpressions = [];
+
+  if (assignedTo) {
+    const filterExpression = "#AT = :assigned_to";
+    params.ExpressionAttributeNames["#AT"] = "assigned_to";
+    params.ExpressionAttributeValues[":assigned_to"] = { S: assignedTo };
+    filterExpressions.push(filterExpression);
+  }
+
   if (addressId && customerId) {
     const jobIds = await getAddressJobIDs(addressId, customerId);
     if (jobIds.length === 0) {
@@ -824,12 +833,14 @@ const getJobs = async (filters, order, exclusiveStartKey, paginate) => {
       const id = jobIds[i];
       params.ExpressionAttributeValues[`:jobId${i}`] = { S: `job_${id}` };
     }
-    params.FilterExpression = `#PK IN (${jobIds
+    const filterExpression = `#PK IN (${jobIds
       .map((_id, index) => `:jobId${index}`)
       .join(", ")})`;
+    filterExpressions.push(filterExpression);
   } else {
     params.ExpressionAttributeValues[":pk"] = { S: "job_" };
-    params.FilterExpression = "begins_with(#PK, :pk)";
+    const filterExpression = "begins_with(#PK, :pk)";
+    filterExpressions.push(filterExpression);
   }
 
   if (from && to) {
@@ -853,6 +864,12 @@ const getJobs = async (filters, order, exclusiveStartKey, paginate) => {
       N: to.toString(),
     };
     params.KeyConditionExpression = `${params.KeyConditionExpression} AND #S <= :to`;
+  }
+
+  if (filterExpressions.length) {
+    params.FilterExpression = filterExpressions
+      .map((e) => `(${e})`)
+      .join(" AND ");
   }
 
   let result = await ddb.query(params).promise();

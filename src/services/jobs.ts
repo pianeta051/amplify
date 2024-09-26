@@ -1,5 +1,6 @@
 import { JobFormValues } from "../components/JobForm/JobForm";
 import { del, get, post, put } from "./api";
+import { isErrorResponse } from "./error";
 
 export type Job = {
   id: string;
@@ -78,6 +79,12 @@ export const getJob = async (jobId: string): Promise<Job> => {
     }
     return response.job;
   } catch (error) {
+    if (isErrorResponse(error)) {
+      const status = error.response.status;
+      if (status === 403) {
+        throw new Error("UNAUTHORIZED");
+      }
+    }
     throw new Error("INTERNAL_ERROR");
   }
 };
