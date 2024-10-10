@@ -4,7 +4,7 @@ import { DailyJobs } from "../../components/DailyJobs/DailyJobs";
 import { WeeklyJobs } from "../../components/WeeklyJobs/WeeklyJobs";
 
 export const JobsPage: FC = () => {
-  const [view, setView] = useState<"daily" | "weekly">("weekly");
+  const [view, setView] = useState<"daily" | "weekly">("daily");
 
   const changeViewHandler = (
     _event: React.MouseEvent<HTMLElement>,

@@ -2,12 +2,33 @@ import { JobFormValues } from "../components/JobForm/JobForm";
 import { del, get, post, put } from "./api";
 import { isErrorResponse } from "./error";
 
+export type JobAssignation = {
+  sub: string;
+  name?: string;
+  email: string;
+};
+
 export type Job = {
   id: string;
   name: string;
   date: string;
   startTime: string;
   endTime: string;
+  assignedTo?: JobAssignation;
+};
+
+const isJobAssignation = (value: unknown): value is JobAssignation => {
+  if (!value || typeof value !== "object") return false;
+  const jobAssignation = value as JobAssignation;
+  if (
+    !jobAssignation.sub ||
+    typeof jobAssignation.sub !== "string" ||
+    (jobAssignation.name && typeof jobAssignation.name !== "string") ||
+    !jobAssignation.email ||
+    typeof jobAssignation.email !== "string"
+  )
+    return false;
+  return true;
 };
 
 const isJob = (value: unknown): value is Job => {
@@ -23,7 +44,8 @@ const isJob = (value: unknown): value is Job => {
     !job.startTime ||
     typeof job.startTime !== "string" ||
     !job.endTime ||
-    typeof job.endTime !== "string"
+    typeof job.endTime !== "string" ||
+    (job.assignedTo && !isJobAssignation(job.assignedTo))
   )
     return false;
   return true;

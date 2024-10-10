@@ -57,21 +57,16 @@ const {
 
 const { generateToken, parseToken } = require("./token");
 
+const { getAuthData, getUserInfo } = require("./authentication");
+
 // declare a new express app
 const app = express();
 app.use(bodyParser.json());
 app.use(awsServerlessExpressMiddleware.eventContext());
 
 // Enable CORS for all methods
-app.use(function (req, res, next) {
-  // Extract the last element separating by :
-  const authProvider =
-    req.apiGateway.event.requestContext.identity.cognitoAuthenticationProvider;
-  const providerParts = authProvider.split(":");
-  const userSub = providerParts[providerParts.length - 1];
-  req.authData = {
-    userSub,
-  };
+app.use(async function (req, res, next) {
+  req.authData = await getAuthData(req);
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "*");
   next();
@@ -304,13 +299,15 @@ app.get("/jobs", async function (req, res) {
   const order = req.query?.order;
   const exclusiveStartKey = parseToken(nextToken);
   const userSub = req.authData?.userSub;
+  const groups = req.authData?.groups;
+  const isAdmin = groups.includes("Admin");
   const { items, lastEvaluatedKey } = await getJobs(
     {
       addressId,
       customerId,
       from,
       to,
-      assignedTo: userSub,
+      assignedTo: isAdmin ? undefined : userSub,
     },
     order,
     exclusiveStartKey,
@@ -340,10 +337,17 @@ app.get("/jobs/:id", async function (req, res) {
   const jobId = req.params.id;
   const job = await getJob(jobId);
   const userSub = req.authData?.userSub;
-  if (job.assigned_to.S !== userSub) {
+  const groups = req.authData?.groups;
+  const isAdmin = groups.includes("Admin");
+  const jobResponse = mapJob(job);
+  if (job.assigned_to.S !== userSub && !isAdmin) {
     res.status(403).json({ message: "You're not authorized to see this job" });
   } else {
-    res.json({ job: mapJob(job) });
+    if (isAdmin) {
+      const userInfo = await getUserInfo(job.assigned_to.S);
+      jobResponse.assignedTo = userInfo;
+    }
+    res.json({ job: jobResponse });
   }
 });
 
@@ -590,8 +594,15 @@ app.put("/jobs/:id", async function (req, res) {
   try {
     const id = req.params.id;
     const job = mapJobFromRequestBody(req.body);
+    const userSub = req.authData?.userSub;
     const updatedJob = await updateJob(id, job);
-    res.json({ job: updatedJob });
+    if (job.assigned_to.S !== userSub) {
+      res
+        .status(403)
+        .json({ message: "You're not authorized to see this job" });
+    } else {
+      res.json({ job: updatedJob });
+    }
   } catch (error) {
     if (error.message === "JOB_NOT_FOUND") {
       res.status(404).json({

@@ -17,6 +17,7 @@ import { ErrorCode } from "../../services/error";
 import { DeleteJobButton } from "../../components/DeleteJobButton/DeleteJobButton";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import PersonIcon from "@mui/icons-material/Person";
 
 type JobDetailsParams = {
   jobId: string;
@@ -94,6 +95,19 @@ export const JobDetailsPage: FC = () => {
           </ListItemIcon>
           <ListItemText primary="End time" secondary={job.endTime} />
         </ListItem>
+        {job.assignedTo && (
+          <ListItem disablePadding>
+            <ListItemIcon>
+              <PersonIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="Assigned to"
+              secondary={[job.assignedTo.name, job.assignedTo.email]
+                .filter(Boolean)
+                .join(" - ")}
+            />
+          </ListItem>
+        )}
       </List>
       <JobAddresses jobId={jobId} />
     </>

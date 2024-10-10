@@ -13,7 +13,7 @@ import { ErrorCode, isErrorCode } from "../../services/error";
 export const SetPasswordPage: FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ErrorCode | null>(null);
-  const { user, logIn } = useAuth();
+  const { user, logIn, isInGroup } = useAuth();
 
   const navigate = useNavigate();
 
@@ -31,7 +31,11 @@ export const SetPasswordPage: FC = () => {
         }
 
         setLoading(false);
-        navigate("/users");
+        if (isInGroup("Admin")) {
+          navigate("/users");
+        } else {
+          navigate("/customers");
+        }
       })
       .catch((error) => {
         setLoading(false);
