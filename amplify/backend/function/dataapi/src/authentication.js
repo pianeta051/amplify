@@ -1,4 +1,5 @@
 const { CognitoIdentityServiceProvider } = require("aws-sdk");
+const { mapJob } = require("./mappers");
 
 const cognitoIdentityServiceProvider = new CognitoIdentityServiceProvider();
 const userPoolId = "eu-west-2_Pyr00gWzU";
@@ -46,7 +47,33 @@ const getUserInfo = async (userSub) => {
   }, {});
 };
 
+const getJobUsers = async (items) => {
+  const userIds = [];
+  items.forEach((item) => {
+    const userId = item.assigned_to.S;
+    if (!userIds.includes(userId)) {
+      userIds.push(userId);
+    }
+  });
+  const users = [];
+  for (const item of userIds) {
+    users.push(await getUserInfo(item));
+  }
+  let jobs = items.map(mapJob);
+  jobs = jobs.map((job, i) => {
+    const assignedTo = users.find(
+      (user) => user.sub === items[i].assigned_to.S
+    );
+    return {
+      ...job,
+      assignedTo,
+    };
+  });
+  return jobs;
+};
+
 module.exports = {
   getAuthData,
   getUserInfo,
+  getJobUsers,
 };

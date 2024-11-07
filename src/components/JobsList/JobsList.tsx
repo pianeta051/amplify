@@ -10,6 +10,24 @@ export const JobsList: FC<JobsListProps> = ({ jobs }) => {
   if (jobs.length === 0) {
     return <Alert severity="warning">There are no jobs</Alert>;
   }
+
+  const jobText = (job: Job): string | React.ReactNode => {
+    const dateAndTime = `${job.date} ${job.startTime} - ${job.endTime}`;
+    if (job.assignedTo) {
+      const assignedTo = [job.assignedTo.name, job.assignedTo.email]
+        .filter(Boolean)
+        .join(" - ");
+      return (
+        <>
+          {assignedTo}
+          <br />
+          {dateAndTime}
+        </>
+      );
+    }
+    return dateAndTime;
+  };
+
   return (
     <List>
       {jobs.map((job) => (
@@ -17,10 +35,7 @@ export const JobsList: FC<JobsListProps> = ({ jobs }) => {
           onClick={() => navigate(`/jobs/${job.id}`)}
           key={job.id}
         >
-          <ListItemText
-            primary={job.name}
-            secondary={`${job.date} ${job.startTime} - ${job.endTime}`}
-          />
+          <ListItemText primary={job.name} secondary={jobText(job)} />
         </ListItemButton>
       ))}
     </List>

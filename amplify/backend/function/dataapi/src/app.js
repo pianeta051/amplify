@@ -57,7 +57,7 @@ const {
 
 const { generateToken, parseToken } = require("./token");
 
-const { getAuthData, getUserInfo } = require("./authentication");
+const { getAuthData, getUserInfo, getJobUsers } = require("./authentication");
 
 // declare a new express app
 const app = express();
@@ -314,7 +314,11 @@ app.get("/jobs", async function (req, res) {
     paginate
   );
   const responseToken = generateToken(lastEvaluatedKey);
-  res.json({ jobs: items.map(mapJob), nextToken: responseToken });
+  let jobs = items.map(mapJob);
+  if (isAdmin) {
+    jobs = await getJobUsers(items);
+  }
+  res.json({ jobs, nextToken: responseToken });
 });
 
 app.get("/jobs/:id/addresses", async function (req, res) {

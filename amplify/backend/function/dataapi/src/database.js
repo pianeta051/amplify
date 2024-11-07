@@ -810,7 +810,7 @@ const getJobs = async (filters, order, exclusiveStartKey, paginate) => {
 
   if (paginate) {
     params.ExclusiveStartKey = exclusiveStartKey;
-    params.Limit = PAGE_SIZE;
+    params.Limit = 15;
   }
 
   const filterExpressions = [];
