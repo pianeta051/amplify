@@ -30,7 +30,7 @@ const getAuthData = async (req) => {
   };
 };
 
-const USER_ATTRIBUTES = ["sub", "name", "email"];
+const USER_ATTRIBUTES = ["sub", "name", "email", "custom:color"];
 const getUserInfo = async (userSub) => {
   const params = {
     UserPoolId: userPoolId,
@@ -41,7 +41,8 @@ const getUserInfo = async (userSub) => {
     .promise();
   return response.UserAttributes.reduce((acc, { Name, Value }) => {
     if (USER_ATTRIBUTES.includes(Name)) {
-      acc[Name] = Value;
+      const attrName = Name.startsWith("custom:") ? Name.split(":")[1] : Name;
+      acc[attrName] = Value;
     }
     return acc;
   }, {});

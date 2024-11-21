@@ -6,6 +6,7 @@ export type JobAssignation = {
   sub: string;
   name?: string;
   email: string;
+  color?: string;
 };
 
 export type Job = {
@@ -24,6 +25,7 @@ const isJobAssignation = (value: unknown): value is JobAssignation => {
     !jobAssignation.sub ||
     typeof jobAssignation.sub !== "string" ||
     (jobAssignation.name && typeof jobAssignation.name !== "string") ||
+    (jobAssignation.color && typeof jobAssignation.color !== "string") ||
     !jobAssignation.email ||
     typeof jobAssignation.email !== "string"
   )

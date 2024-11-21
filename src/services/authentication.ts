@@ -1,6 +1,7 @@
 import { Auth } from "aws-amplify";
 import { CognitoUser } from "amazon-cognito-identity-js";
 import * as AdminQueries from "./adminQueries";
+import { CreateUserFormValues } from "../components/CreateUserForm/CreateUserForm";
 
 type UserAttribute = { Name: string; Value: string };
 
@@ -13,6 +14,7 @@ export type User = {
   id: string;
   email: string;
   name?: string;
+  color?: string;
 };
 
 export type CognitoUserWithAttributes = CognitoUser & {
@@ -44,14 +46,10 @@ const findAttributeValue = (user: UserResponse, attribute: string) =>
   user.Attributes.find((att) => att.Name === attribute)?.Value;
 
 export const createUser = async (
-  email: string,
-  password: string
+  formValues: CreateUserFormValues
 ): Promise<void> => {
   try {
-    const response = await AdminQueries.post("/createUser", {
-      email: email,
-      password: password,
-    });
+    const response = await AdminQueries.post("/createUser", formValues);
     console.log(response);
   } catch (error) {
     throw new Error("INTERNAL_ERROR");
@@ -100,10 +98,11 @@ export const getUsers = async (): Promise<User[]> => {
       const id = user.Username;
       const email = findAttributeValue(user, "email");
       const name = findAttributeValue(user, "name");
+      const color = findAttributeValue(user, "custom:color");
       if (!id || !email) {
         return null;
       }
-      return { id, email, name };
+      return { id, email, name, color };
     }).filter((user: User | null) => user !== null);
     return users;
   } catch (error) {

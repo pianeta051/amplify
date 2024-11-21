@@ -63,7 +63,8 @@ async function removeUserFromGroup(username, groupname) {
   }
 }
 
-async function createUser(email, password) {
+async function createUser(user) {
+  const { email, password, color } = user;
   const params = {
     DesiredDeliveryMediums: ["EMAIL"],
     TemporaryPassword: password,
@@ -74,6 +75,14 @@ async function createUser(email, password) {
     Username: email,
     UserPoolId: userPoolId,
   };
+
+  // Add color as a custom attribute
+  if (color) {
+    params.UserAttributes.push({
+      Name: "custom:color",
+      Value: color,
+    });
+  }
 
   console.log(`Attempting to create user ${email}`);
 

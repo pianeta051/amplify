@@ -17,6 +17,7 @@ import moment from "moment";
 import { CalendarWrapper } from "./WeeklyJobs.style";
 import "moment/locale/en-gb";
 import { CreateJobModal } from "../CreateJobModal/CreateJobModal";
+import { JobCalendarColorLegend } from "../JobCalendarColorLegend/JobCalendarColorLegend";
 
 export const WeeklyJobs: FC = () => {
   dayjs.extend(isoWeek);
@@ -46,7 +47,7 @@ export const WeeklyJobs: FC = () => {
   };
 
   const eventClickHandler = (event: Event) => {
-    navigate(`/jobs/${event.resource}`);
+    navigate(`/jobs/${event.resource?.id}`);
   };
 
   const calendarClickHandler: (slotInfo: SlotInfo) => void = (slotInfo) => {
@@ -87,11 +88,22 @@ export const WeeklyJobs: FC = () => {
   const localizer = momentLocalizer(moment);
 
   const events: Event[] = jobs.map((job) => ({
-    resource: job.id,
+    resource: { id: job.id, color: job.assignedTo?.color },
     title: job.name,
     start: new Date(`${job.date} ${job.startTime}`),
     end: new Date(`${job.date} ${job.endTime}`),
   }));
+
+  const eventProps = (event: Event) => {
+    if (event.resource?.color) {
+      return {
+        style: {
+          backgroundColor: event.resource.color,
+        },
+      };
+    }
+    return {};
+  };
 
   return (
     <>
@@ -112,8 +124,10 @@ export const WeeklyJobs: FC = () => {
           onSelectEvent={eventClickHandler}
           onSelectSlot={calendarClickHandler}
           selectable
+          eventPropGetter={eventProps}
         />
       </CalendarWrapper>
+      <JobCalendarColorLegend jobs={jobs} />
       {isModalOpen && modalDate && modalStartTime && modalEndTime && (
         <CreateJobModal
           onClose={closeModalHandler}
