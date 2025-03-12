@@ -9,6 +9,7 @@ import { Typography } from "@mui/material";
 import { useCreateJob } from "../../hooks/useJobs/useCreateJob";
 import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 import dayjs from "dayjs";
+import { useAuth } from "../../context/AuthContext";
 
 export const CreateJobPage: FC = () => {
   const { createJob, loading, error } = useCreateJob();
@@ -17,6 +18,7 @@ export const CreateJobPage: FC = () => {
   const addressId = searchParams.get("addressId");
   const customerId = searchParams.get("customerId");
   const date = searchParams.get("date");
+  const { user } = useAuth();
 
   const submitHandler = (formValues: JobFormValues) => {
     createJob(formValues)
@@ -50,6 +52,7 @@ export const CreateJobPage: FC = () => {
           date: defaultDate,
           startTime: dayjs(),
           endTime: dayjs().add(1, "hour"),
+          assignedTo: user?.attributes?.sub,
         }}
       />
     </>

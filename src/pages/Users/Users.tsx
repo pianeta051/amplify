@@ -1,25 +1,22 @@
 import { Button, CircularProgress, Typography } from "@mui/material";
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
 import { UsersTable } from "../../components/UsersTable/UsersTable";
-import { getUsers, User } from "../../services/authentication";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
+import { useUsers } from "../../hooks/useUsers/useUsers";
+import { ErrorAlert } from "../../components/ErrorAlert/ErrorAlert";
 
 export const UsersPage: FC = () => {
-  const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState<User[]>([]);
+  const { users, loading, error } = useUsers();
+
   const navigate = useNavigate();
+
+  if (error) {
+    return <ErrorAlert code={error} />;
+  }
 
   const toCreateUser = () => navigate("/users/create");
 
-  useEffect(() => {
-    if (loading) {
-      getUsers().then((users) => {
-        setLoading(false);
-        setUsers(users);
-      });
-    }
-  }, [loading, setUsers, setLoading]);
   return (
     <>
       <Typography variant="h3" gutterBottom>

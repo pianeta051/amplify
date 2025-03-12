@@ -21,7 +21,7 @@
       "function": {
         "AdminQueries3903e60d": {
           "deploymentBucketName": "amplify-exercises-dev-164240-deployment",
-          "s3Key": "amplify-builds/AdminQueries3903e60d-756b4666337a4269765a-build.zip"
+          "s3Key": "amplify-builds/AdminQueries3903e60d-6848383331684f582f74-build.zip"
         },
         "exercisesauthCustomMessage": {
           "deploymentBucketName": "amplify-exercises-dev-164240-deployment",
@@ -29,7 +29,7 @@
         },
         "dataapi": {
           "deploymentBucketName": "amplify-exercises-dev-164240-deployment",
-          "s3Key": "amplify-builds/dataapi-48534a317763654b4e45-build.zip"
+          "s3Key": "amplify-builds/dataapi-385444706e4c54436d54-build.zip"
         }
       },
       "api": {

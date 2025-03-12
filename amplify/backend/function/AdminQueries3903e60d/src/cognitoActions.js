@@ -67,20 +67,20 @@ async function createUser(user) {
   const { email, password, color } = user;
   const params = {
     DesiredDeliveryMediums: ["EMAIL"],
-    TemporaryPassword: password,
+    TemporaryPassword: user.password,
     UserAttributes: [
-      { Name: "email", Value: email },
+      { Name: "email", Value: user.email },
       { Name: "email_verified", Value: "True" },
     ],
-    Username: email,
+    Username: user.email,
     UserPoolId: userPoolId,
   };
 
   // Add color as a custom attribute
-  if (color) {
+  if (user.color) {
     params.UserAttributes.push({
       Name: "custom:color",
-      Value: color,
+      Value: user.color,
     });
   }
 

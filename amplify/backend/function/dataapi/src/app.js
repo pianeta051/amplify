@@ -468,8 +468,26 @@ app.post("/jobs", async function (req, res) {
   const job = mapJobFromRequestBody(req.body);
   const customerId = req.params.customerId;
   const userSub = req.authData?.userSub;
-  const createdJob = await createJob(job, userSub);
-  res.json({ job: { ...createdJob, customerId } });
+  const groups = req.authData?.groups;
+  const isAdmin = groups?.includes("Admin");
+  let assignedTo = userSub;
+  if (isAdmin && job?.assignedTo) {
+    assignedTo = job.assignedTo;
+  }
+  const createdJob = await createJob(job, assignedTo);
+  const userInfo = await getUserInfo(assignedTo);
+  res.json({
+    job: {
+      ...createdJob,
+      customerId,
+      assignedTo: {
+        sub: userInfo.sub,
+        email: userInfo.email,
+        name: userInfo.name,
+        color: userInfo.color,
+      },
+    },
+  });
 });
 
 // Update a customer

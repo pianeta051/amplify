@@ -94,6 +94,7 @@ export const EditJobPage: FC = () => {
           date: dayjs(job.date),
           startTime: dayjs(`${job.date} ${job.startTime}`),
           endTime: dayjs(`${job.date} ${job.endTime}`),
+          assignedTo: job.assignedTo?.sub,
         }}
       />
     </>

@@ -20,7 +20,12 @@ export const JobCalendarColorLegend: FC<JobCalendarColorLegendProps> = ({
 }) => {
   const usersWithColors = jobs
     .filter((job) => !!job.assignedTo?.color)
-    .map((job) => job.assignedTo);
+    .map((job) => job.assignedTo)
+    // remove duplicate users
+    .filter(
+      (user, index, self) =>
+        index === self.findIndex((t) => t?.sub === user?.sub)
+    );
   if (usersWithColors.length === 0) {
     return null;
   }
