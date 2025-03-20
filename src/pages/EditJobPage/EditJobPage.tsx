@@ -90,11 +90,12 @@ export const EditJobPage: FC = () => {
         initialValues={{
           ...job,
           addresses: initialAddresses,
-          // TODO Replace with the actual date from the job
           date: dayjs(job.date),
           startTime: dayjs(`${job.date} ${job.startTime}`),
           endTime: dayjs(`${job.date} ${job.endTime}`),
           assignedTo: job.assignedTo?.sub,
+          // TODO replace withn the actual image from the job
+          imageUrl: "",
         }}
       />
     </>

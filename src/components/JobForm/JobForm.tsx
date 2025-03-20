@@ -2,7 +2,7 @@ import { useFormik } from "formik";
 import { FC } from "react";
 import * as yup from "yup";
 import { Form } from "../Form/Form";
-import { TextField } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { JobAddressesInput } from "../JobAddressesInput/JobAddressesInput";
 import dayjs, { Dayjs } from "dayjs";
@@ -11,6 +11,8 @@ import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { renderTimeViewClock } from "@mui/x-date-pickers/timeViewRenderers";
 import { UserSelector } from "../UserSelector/UserSelector";
 import { useAuth } from "../../context/AuthContext";
+import { UploadFileButton } from "../UploadFileButton/UploadFileButton";
+import { ImagePicker } from "../ImagePicker/ImagePicker";
 
 export type JobFormAddress = { addressId: string; customerId: string };
 
@@ -21,6 +23,7 @@ export type JobFormValues = {
   startTime: Dayjs;
   endTime: Dayjs;
   assignedTo?: string;
+  imageUrl: string;
 };
 
 const INITIAL_VALUES: JobFormValues = {
@@ -29,6 +32,7 @@ const INITIAL_VALUES: JobFormValues = {
   date: dayjs(),
   startTime: dayjs(),
   endTime: dayjs(),
+  imageUrl: "",
 };
 
 type JobFormProps = {
@@ -52,6 +56,7 @@ const validationSchema = yup.object<JobFormValues>({
   startTime: yup.date().required(),
   endTime: yup.date(),
   assignedTo: yup.string(),
+  imageUrl: yup.string(),
 });
 
 export const JobForm: FC<JobFormProps> = ({
@@ -68,6 +73,10 @@ export const JobForm: FC<JobFormProps> = ({
 
   const changeUserHandler = (value: string | null) => {
     formik.handleChange({ target: { name: "assignedTo", value } });
+  };
+
+  const changeFileHandler = (value: string) => {
+    formik.handleChange({ target: { name: "imageUrl", value } });
   };
 
   return (
@@ -141,6 +150,10 @@ export const JobForm: FC<JobFormProps> = ({
             onChange={changeUserHandler}
           />
         )}
+        <ImagePicker
+          onChange={changeFileHandler}
+          value={formik.values.imageUrl}
+        />
         <LoadingButton loading={loading} variant="outlined" type="submit">
           Submit
         </LoadingButton>
