@@ -230,6 +230,10 @@ const createJob = async (job, assignedTo) => {
       },
     },
   };
+  if (job.imageUrl) {
+    params.Item.image_url = { S: job.imageUrl };
+  }
+
   await ddb.putItem(params).promise();
 
   // Bucle que vaya creando las filas para las addresses

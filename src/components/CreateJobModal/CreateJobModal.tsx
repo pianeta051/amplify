@@ -15,8 +15,8 @@ export const CreateJobModal: FC<CreateJobModalProps> = ({
   initialValues,
 }) => {
   const { createJob, loading, error } = useCreateJob();
-  const submitHandler = (values: JobFormValues) => {
-    createJob(values).then(onClose);
+  const submitHandler = (values: JobFormValues, file: File | null) => {
+    createJob({ formValues: values, image: file }).then(onClose);
   };
   return (
     <Dialog open={true} onClose={onClose}>

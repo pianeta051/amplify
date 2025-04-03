@@ -1,24 +1,23 @@
 import { FC } from "react";
 import { UploadFileButton } from "../UploadFileButton/UploadFileButton";
 import { DeleteButton, ImageDisplay } from "./ImagePicker.style";
-import { CardMedia } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 export type ImagePickerProps = {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: File | null) => void;
 };
 
 export const ImagePicker: FC<ImagePickerProps> = ({ value, onChange }) => {
   if (value) {
     return (
       <ImageDisplay image={value}>
-        <DeleteButton onClick={() => onChange("")}>
+        <DeleteButton onClick={() => onChange(null)}>
           <DeleteIcon />
         </DeleteButton>
-        <UploadFileButton onChange={onChange} />
+        <UploadFileButton onChange={onChange} label="Change image" />
       </ImageDisplay>
     );
   }
-  return <UploadFileButton onChange={onChange} />;
+  return <UploadFileButton onChange={onChange} label="Add image" />;
 };

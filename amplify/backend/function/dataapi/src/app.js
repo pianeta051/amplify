@@ -617,12 +617,15 @@ app.put("/jobs/:id", async function (req, res) {
     const id = req.params.id;
     const job = mapJobFromRequestBody(req.body);
     const userSub = req.authData?.userSub;
-    const updatedJob = await updateJob(id, job);
-    if (job.assigned_to.S !== userSub) {
+    const groups = req.authData?.groups;
+    const isAdmin = groups.includes("Admin");
+
+    if (job.assigned_to?.S !== userSub && !isAdmin) {
       res
         .status(403)
         .json({ message: "You're not authorized to see this job" });
     } else {
+      const updatedJob = await updateJob(id, job);
       res.json({ job: updatedJob });
     }
   } catch (error) {

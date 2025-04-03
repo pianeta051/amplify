@@ -1,6 +1,9 @@
 import {
   Button,
+  Card,
+  CardMedia,
   CircularProgress,
+  Grid,
   List,
   ListItem,
   ListItemIcon,
@@ -18,6 +21,7 @@ import { DeleteJobButton } from "../../components/DeleteJobButton/DeleteJobButto
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PersonIcon from "@mui/icons-material/Person";
+import { JobImage } from "./JobDetails.style";
 
 type JobDetailsParams = {
   jobId: string;
@@ -76,39 +80,51 @@ export const JobDetailsPage: FC = () => {
           onDelete={deleteHandler}
         />
       </Stack>
-      <List>
-        <ListItem disablePadding>
-          <ListItemIcon>
-            <CalendarTodayIcon />
-          </ListItemIcon>
-          <ListItemText primary="Date" secondary={job.date} />
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemIcon>
-            <AccessTimeIcon />
-          </ListItemIcon>
-          <ListItemText primary="Start time" secondary={job.startTime} />
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemIcon>
-            <AccessTimeIcon />
-          </ListItemIcon>
-          <ListItemText primary="End time" secondary={job.endTime} />
-        </ListItem>
-        {job.assignedTo && (
-          <ListItem disablePadding>
-            <ListItemIcon>
-              <PersonIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary="Assigned to"
-              secondary={[job.assignedTo.name, job.assignedTo.email]
-                .filter(Boolean)
-                .join(" - ")}
-            />
-          </ListItem>
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={6}>
+          <List>
+            <ListItem disablePadding>
+              <ListItemIcon>
+                <CalendarTodayIcon />
+              </ListItemIcon>
+              <ListItemText primary="Date" secondary={job.date} />
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemIcon>
+                <AccessTimeIcon />
+              </ListItemIcon>
+              <ListItemText primary="Start time" secondary={job.startTime} />
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemIcon>
+                <AccessTimeIcon />
+              </ListItemIcon>
+              <ListItemText primary="End time" secondary={job.endTime} />
+            </ListItem>
+            {job.assignedTo && (
+              <ListItem disablePadding>
+                <ListItemIcon>
+                  <PersonIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Assigned to"
+                  secondary={[job.assignedTo.name, job.assignedTo.email]
+                    .filter(Boolean)
+                    .join(" - ")}
+                />
+              </ListItem>
+            )}
+          </List>
+        </Grid>
+        {job.imageUrl && (
+          <Grid item xs={12} md={6}>
+            <Card sx={{ maxWidth: "100%" }}>
+              <JobImage src={job.imageUrl} />
+            </Card>
+          </Grid>
         )}
-      </List>
+      </Grid>
+
       <JobAddresses jobId={jobId} />
     </>
   );

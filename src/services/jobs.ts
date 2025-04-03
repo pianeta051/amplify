@@ -16,6 +16,7 @@ export type Job = {
   startTime: string;
   endTime: string;
   assignedTo?: JobAssignation;
+  imageUrl?: string;
 };
 
 const isJobAssignation = (value: unknown): value is JobAssignation => {
@@ -47,7 +48,8 @@ const isJob = (value: unknown): value is Job => {
     typeof job.startTime !== "string" ||
     !job.endTime ||
     typeof job.endTime !== "string" ||
-    (job.assignedTo && !isJobAssignation(job.assignedTo))
+    (job.assignedTo && !isJobAssignation(job.assignedTo)) ||
+    !(typeof job.imageUrl === "string" || job.imageUrl === undefined)
   )
     return false;
   return true;

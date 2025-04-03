@@ -4,12 +4,17 @@
       "authorizationType": "AMAZON_COGNITO_USER_POOLS",
       "dependsOn": [
         {
-          "attributes": ["UserPoolId"],
+          "attributes": [
+            "UserPoolId"
+          ],
           "category": "auth",
           "resourceName": "exercisesauth"
         },
         {
-          "attributes": ["Arn", "Name"],
+          "attributes": [
+            "Arn",
+            "Name"
+          ],
           "category": "function",
           "resourceName": "AdminQueries3903e60d"
         }
@@ -20,17 +25,24 @@
     "dataapi": {
       "dependsOn": [
         {
-          "attributes": ["Name", "Arn"],
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
           "category": "function",
           "resourceName": "dataapi"
         },
         {
-          "attributes": ["UserPoolId"],
+          "attributes": [
+            "UserPoolId"
+          ],
           "category": "auth",
           "resourceName": "exercisesauth"
         },
         {
-          "attributes": ["AdminGroupRole"],
+          "attributes": [
+            "AdminGroupRole"
+          ],
           "category": "auth",
           "resourceName": "userPoolGroups"
         }
@@ -44,7 +56,10 @@
       "customAuth": false,
       "dependsOn": [
         {
-          "attributes": ["Arn", "Name"],
+          "attributes": [
+            "Arn",
+            "Name"
+          ],
           "category": "function",
           "resourceName": "exercisesauthCustomMessage",
           "triggerProvider": "Cognito"
@@ -52,15 +67,23 @@
       ],
       "frontendAuthConfig": {
         "mfaConfiguration": "OFF",
-        "mfaTypes": ["SMS"],
+        "mfaTypes": [
+          "SMS"
+        ],
         "passwordProtectionSettings": {
           "passwordPolicyCharacters": [],
           "passwordPolicyMinLength": 8
         },
-        "signupAttributes": ["EMAIL"],
+        "signupAttributes": [
+          "EMAIL"
+        ],
         "socialProviders": [],
-        "usernameAttributes": ["EMAIL"],
-        "verificationMechanisms": ["EMAIL"]
+        "usernameAttributes": [
+          "EMAIL"
+        ],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
       },
       "providerPlugin": "awscloudformation",
       "service": "Cognito"
@@ -87,7 +110,9 @@
       "build": true,
       "dependsOn": [
         {
-          "attributes": ["UserPoolId"],
+          "attributes": [
+            "UserPoolId"
+          ],
           "category": "auth",
           "resourceName": "exercisesauth"
         }
@@ -182,6 +207,26 @@
     "exercises": {
       "providerPlugin": "awscloudformation",
       "service": "DynamoDB"
+    },
+    "s33ca9c572": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "exercisesauth"
+        },
+        {
+          "attributes": [
+            "AdminGroupRole"
+          ],
+          "category": "auth",
+          "resourceName": "userPoolGroups"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "S3"
     }
   }
 }

@@ -1,5 +1,5 @@
 import { useFormik } from "formik";
-import { FC } from "react";
+import { FC, useState } from "react";
 import * as yup from "yup";
 import { Form } from "../Form/Form";
 import { Button, TextField } from "@mui/material";
@@ -23,7 +23,7 @@ export type JobFormValues = {
   startTime: Dayjs;
   endTime: Dayjs;
   assignedTo?: string;
-  imageUrl: string;
+  imageUrl?: string;
 };
 
 const INITIAL_VALUES: JobFormValues = {
@@ -36,7 +36,7 @@ const INITIAL_VALUES: JobFormValues = {
 };
 
 type JobFormProps = {
-  onSubmit: (values: JobFormValues) => void;
+  onSubmit: (values: JobFormValues, newFile: File | null) => void;
   initialValues?: JobFormValues;
   loading?: boolean;
 };
@@ -64,9 +64,10 @@ export const JobForm: FC<JobFormProps> = ({
   initialValues = INITIAL_VALUES,
   loading,
 }) => {
+  const [newFile, setNewFile] = useState<File | null>(null);
   const formik = useFormik<JobFormValues>({
     initialValues,
-    onSubmit,
+    onSubmit: (values) => onSubmit(values, newFile),
     validationSchema,
   });
   const { isInGroup } = useAuth();
@@ -75,8 +76,13 @@ export const JobForm: FC<JobFormProps> = ({
     formik.handleChange({ target: { name: "assignedTo", value } });
   };
 
-  const changeFileHandler = (value: string) => {
-    formik.handleChange({ target: { name: "imageUrl", value } });
+  const changeFileHandler = (file: File | null) => {
+    setNewFile(file);
+    if (file) {
+      formik.setFieldValue("imageUrl", URL.createObjectURL(file));
+    } else {
+      formik.setFieldValue("imageUrl", "");
+    }
   };
 
   return (
@@ -152,7 +158,7 @@ export const JobForm: FC<JobFormProps> = ({
         )}
         <ImagePicker
           onChange={changeFileHandler}
-          value={formik.values.imageUrl}
+          value={formik.values.imageUrl ?? ""}
         />
         <LoadingButton loading={loading} variant="outlined" type="submit">
           Submit

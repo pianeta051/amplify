@@ -1,10 +1,11 @@
 import useSWRMutation from "swr/mutation";
-import { Job, JobFilters, createJob } from "../../services/jobs";
+import { Job, JobFilters, createJob, editJob } from "../../services/jobs";
 import { JobFormValues } from "../../components/JobForm/JobForm";
 import { extractErrorCode } from "../../services/error";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import { keyFunctionGenerator } from "./useJobs";
+import { uploadFile } from "../../services/files";
 
 export const useCreateJob = () => {
   const { mutate } = useSWRConfig();
@@ -12,11 +13,20 @@ export const useCreateJob = () => {
     Job,
     Error,
     readonly [string],
-    JobFormValues
+    { formValues: JobFormValues; image: File | null }
   >(
     ["add-job"],
-    async ([_operation], { arg: formValues }) => {
+    async ([_operation], { arg: { formValues, image } }) => {
+      // Create the job
       const job = await createJob(formValues);
+      // Upload the image
+      let imageUrl: string | undefined;
+      if (image) {
+        imageUrl = await uploadFile(image, `job-${job.id}/job-image.jpg`);
+      }
+      // Update the job to set the image
+      await editJob(job.id, { ...formValues, imageUrl });
+
       // Refresh all caches for job lists
       await mutate<
         readonly [string, JobFilters, string | undefined],
