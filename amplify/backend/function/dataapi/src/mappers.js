@@ -69,7 +69,7 @@ const mapJob = (jobFromDb) => {
     date: start.format("YYYY-MM-DD"),
     startTime: start.format("HH:mm"),
     endTime: end.format("HH:mm"),
-    imageUrl: jobFromDb.image_url?.S,
+    imageKey: jobFromDb.image_key?.S,
   };
 };
 

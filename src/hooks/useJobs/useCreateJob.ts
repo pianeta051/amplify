@@ -18,14 +18,15 @@ export const useCreateJob = () => {
     ["add-job"],
     async ([_operation], { arg: { formValues, image } }) => {
       // Create the job
-      const job = await createJob(formValues);
+      const job = await createJob({ ...formValues, imageUrl: undefined });
       // Upload the image
-      let imageUrl: string | undefined;
       if (image) {
-        imageUrl = await uploadFile(image, `job-${job.id}/job-image.jpg`);
+        const imageKey = `jobs/${job.id}/job-image.jpg`;
+        await uploadFile(image, imageKey);
+        // Update the job to set the image
+        formValues.imageUrl = undefined;
+        await editJob(job.id, { ...formValues, imageKey });
       }
-      // Update the job to set the image
-      await editJob(job.id, { ...formValues, imageUrl });
 
       // Refresh all caches for job lists
       await mutate<

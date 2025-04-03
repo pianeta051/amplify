@@ -230,9 +230,6 @@ const createJob = async (job, assignedTo) => {
       },
     },
   };
-  if (job.imageUrl) {
-    params.Item.image_url = { S: job.imageUrl };
-  }
 
   await ddb.putItem(params).promise();
 
@@ -1245,6 +1242,14 @@ const updateJob = async (id, updatedJob) => {
       SK: { S: "description" },
     },
   };
+  if (updatedJob.imageKey) {
+    updateJobParams.ExpressionAttributeNames["#IK"] = "image_key";
+    updateJobParams.ExpressionAttributeValues[":image_key"] = {
+      S: updatedJob.imageKey,
+    };
+    updateJobParams.UpdateExpression += ", #IK = :image_key";
+  }
+
   await ddb.updateItem(updateJobParams).promise();
 
   // Borrar todos los address_assignation que tiene ahora mismo (ya lo hacemos en delete job)

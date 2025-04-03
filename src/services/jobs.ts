@@ -1,6 +1,7 @@
 import { JobFormValues } from "../components/JobForm/JobForm";
 import { del, get, post, put } from "./api";
 import { isErrorResponse } from "./error";
+import { getFileUrl } from "./files";
 
 export type JobAssignation = {
   sub: string;
@@ -19,6 +20,10 @@ export type Job = {
   imageUrl?: string;
 };
 
+export type JobResponse = Omit<Job, "imageUrl"> & {
+  imageKey?: string;
+};
+
 const isJobAssignation = (value: unknown): value is JobAssignation => {
   if (!value || typeof value !== "object") return false;
   const jobAssignation = value as JobAssignation;
@@ -34,9 +39,9 @@ const isJobAssignation = (value: unknown): value is JobAssignation => {
   return true;
 };
 
-const isJob = (value: unknown): value is Job => {
+const isJobResponse = (value: unknown): value is JobResponse => {
   if (!value || typeof value !== "object") return false;
-  const job = value as Job;
+  const job = value as JobResponse;
   if (
     !job.id ||
     typeof job.id !== "string" ||
@@ -48,8 +53,10 @@ const isJob = (value: unknown): value is Job => {
     typeof job.startTime !== "string" ||
     !job.endTime ||
     typeof job.endTime !== "string" ||
-    (job.assignedTo && !isJobAssignation(job.assignedTo)) ||
-    !(typeof job.imageUrl === "string" || job.imageUrl === undefined)
+    (job.assignedTo &&
+      !isJobAssignation(job.assignedTo) &&
+      typeof job.assignedTo !== "string") ||
+    !(typeof job.imageKey === "string" || job.imageKey === undefined)
   )
     return false;
   return true;
@@ -70,7 +77,7 @@ type JobsPaginationArguments = {
 export const createJob = async (formValues: JobFormValues): Promise<Job> => {
   try {
     const response = await post("/jobs", transformFormValues(formValues));
-    if (!isJob(response.job)) {
+    if (!isJobResponse(response.job)) {
       throw new Error("INTERNAL_ERROR");
     }
     return response.job;
@@ -79,18 +86,28 @@ export const createJob = async (formValues: JobFormValues): Promise<Job> => {
   }
 };
 
+export type EditJobParameters = Omit<JobFormValues, "imageUrl"> & {
+  imageKey?: string;
+};
+
 export const editJob = async (
   jobId: string,
-  formValues: JobFormValues
+  formValues: EditJobParameters
 ): Promise<Job> => {
   try {
     const response = await put(
       "/jobs/" + jobId,
       transformFormValues(formValues)
     );
-    if (!isJob(response.job)) {
+    if (!isJobResponse(response.job)) {
       throw new Error("INTERNAL_ERROR");
     }
+    if (response.job.imageKey) {
+      const imageUrl = await getFileUrl(response.job.imageKey);
+      response.job.imageUrl = imageUrl;
+      response.job.imageKey = undefined;
+    }
+
     return response.job;
   } catch (error) {
     throw new Error("INTERNAL_ERROR");
@@ -100,9 +117,15 @@ export const editJob = async (
 export const getJob = async (jobId: string): Promise<Job> => {
   try {
     const response = await get(`/jobs/${jobId}`);
-    if (!isJob(response.job)) {
+    if (!isJobResponse(response.job)) {
       throw new Error("INTERNAL_ERROR");
     }
+    if (response.job.imageKey) {
+      const imageUrl = await getFileUrl(response.job.imageKey);
+      response.job.imageUrl = imageUrl;
+      response.job.imageKey = undefined;
+    }
+
     return response.job;
   } catch (error) {
     if (isErrorResponse(error)) {
@@ -127,7 +150,7 @@ export const getJobs = async (
       order,
       paginate: paginate === false ? "false" : "true",
     });
-    if (!Array.isArray(response.jobs) || !response.jobs.every(isJob)) {
+    if (!Array.isArray(response.jobs) || !response.jobs.every(isJobResponse)) {
       throw new Error("INTERNAL_ERROR");
     }
     return { jobs: response.jobs, nextToken: response.nextToken };
