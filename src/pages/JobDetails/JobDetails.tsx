@@ -1,7 +1,6 @@
 import {
   Button,
   Card,
-  CardMedia,
   CircularProgress,
   Grid,
   List,

@@ -2,7 +2,7 @@ import { useFormik } from "formik";
 import { FC, useState } from "react";
 import * as yup from "yup";
 import { Form } from "../Form/Form";
-import { Button, TextField } from "@mui/material";
+import { TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { JobAddressesInput } from "../JobAddressesInput/JobAddressesInput";
 import dayjs, { Dayjs } from "dayjs";
@@ -11,7 +11,6 @@ import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { renderTimeViewClock } from "@mui/x-date-pickers/timeViewRenderers";
 import { UserSelector } from "../UserSelector/UserSelector";
 import { useAuth } from "../../context/AuthContext";
-import { UploadFileButton } from "../UploadFileButton/UploadFileButton";
 import { ImagePicker } from "../ImagePicker/ImagePicker";
 
 export type JobFormAddress = { addressId: string; customerId: string };
@@ -36,7 +35,11 @@ const INITIAL_VALUES: JobFormValues = {
 };
 
 type JobFormProps = {
-  onSubmit: (values: JobFormValues, newFile: File | null) => void;
+  onSubmit: (
+    values: JobFormValues,
+    newFile: File | null,
+    deleteImage: boolean
+  ) => void;
   initialValues?: JobFormValues;
   loading?: boolean;
 };
@@ -65,9 +68,10 @@ export const JobForm: FC<JobFormProps> = ({
   loading,
 }) => {
   const [newFile, setNewFile] = useState<File | null>(null);
+  const [imageDeleted, setImageDeleted] = useState(false);
   const formik = useFormik<JobFormValues>({
     initialValues,
-    onSubmit: (values) => onSubmit(values, newFile),
+    onSubmit: (values) => onSubmit(values, newFile, imageDeleted),
     validationSchema,
   });
   const { isInGroup } = useAuth();
@@ -79,8 +83,12 @@ export const JobForm: FC<JobFormProps> = ({
   const changeFileHandler = (file: File | null) => {
     setNewFile(file);
     if (file) {
+      setImageDeleted(false);
       formik.setFieldValue("imageUrl", URL.createObjectURL(file));
     } else {
+      if (initialValues.imageUrl) {
+        setImageDeleted(true);
+      }
       formik.setFieldValue("imageUrl", "");
     }
   };

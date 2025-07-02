@@ -1248,6 +1248,23 @@ const updateJob = async (id, updatedJob) => {
       S: updatedJob.imageKey,
     };
     updateJobParams.UpdateExpression += ", #IK = :image_key";
+  } else {
+    const deleteImageParams = {
+      ExpressionAttributeNames: {
+        "#IK": "image_key",
+      },
+      Key: {
+        PK: {
+          S: `job_${id}`,
+        },
+        SK: {
+          S: "description",
+        },
+      },
+      TableName: TABLE_NAME,
+      UpdateExpression: "REMOVE #IK",
+    };
+    await ddb.updateItem(deleteImageParams).promise();
   }
 
   await ddb.updateItem(updateJobParams).promise();

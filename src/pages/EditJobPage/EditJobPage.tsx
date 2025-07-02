@@ -67,8 +67,12 @@ export const EditJobPage: FC = () => {
       } as JobFormAddress)
   );
 
-  const submitHandler = (formValues: JobFormValues) => {
-    editJob(formValues)
+  const submitHandler = (
+    formValues: JobFormValues,
+    image: File | null,
+    deleteImage: boolean
+  ) => {
+    editJob({ formValues, image, deleteImage })
       .then(() => {
         navigate(`/jobs/${jobId}`);
       })
@@ -94,8 +98,7 @@ export const EditJobPage: FC = () => {
           startTime: dayjs(`${job.date} ${job.startTime}`),
           endTime: dayjs(`${job.date} ${job.endTime}`),
           assignedTo: job.assignedTo?.sub,
-          // TODO replace withn the actual image from the job
-          imageUrl: "",
+          imageUrl: job.imageUrl,
         }}
       />
     </>

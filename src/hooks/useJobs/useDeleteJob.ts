@@ -3,6 +3,7 @@ import useSWRMutation from "swr/mutation";
 import { Job, deleteJob } from "../../services/jobs";
 import { unstable_serialize } from "swr/infinite";
 import { keyFunctionGenerator } from "./useJobs";
+import { deleteFile } from "../../services/files";
 
 export const useDeleteJob = (jobId: string) => {
   const { mutate } = useSWRConfig();
@@ -15,6 +16,8 @@ export const useDeleteJob = (jobId: string) => {
   >(
     jobId ? ["job", jobId] : null,
     async ([_operation, jobId]) => {
+      const imageKey = `jobs/${jobId}/job-image.jpg`;
+      await deleteFile(imageKey);
       await deleteJob(jobId);
       await mutate<
         readonly [string, string | undefined, string | undefined],
