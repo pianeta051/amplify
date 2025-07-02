@@ -54,6 +54,7 @@ export const CreateJobPage: FC = () => {
           endTime: dayjs().add(1, "hour"),
           assignedTo: user?.attributes?.sub,
           imageUrl: "",
+          price: 0,
         }}
       />
     </>

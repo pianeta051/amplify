@@ -138,6 +138,7 @@ export const WeeklyJobs: FC = () => {
             startTime: modalStartTime,
             endTime: modalEndTime,
             imageUrl: "",
+            price: 0,
           }}
         />
       )}

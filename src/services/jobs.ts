@@ -18,6 +18,7 @@ export type Job = {
   endTime: string;
   assignedTo?: JobAssignation;
   imageUrl?: string;
+  price: number;
 };
 
 export type JobResponse = Omit<Job, "imageUrl"> & {

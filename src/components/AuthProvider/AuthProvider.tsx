@@ -6,7 +6,6 @@ import {
   logOut as serviceLogOut,
 } from "../../services/authentication";
 import { CircularProgress } from "@mui/material";
-import { useSWRConfig } from "swr";
 import { mutate } from "swr";
 
 type AuthProviderProps = {

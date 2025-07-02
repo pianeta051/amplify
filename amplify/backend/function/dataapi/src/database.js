@@ -228,6 +228,7 @@ const createJob = async (job, assignedTo) => {
       end: {
         N: job.end.toString(),
       },
+      price: { N: job.price.toString() },
     },
   };
 
@@ -1224,6 +1225,7 @@ const updateJob = async (id, updatedJob) => {
       "#N": "name",
       "#ST": "start",
       "#ET": "end",
+      "#P": "price",
     },
     ExpressionAttributeValues: {
       ":name": {
@@ -1235,8 +1237,11 @@ const updateJob = async (id, updatedJob) => {
       ":end": {
         N: updatedJob.end.toString(),
       },
+      ":price": {
+        N: job.price.toString(),
+      },
     },
-    UpdateExpression: "SET #N = :name, #ST = :start, #ET = :end",
+    UpdateExpression: "SET #N = :name, #ST = :start, #ET = :end, #P = :price",
     Key: {
       PK: { S: `job_${id}` },
       SK: { S: "description" },

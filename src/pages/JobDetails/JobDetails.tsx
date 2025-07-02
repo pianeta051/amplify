@@ -20,6 +20,7 @@ import { DeleteJobButton } from "../../components/DeleteJobButton/DeleteJobButto
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PersonIcon from "@mui/icons-material/Person";
+import CurrencyPoundIcon from "@mui/icons-material/CurrencyPound";
 import { JobImage } from "./JobDetails.style";
 
 type JobDetailsParams = {
@@ -99,6 +100,12 @@ export const JobDetailsPage: FC = () => {
                 <AccessTimeIcon />
               </ListItemIcon>
               <ListItemText primary="End time" secondary={job.endTime} />
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemIcon>
+                <CurrencyPoundIcon />
+              </ListItemIcon>
+              <ListItemText primary="Price" secondary={job.price.toFixed(2)} />
             </ListItem>
             {job.assignedTo && (
               <ListItem disablePadding>

@@ -12,6 +12,7 @@ import { renderTimeViewClock } from "@mui/x-date-pickers/timeViewRenderers";
 import { UserSelector } from "../UserSelector/UserSelector";
 import { useAuth } from "../../context/AuthContext";
 import { ImagePicker } from "../ImagePicker/ImagePicker";
+import { PriceInput } from "../PriceInput/PriceInput";
 
 export type JobFormAddress = { addressId: string; customerId: string };
 
@@ -23,6 +24,7 @@ export type JobFormValues = {
   endTime: Dayjs;
   assignedTo?: string;
   imageUrl?: string;
+  price: number;
 };
 
 const INITIAL_VALUES: JobFormValues = {
@@ -32,6 +34,7 @@ const INITIAL_VALUES: JobFormValues = {
   startTime: dayjs(),
   endTime: dayjs(),
   imageUrl: "",
+  price: 0,
 };
 
 type JobFormProps = {
@@ -60,6 +63,7 @@ const validationSchema = yup.object<JobFormValues>({
   endTime: yup.date(),
   assignedTo: yup.string(),
   imageUrl: yup.string(),
+  price: yup.number().required().positive(),
 });
 
 export const JobForm: FC<JobFormProps> = ({
@@ -157,6 +161,12 @@ export const JobForm: FC<JobFormProps> = ({
             minutes: renderTimeViewClock,
           }}
           minTime={formik.values.startTime}
+        />
+        <PriceInput
+          name="price"
+          value={formik.values.price}
+          onChange={formik.handleChange}
+          errorMessage={formik.touched.price ? formik.errors.price : undefined}
         />
         {isInGroup("Admin") && (
           <UserSelector
