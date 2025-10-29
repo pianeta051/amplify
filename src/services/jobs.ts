@@ -18,11 +18,13 @@ export type Job = {
   endTime: string;
   assignedTo?: JobAssignation;
   imageUrl?: string;
+  invoiceKey?: string;
   price: number;
 };
 
 export type JobResponse = Omit<Job, "imageUrl"> & {
   imageKey?: string;
+  invoiceKey?: string;
 };
 
 const isJobAssignation = (value: unknown): value is JobAssignation => {
@@ -89,6 +91,7 @@ export const createJob = async (formValues: JobFormValues): Promise<Job> => {
 
 export type EditJobParameters = Omit<JobFormValues, "imageUrl"> & {
   imageKey?: string;
+  invoiceKey?: string;
 };
 
 export const editJob = async (
@@ -168,7 +171,7 @@ export const deleteJob = async (jobId: string): Promise<void> => {
   }
 };
 
-const transformFormValues = (formValues: JobFormValues) => {
+export const transformFormValues = (formValues: JobFormValues) => {
   return {
     ...formValues,
     date: formValues.date.format("YYYY-MM-DD"),

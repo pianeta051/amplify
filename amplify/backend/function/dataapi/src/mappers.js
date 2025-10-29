@@ -70,6 +70,7 @@ const mapJob = (jobFromDb) => {
     startTime: start.format("HH:mm"),
     endTime: end.format("HH:mm"),
     imageKey: jobFromDb.image_key?.S,
+    invoiceKey: jobFromDb.invoice_key?.S,
     price: +jobFromDb.price.N,
   };
 };

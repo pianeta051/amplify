@@ -7,6 +7,8 @@ import { unstable_serialize } from "swr/infinite";
 import { keyFunctionGenerator } from "./useJobs";
 import { extractErrorCode } from "../../services/error";
 import { deleteFile, uploadFile } from "../../services/files";
+import { generateJobInvoice } from "../../services/pdf";
+import { getJobAddresses } from "../../services/addresses";
 
 export const useEditJob = (jobId: string) => {
   const { mutate } = useSWRConfig();
@@ -30,6 +32,10 @@ export const useEditJob = (jobId: string) => {
         await deleteFile(imageKey);
         editParams.imageKey = undefined;
       }
+      const { addresses } = await getJobAddresses(jobId);
+      const invoiceKey = `jobs/${jobId}/invoice.pdf`;
+      await generateJobInvoice(formValues, addresses, invoiceKey);
+      editParams.invoiceKey = invoiceKey;
       const job = editJob(jobId, editParams);
       await mutate<
         readonly [string, JobFilters, string | undefined],

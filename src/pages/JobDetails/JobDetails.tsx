@@ -22,6 +22,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PersonIcon from "@mui/icons-material/Person";
 import CurrencyPoundIcon from "@mui/icons-material/CurrencyPound";
 import { JobImage } from "./JobDetails.style";
+import { S3DownloadButton } from "../../components/S3DownloadButton/S3DownloadButton";
 
 type JobDetailsParams = {
   jobId: string;
@@ -79,6 +80,15 @@ export const JobDetailsPage: FC = () => {
           onError={errorHandler}
           onDelete={deleteHandler}
         />
+        {job.invoiceKey && (
+          <S3DownloadButton
+            s3Key={job.invoiceKey}
+            label="Download Invoice"
+            onDownloadError={(errorMessage) => {
+              setOperationError(errorMessage as ErrorCode);
+            }}
+          />
+        )}
       </Stack>
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>

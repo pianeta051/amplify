@@ -1,11 +1,19 @@
 import useSWRMutation from "swr/mutation";
-import { Job, JobFilters, createJob, editJob } from "../../services/jobs";
+import {
+  EditJobParameters,
+  Job,
+  JobFilters,
+  createJob,
+  editJob,
+} from "../../services/jobs";
 import { JobFormValues } from "../../components/JobForm/JobForm";
 import { extractErrorCode } from "../../services/error";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import { keyFunctionGenerator } from "./useJobs";
 import { uploadFile } from "../../services/files";
+import { generateJobInvoice } from "../../services/pdf";
+import { getJobAddresses } from "../../services/addresses";
 
 export const useCreateJob = () => {
   const { mutate } = useSWRConfig();
@@ -18,15 +26,20 @@ export const useCreateJob = () => {
     ["add-job"],
     async ([_operation], { arg: { formValues, image } }) => {
       // Create the job
-      const job = await createJob({ ...formValues, imageUrl: undefined });
+      let job = await createJob({ ...formValues, imageUrl: undefined });
+      const editParameters: EditJobParameters = { ...formValues };
       // Upload the image
       if (image) {
         const imageKey = `jobs/${job.id}/job-image.jpg`;
         await uploadFile(image, imageKey);
         // Update the job to set the image
-        formValues.imageUrl = undefined;
-        await editJob(job.id, { ...formValues, imageKey });
+        editParameters.imageKey = imageKey;
       }
+      const { addresses } = await getJobAddresses(job.id);
+      const invoiceKey = `jobs/${job.id}/invoice.pdf`;
+      await generateJobInvoice(formValues, addresses, invoiceKey);
+      editParameters.invoiceKey = invoiceKey;
+      job = await editJob(job.id, editParameters);
 
       // Refresh all caches for job lists
       await mutate<

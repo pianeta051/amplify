@@ -1226,6 +1226,7 @@ const updateJob = async (id, updatedJob) => {
       "#ST": "start",
       "#ET": "end",
       "#P": "price",
+      "#IVK": "invoice_key",
     },
     ExpressionAttributeValues: {
       ":name": {
@@ -1238,15 +1239,20 @@ const updateJob = async (id, updatedJob) => {
         N: updatedJob.end.toString(),
       },
       ":price": {
-        N: job.price.toString(),
+        N: updatedJob.price.toString(),
+      },
+      ":invoice_key": {
+        S: updatedJob.invoiceKey,
       },
     },
-    UpdateExpression: "SET #N = :name, #ST = :start, #ET = :end, #P = :price",
+    UpdateExpression:
+      "SET #N = :name, #ST = :start, #ET = :end, #P = :price, #IVK = :invoice_key",
     Key: {
       PK: { S: `job_${id}` },
       SK: { S: "description" },
     },
   };
+
   if (updatedJob.imageKey) {
     updateJobParams.ExpressionAttributeNames["#IK"] = "image_key";
     updateJobParams.ExpressionAttributeValues[":image_key"] = {
@@ -1271,6 +1277,8 @@ const updateJob = async (id, updatedJob) => {
     };
     await ddb.updateItem(deleteImageParams).promise();
   }
+
+  console.log(JSON.stringify({ updateJobParams, job }, null, 2));
 
   await ddb.updateItem(updateJobParams).promise();
 
