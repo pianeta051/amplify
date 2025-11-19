@@ -1333,6 +1333,17 @@ const updateJob = async (id, updatedJob) => {
     ...updatedJob,
   };
 };
+
+const getJobCustomers = async (jobId) => {
+  const { addresses } = await getJobAddresses(jobId);
+  const customers = [];
+  for (const address of addresses) {
+    const customer = await getCustomer(address.PK.S.replace("customer_", ""));
+    customers.push(customer);
+  }
+  return customers;
+};
+
 module.exports = {
   addExternalLinkToCustomer,
   addMainAddress,
@@ -1357,6 +1368,7 @@ module.exports = {
   getCustomerSecondaryAddresses,
   getJob,
   getJobAddresses,
+  getJobCustomers,
   getJobs,
   queryCustomersByEmail,
   updateCustomer,

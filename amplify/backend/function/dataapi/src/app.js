@@ -32,10 +32,10 @@ const {
   getCustomerSecondaryAddress,
   getJob,
   getJobAddresses,
+  getJobCustomers,
   getJobs,
   updateCustomer,
   updateJob,
-
   updateTaxData,
   updateVoucher,
   updateMainAddress,
@@ -54,6 +54,8 @@ const {
   mapJobFromRequestBody,
   mapJobTemporalFilters,
 } = require("./mappers");
+
+const { emailCustomerAboutJob } = require("./mailer");
 
 const { generateToken, parseToken } = require("./token");
 
@@ -475,6 +477,11 @@ app.post("/jobs", async function (req, res) {
     assignedTo = job.assignedTo;
   }
   const createdJob = await createJob(job, assignedTo);
+  const customers = await getJobCustomers(createdJob.id);
+  for (const customer of customers) {
+    await emailCustomerAboutJob(mapCustomer(customer), createdJob);
+  }
+
   const userInfo = await getUserInfo(assignedTo);
   res.json({
     job: {
