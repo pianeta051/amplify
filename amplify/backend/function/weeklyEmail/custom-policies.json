@@ -1,0 +1,9 @@
+[
+  {
+    "Action": ["ses:SendEmail"],
+    "Resource": [
+      "arn:aws:ses:eu-west-2:295621520330:identity/pianeta14@hotmail.com",
+      "arn:aws:ses:eu-west-2:295621520330:identity/pianeta05@hotmail.com"
+    ]
+  }
+]
