@@ -1,5 +1,6 @@
 const AWS = require("aws-sdk");
 const ses = new AWS.SES();
+const s3Client = new AWS.S3();
 
 const emailCustomerAboutJob = async (customer, job) => {
   // should be customer.email, but we'll use this one for testing
@@ -7,24 +8,73 @@ const emailCustomerAboutJob = async (customer, job) => {
   // should come from an env var, but let's hardcode it for now
   const senderEmail = "pianeta05@hotmail.com";
 
-  const subject = "New job created";
   const textBody = emailCustomerAboutJobTextTemplate(customer, job);
   const htmlBody = emailCustomerAboutJobHtmlTemplate(customer, job);
 
+  const rawEmailParams = {
+    from: senderEmail,
+    to: destinationEmail,
+    textContent: textBody,
+    htmlContent: htmlBody,
+  };
+
+  if (job.invoiceKey) {
+    const s3Response = await s3Client
+      .getObject({
+        Bucket: process.env.STORAGE_S33CA9C572_BUCKETNAME,
+        Key: `public/${job.invoiceKey}`,
+      })
+      .promise();
+    const fileBuffer = s3Response.Body;
+    const base64File = fileBuffer.toString("base64");
+    rawEmailParams.attachmentFileContent = base64File;
+  }
   const params = {
     Source: senderEmail,
-    Destination: {
-      ToAddresses: [destinationEmail],
-    },
-    Message: {
-      Subject: { Data: subject, Charset: "UTF-8" },
-      Body: {
-        Text: { Data: textBody, Charset: "UTF-8" },
-        Html: { Data: htmlBody, Charset: "UTF-8" },
-      },
+    Destinations: [destinationEmail],
+    RawMessage: {
+      Data: emailCustomerAboutJobRawEmail(rawEmailParams),
     },
   };
-  await ses.sendEmail(params).promise();
+
+  await ses.sendRawEmail(params).promise();
+};
+
+const mixedBoundary = "MixedBoundary123";
+const alternativeBoundary = "AltBoundary456";
+
+const emailCustomerAboutJobRawEmail = ({
+  from,
+  to,
+  textContent,
+  htmlContent,
+  attachmentFileContent,
+}) => {
+  const rawEmail =
+    `From: ${from}\n` +
+    `To: ${to}\n` +
+    `Subject: New job created\n` +
+    `MIME-Version: 1.0\n` +
+    `Content-Type: multipart/mixed; boundary="${mixedBoundary}"\n\n` +
+    // --- multipart/alternative (text + html)
+    `--${mixedBoundary}\n` +
+    `Content-Type: multipart/alternative; boundary="${alternativeBoundary}"\n\n` +
+    `--${alternativeBoundary}\n` +
+    `Content-Type: text/plain; charset="utf-8"\n\n` +
+    `${textContent}\n\n` +
+    // HTML
+    `--${alternativeBoundary}\n` +
+    `Content-Type: text/html; charset="utf-8"\n\n` +
+    `${htmlContent}\n\n` +
+    `--${alternativeBoundary}--\n\n` +
+    // --- Attachment
+    `--${mixedBoundary}\n` +
+    `Content-Type: application/pdf; name="invoice.pdf"\n` +
+    `Content-Disposition: attachment; filename="invoice.pdf"\n` +
+    `Content-Transfer-Encoding: base64\n\n` +
+    attachmentFileContent +
+    `\n\n--${mixedBoundary}--`;
+  return rawEmail;
 };
 
 const emailCustomerAboutJobTextTemplate = (customer, job) => `

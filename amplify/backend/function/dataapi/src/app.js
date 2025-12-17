@@ -1,4 +1,8 @@
-/*
+/* Amplify Params - DO NOT EDIT
+	ENV
+	REGION
+	STORAGE_S33CA9C572_BUCKETNAME
+Amplify Params - DO NOT EDIT */ /*
 Copyright 2017 - 2017 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance with the License. A copy of the License is located at
     http://aws.amazon.com/apache2.0/
@@ -477,10 +481,6 @@ app.post("/jobs", async function (req, res) {
     assignedTo = job.assignedTo;
   }
   const createdJob = await createJob(job, assignedTo);
-  const customers = await getJobCustomers(createdJob.id);
-  for (const customer of customers) {
-    await emailCustomerAboutJob(mapCustomer(customer), createdJob);
-  }
 
   const userInfo = await getUserInfo(assignedTo);
   res.json({
@@ -644,6 +644,19 @@ app.put("/jobs/:id", async function (req, res) {
       throw error;
     }
   }
+});
+
+// send an email to a customer about a new job
+app.post("/notifications/new-job/:id", async function (req, res) {
+  const jobId = req.params.id;
+  const job = await getJob(jobId);
+  const mappedJob = mapJob(job);
+  const customers = await getJobCustomers(jobId);
+  const emailSendings = customers.map((customer) =>
+    emailCustomerAboutJob(mapCustomer(customer), mappedJob)
+  );
+  await Promise.all(emailSendings);
+  res.status(200);
 });
 
 // Export the app object. When executing the application local this does nothing. However,

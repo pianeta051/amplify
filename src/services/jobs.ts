@@ -179,3 +179,7 @@ export const transformFormValues = (formValues: JobFormValues) => {
     endTime: formValues.endTime.format("HH:mm"),
   };
 };
+
+export const notifyAboutJob = async (jobId: string): Promise<void> => {
+  await post("/notifications/new-job/" + jobId);
+};

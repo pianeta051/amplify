@@ -5,6 +5,7 @@ import {
   JobFilters,
   createJob,
   editJob,
+  notifyAboutJob,
 } from "../../services/jobs";
 import { JobFormValues } from "../../components/JobForm/JobForm";
 import { extractErrorCode } from "../../services/error";
@@ -40,6 +41,7 @@ export const useCreateJob = () => {
       await generateJobInvoice(formValues, addresses, invoiceKey);
       editParameters.invoiceKey = invoiceKey;
       job = await editJob(job.id, editParameters);
+      notifyAboutJob(job.id).catch(console.error);
 
       // Refresh all caches for job lists
       await mutate<
