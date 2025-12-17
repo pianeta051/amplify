@@ -2,9 +2,7 @@
   "lambdaLayers": [],
   "permissions": {
     "storage": {
-      "s33ca9c572": [
-        "read"
-      ]
+      "s33ca9c572": ["read"]
     }
   }
 }
